@@ -68,7 +68,8 @@ States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
     return s;
 }
 
-States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress) {
+States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
+                     bool silent) {
     // std::cout << "Here" << std::endl;
     States s = generateStates(this->chefList, this->chefRecipePairs, chefs);
     int energy = getEnergyFunc(s, this->chefList, this->recipeList,
@@ -81,7 +82,14 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress) {
     // srand(time(NULL));
     while (step < this->stepMax) {
         if (progress) {
-            std::cout << "\r" << step << "/" << this->stepMax << std::flush;
+            if (silent) {
+                if (step % 500 == 0) {
+                    std::cout << "\r" << step << "/" << this->stepMax
+                              << std::flush;
+                }
+            } else {
+                std::cout << "\r" << step << "/" << this->stepMax << std::flush;
+            }
         }
         States newS = randomMoveFunc(s, this->chefList, this->recipeList,
                                      this->chefRecipePairs);
@@ -117,7 +125,7 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress) {
     }
     // std::cout << " * Best energy: " << this->bestEnergy << std::endl;
     // print(this->bestState, verbose);
-    if (progress) {
+    if (progress && !silent) {
         std::fstream file;
         file.open("../out/history.csv", std::ios::out);
         for (int i = 0; i < step; i++) {

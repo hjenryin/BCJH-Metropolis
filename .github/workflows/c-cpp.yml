@@ -1,0 +1,20 @@
+name: C/C++ CI
+
+on:
+  push:
+    paths:
+    - "data/userData.json"
+
+
+jobs:
+  buildRun:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: build
+      run: mkdir build && cd ./build && ls -aR && cmake ../ && make
+    - name: run
+      run: cd ./build && ./bcjh -s
+
