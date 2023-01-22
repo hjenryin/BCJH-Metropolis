@@ -35,7 +35,7 @@ class Chef {
     }
     static void setGlobalAbilityFemale(int ability) {
         globalAbilityFemale = ability;
-        std::cout << "setGlobalAbilityFemale" << ability << std::endl;
+        // std::cout << "setGlobalAbilityFemale" << ability << std::endl;
     }
     static void setGlobalAbilityAll(int ability) {
         globalAbilityBuff.add(ability);

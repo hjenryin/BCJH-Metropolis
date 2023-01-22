@@ -72,7 +72,7 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress) {
     // std::cout << "Here" << std::endl;
     States s = generateStates(this->chefList, this->chefRecipePairs, chefs);
     int energy = getEnergyFunc(s, this->chefList, this->recipeList,
-                               this->chefRecipePairs);
+                               this->chefRecipePairs, false);
     // std::cout << "Initial energy: " << energy << std::endl;
     this->bestState = s;
     this->bestEnergy = energy;
@@ -87,8 +87,7 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress) {
                                      this->chefRecipePairs);
         // print(newS);
         int newEnergy = getEnergyFunc(newS, this->chefList, this->recipeList,
-                                      this->chefRecipePairs);
-        // std::cout << "Energy is " << newEnergy << std::endl;
+                                      this->chefRecipePairs, false);
         double prob = 0;
         int delta = energy - newEnergy;
         if (delta / t > 30) {
@@ -126,7 +125,8 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress) {
                  << std::endl;
         }
         file.close();
-        std::cout << system("python3 ../src/plot.py");
+        // std::cout <<
+        system("python3 ../src/plot.py");
     }
 
     return this->bestState;
@@ -144,11 +144,14 @@ void SARunner::print(States s, bool verbose) {
     }
     if (verbose) {
         std::cout << "------verbose------" << std::endl;
-        r = 0;
-        for (int i = 0; i < NUM_CHEFS; i++) {
-            for (int j = 0; j < DISH_PER_CHEF; i++) {
-                getPrice(*s.chef[i], *s.recipe[r++], true);
-            }
-        }
+
+        // r = 0;
+        // for (int i = 0; i < NUM_CHEFS; i++) {
+        //     for (int j = 0; j < DISH_PER_CHEF; i++) {
+        //         getPrice(*s.chef[i], *s.recipe[r++], true);
+        //     }
+        // }
+        this->getEnergyFunc(s, this->chefList, this->recipeList,
+                            this->chefRecipePairs, true);
     }
 }

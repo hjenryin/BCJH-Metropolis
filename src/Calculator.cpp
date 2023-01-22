@@ -108,15 +108,22 @@ BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule rule,
         recipe->print();
         std::cout << "Grade: " << grade << std::endl;
         std::cout << "Skill: " << skillBuff
-                  << " (=" << recipe->flavor * chef->skill.flavorBuff << " + "
-                  << recipe->cookAbility * chef->skill.abilityBuff << " + "
-                  << recipe->materials * chef->skill.materialBuff << " + "
-                  << rb.dishBuff << ")" << std::endl;
-        std::cout << "Intention: " << intentionAddBuff << " + "
-                  << intentionBaseBuff << std::endl;
-        std::cout << "Buff: " << buff << std::endl;
+                  << "% ( = " << recipe->flavor * chef->skill.flavorBuff
+                  << " + " << recipe->cookAbility * chef->skill.abilityBuff
+                  << " + " << recipe->materials * chef->skill.materialBuff
+                  << " + " << rb.dishBuff << ")" << std::endl;
+        std::cout << "Intention: (基础+" << rule.baseRule.directAdd << "，+"
+                  << intentionBaseBuff << "%；售价+" << intentionAddBuff
+                  << "%) " << std::endl;
+        std::cout << "售价总计Buff: " << buff << std::endl;
         std::cout << "Price: " << totalPrice << std::endl;
     }
-    BanquetInfo b = {totalPrice, recipe->rarity - rule.addRule.full};
+    int full;
+    if (rule.addRule.fullAdd) {
+        full = recipe->rarity + rule.addRule.full;
+    } else {
+        full = rule.addRule.full;
+    }
+    BanquetInfo b = {totalPrice, full};
     return b;
 }
