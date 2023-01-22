@@ -126,7 +126,7 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress) {
         }
         file.close();
         // std::cout <<
-        system("python3 ../src/plot.py");
+        system("python3 ../src/plot.py &");
     }
 
     return this->bestState;
