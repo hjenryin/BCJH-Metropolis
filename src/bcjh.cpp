@@ -18,7 +18,9 @@ int main() {
     if (val) {
         std::cout << buffer << std::endl;
     }
-    srand(time(NULL));
+    int seed = time(NULL);
+    std::cout << "随机种子：" << seed << std::endl;
+    srand(seed);
     std::map<int, Chef> chefList0, chefList;
     std::map<int, Recipe> recipeList;
     loadChef(chefList0);
@@ -35,7 +37,7 @@ int main() {
                       f::t_dist_slow);
     States s = saRunner.run(NULL, false, true);
     std::cout << std::endl;
-    saRunner.print(s);
+    saRunner.print(s, VERBOSE_MODE);
     std::cout << "Score: "
               << e::sumPrice(s, &chefList, &recipeList, &chefRecipePairs)
               << std::endl;
@@ -56,5 +58,5 @@ void initChefRecipePairs(CRPairs &chefRecipePairs,
             }
         }
     }
-    std::cout << chefRecipePairs.size() << std::endl;
+    // std::cout << chefRecipePairs.size() << std::endl;
 }

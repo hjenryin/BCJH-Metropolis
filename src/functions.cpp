@@ -11,12 +11,12 @@ States swapChefTool(States &, CList *, RList *, CRPairs *);
 } // namespace r0
 
 int e::getOptimalPrice(States s, CList *chefList, RList *recipeList,
-                       CRPairs *chefRecipePairs) {
+                       CRPairs *chefRecipePairs, bool verbose) {
     // SARunner saRunner(chefList, recipeList, chefRecipePairs, 500, 100, 0,
     //                   e::sumPrice, r::randomRecipe, f::t_dist);
     // saRunner.run(s.chef);
     // return saRunner.bestEnergy;
-    return e::sumPrice(s, chefList, recipeList, chefRecipePairs);
+    return e::sumPrice(s, chefList, recipeList, chefRecipePairs, verbose);
 }
 bool repeatChef(Chef *chef, Chef *chefs[NUM_CHEFS], int except) {
     for (int i = 0; i < NUM_CHEFS; i++) {
@@ -40,7 +40,7 @@ States r0::randomChef(States &s, CList *chefList, RList *recipeList,
     s.chef[chefNum] = pChef;
     SARunner saRunner(chefList, recipeList, chefRecipePairs, ITER_RECIPE,
                       T_MAX_RECIPE, 0, e::sumPrice, r::randomRecipe,
-                      f::t_dist_fast);
+                      f::t_dist_slow);
     return saRunner.run(s.chef);
 }
 States r0::swapRecipe(States &s, CList *chefList, RList *r,
@@ -108,7 +108,7 @@ States r0::swapChefTool(States &s, CList *chefList, RList *recipeList,
 }
 
 int e::sumPrice(States s, CList *chefList, RList *recipeList,
-                CRPairs *chefRecipePairs) {
+                CRPairs *chefRecipePairs, bool verbose) {
     if (BANQUET) {
         BanquetRule rule[9];
         int bestFull = banquetRule(rule, s);
@@ -116,17 +116,21 @@ int e::sumPrice(States s, CList *chefList, RList *recipeList,
         int totalScore = 0;
         int totalFull = 0;
         for (int i = 0; i < 9; i++) {
-            bi[i] = getPrice(s.chef[i / 3], s.recipe[i], rule[i]);
+            if (verbose && i % 3 == 0) {
+                std::cout << "************" << std::endl;
+                s.chef[i / 3]->print();
+                std::cout << "************" << std::endl;
+            }
+            bi[i] = getPrice(s.chef[i / 3], s.recipe[i], rule[i], verbose);
             totalFull += bi[i].full;
             totalScore += bi[i].price;
         }
-        // std::cout << "Full:" << totalFull << std::endl;
-        // std::cout << "Score:" << totalScore << std::endl;
+
         switch (totalFull - bestFull) {
         case 0:
             return std::ceil(totalScore * 1.3);
         default:
-            int delta = std::abs(totalFull - 23);
+            int delta = std::abs(totalFull - bestFull);
             return std::ceil(totalScore * (1 - 0.05 * delta));
         }
     } else {
@@ -134,9 +138,14 @@ int e::sumPrice(States s, CList *chefList, RList *recipeList,
         int r = 0;
 
         for (int i = 0; i < NUM_CHEFS; i++) {
+            if (verbose) {
+                std::cout << "************" << std::endl;
+                s.chef[i]->print();
+                std::cout << "************" << std::endl;
+            }
             for (int j = 0; j < DISH_PER_CHEF; j++) {
 
-                energy += getPrice(*s.chef[i], *s.recipe[r++]);
+                energy += getPrice(*s.chef[i], *s.recipe[r++], verbose);
             }
         }
         return energy;
