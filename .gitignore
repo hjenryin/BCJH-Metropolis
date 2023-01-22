@@ -1,0 +1,6 @@
+.vscode/
+build/
+data/backup/
+data/userData.json
+
+vcpkg/
