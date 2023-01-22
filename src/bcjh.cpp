@@ -9,15 +9,20 @@
 #include "functions.hpp"
 #include "../config.hpp"
 #include <unistd.h>
+#include <stdio.h>
 bool Chef::coinBuffOn = true;
 void initChefRecipePairs(CRPairs &, std::map<int, Chef> &,
                          std::map<int, Recipe> &);
-int main() {
-    char buffer[256];
-    char *val = getcwd(buffer, sizeof(buffer));
-    if (val) {
-        std::cout << buffer << std::endl;
+int main(int argc, char *argv[]) {
+    int opt;
+    bool silent = false;
+    const char *optstring = "s";
+    while ((opt = getopt(argc, argv, optstring)) != -1) {
+        if (opt == 's') {
+            silent = true;
+        }
     }
+
     int seed = time(NULL);
     std::cout << "随机种子：" << seed << std::endl;
     srand(seed);
@@ -35,7 +40,7 @@ int main() {
     SARunner saRunner(&chefList, &recipeList, &chefRecipePairs, ITER_CHEF,
                       T_MAX_CHEF, 0, e::getOptimalPrice, r::randomChef,
                       f::t_dist_slow);
-    States s = saRunner.run(NULL, false, true);
+    States s = saRunner.run(NULL, false, true, silent);
     std::cout << std::endl;
     saRunner.print(s, VERBOSE_MODE);
     std::cout << "Score: "
