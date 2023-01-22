@@ -27,10 +27,10 @@ States randomChef(States, CList *, RList *, CRPairs *);
 } // namespace r
 namespace e {
 
-typedef int (*GetEnergy)(States, CList *, RList *, CRPairs *);
+typedef int (*GetEnergy)(States, CList *, RList *, CRPairs *, bool);
 
-int sumPrice(States, CList *, RList *, CRPairs *);
-int getOptimalPrice(States s, CList *, RList *, CRPairs *);
+int sumPrice(States s, CList *c, RList *r, CRPairs *p, bool vb = false);
+int getOptimalPrice(States s, CList *c, RList *r, CRPairs *p, bool vb = false);
 } // namespace e
 
 namespace f {
