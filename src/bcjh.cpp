@@ -26,11 +26,10 @@ int main(int argc, char *argv[]) {
             verbose = true;
         }
     }
-    // std::cout << "silent: " << silent << std::endl;
-    // std::cout << "verbose: " << verbose << std::endl;
-
     int seed = time(NULL);
-    std::cout << "随机种子：" << seed << std::endl;
+
+    if (verbose)
+        std::cout << "随机种子：" << seed << std::endl;
     srand(seed);
     std::map<int, Chef> chefList0, chefList;
     std::map<int, Recipe> recipeList;
@@ -51,7 +50,7 @@ int main(int argc, char *argv[]) {
     saRunner.print(s, verbose);
     std::cout << "Score: "
               << e::sumPrice(s, &chefList, &recipeList, &chefRecipePairs)
-              << std::endl;
+              << "\n***************" << std::endl;
 
     return 0;
 }
