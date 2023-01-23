@@ -26,7 +26,7 @@ SARunner::SARunner(CList *chefList, RList *recipeList, CRPairs *chefRecipePairs,
 States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
                                 Chef *chefs[NUM_CHEFS]) {
     States s;
-    int r = 0;
+
     // std::cout << chefs << std::endl;
     // std::cout << chefList->size() << " " << chefRecipePairs->size()
     // << std::endl;
@@ -52,13 +52,14 @@ States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
 
         // s.chef = chefId;
     }
-
+    int r = 0;
     for (int j = 0; j < NUM_CHEFS; j++) {
         auto recipeList = &(*chefRecipePairs)[s.chef[j]];
-        // std::cout << j << " " << recipeList->size() << std::endl;
         for (int i = 0; i < DISH_PER_CHEF; i++) {
-
-            s.recipe[r++] = (*recipeList)[rand() % recipeList->size()];
+            do {
+                s.recipe[r] = (*recipeList)[rand() % recipeList->size()];
+            } while (inArray(s.recipe, r, s.recipe[r]));
+            r++;
         }
     }
 

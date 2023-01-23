@@ -16,12 +16,18 @@ void initChefRecipePairs(CRPairs &, std::map<int, Chef> &,
 int main(int argc, char *argv[]) {
     int opt;
     bool silent = false;
-    const char *optstring = "s";
+    bool verbose = false;
+    const char *optstring = "sv";
     while ((opt = getopt(argc, argv, optstring)) != -1) {
         if (opt == 's') {
             silent = true;
         }
+        if (opt == 'v') {
+            verbose = true;
+        }
     }
+    // std::cout << "silent: " << silent << std::endl;
+    // std::cout << "verbose: " << verbose << std::endl;
 
     int seed = time(NULL);
     std::cout << "随机种子：" << seed << std::endl;
@@ -40,9 +46,9 @@ int main(int argc, char *argv[]) {
     SARunner saRunner(&chefList, &recipeList, &chefRecipePairs, ITER_CHEF,
                       T_MAX_CHEF, 0, e::getOptimalPrice, r::randomChef,
                       f::t_dist_slow);
-    States s = saRunner.run(NULL, false, true, silent);
+    States s = saRunner.run(NULL, verbose, true, silent);
     std::cout << std::endl;
-    saRunner.print(s, VERBOSE_MODE);
+    saRunner.print(s, verbose);
     std::cout << "Score: "
               << e::sumPrice(s, &chefList, &recipeList, &chefRecipePairs)
               << std::endl;

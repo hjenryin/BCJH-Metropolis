@@ -24,9 +24,35 @@ int banquetRule(BanquetRule *const &rule, States &s) {
             rule[i].addRule.skillBuff.abilityBuff.steam += 100;
         }
     }
+    rule[2].addRule.buff = -30;
+    for (int i = 0; i < 3; i++) {
+        if (s.recipe[i]->flavor.salty == true) {
+            rule[i].addRule.full -= 3;
+            break;
+        }
+    }
+
+    //////
+
     rule[3].addRule.fullAdd = false;
     rule[3].addRule.full = 6;
+
     rule[4].baseRule.directAdd = 500;
+
+    for (int i = 3; i < 6; i++) {
+        if (s.recipe[i]->rarity == 3) {
+            rule[i].addRule.full -= 5;
+            break;
+        }
+    }
+    for (int i = 3; i < 6; i++) {
+        if (s.recipe[i]->flavor.bitter == true) {
+            rule[i].addRule.buff -= 50;
+            break;
+        }
+    }
+
+    //////
 
     for (int i = 6; i < 9; i++) {
         if (s.recipe[i]->rarity == 3) {
@@ -34,6 +60,19 @@ int banquetRule(BanquetRule *const &rule, States &s) {
             break;
         }
     }
+    for (int i = 6; i < 9; i++) {
+        if (s.recipe[i]->cookAbility.knife > 0) {
+            rule[i].baseRule.directAdd += 500;
+            break;
+        }
+    }
+    for (int i = 6; i < 9; i++) {
+        if (s.recipe[i]->cookAbility.stirfry > 0) {
+            rule[i].baseRule.buff -= 15;
+            break;
+        }
+    }
+
     rule[8].add(rule[8]);
     return 46;
 }
