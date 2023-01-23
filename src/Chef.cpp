@@ -281,7 +281,7 @@ Chef Chef::addTool(AbilityEnum a) {
         return newChef;
     case FRY:
         newChef.skill.ability.fry += 100;
-        newChef.name += "-烤";
+        newChef.name += "-炸";
         return newChef;
     case BOIL:
         newChef.skill.ability.boil += 100;
