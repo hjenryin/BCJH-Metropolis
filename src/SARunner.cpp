@@ -33,6 +33,9 @@ States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
     // << std::endl;
     if (chefs == NULL) {
         for (int j = 0; j < NUM_CHEFS; j++) {
+            if (chefList->size() == 0) {
+                throw NoChefException();
+            }
             auto iter = chefList->begin();
             std::advance(iter, rand() % chefList->size());
             s.chef[j] = &iter->second;
@@ -81,10 +84,10 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
     while (step < this->stepMax) {
         if (progress) {
             if (silent) {
-                if (step % 500 == 0) {
-                    std::cout << "\r" << step << "/" << this->stepMax
-                              << std::flush;
-                }
+                // if (step % 500 == 0) {
+                //     std::cout << "\r" << step << "/" << this->stepMax
+                //               << std::flush;
+                // }
             } else {
                 std::cout << "\r" << step << "/" << this->stepMax << std::flush;
             }
