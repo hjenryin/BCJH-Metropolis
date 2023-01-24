@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
     bool silent = false;
     bool verbose = false;
     const char *optstring = "sv";
+    int seed = time(NULL);
     while ((opt = getopt(argc, argv, optstring)) != -1) {
         if (opt == 's') {
             silent = true;
@@ -26,9 +27,8 @@ int main(int argc, char *argv[]) {
             verbose = true;
         }
     }
-    int seed = time(NULL);
-
-    if (verbose)
+    // seed = 1674572046;
+    if (true)
         std::cout << "随机种子：" << seed << std::endl;
     srand(seed);
     std::map<int, Chef> chefList0, chefList;
@@ -66,6 +66,9 @@ void initChefRecipePairs(CRPairs &chefRecipePairs,
                 // std::cout << &(chef->second) << std::endl;
                 chefRecipePairs[&chef->second].push_back(&recipe->second);
             }
+        }
+        if (chefRecipePairs[&chef->second].size() == 0) {
+            chefRecipePairs.erase(&chef->second);
         }
     }
     // std::cout << chefRecipePairs.size() << std::endl;

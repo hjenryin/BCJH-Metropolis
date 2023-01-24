@@ -5,7 +5,7 @@
 #define DISH_PER_CHEF 3
 #define T_MAX_CHEF 500   // 选择厨师时的初始温度
 #define T_MAX_RECIPE 500 // 对于每一组厨师，选择菜谱时的初始温度
-#define ITER_CHEF 4000   // 选择厨师时的迭代次数
+#define ITER_CHEF 3000   // 选择厨师时的迭代次数
 #define ITER_RECIPE 3000 // 对于每一组厨师，选择菜谱时的迭代次数
 #define BANQUET true     // 宴会模式
 #define AVOID_CHEF_1 true
