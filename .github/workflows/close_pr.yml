@@ -6,8 +6,12 @@ on:
     paths:
     - "data/**"
 
-jobs:  
-  run:
+jobs: 
+  
+  closePR:
+    permissions:
+      pull-requests: write 
+
     if: github.repository_owner == 'hjenryin'
     runs-on: ubuntu-latest
     steps:

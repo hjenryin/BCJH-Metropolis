@@ -33,6 +33,9 @@ States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
     // << std::endl;
     if (chefs == NULL) {
         for (int j = 0; j < NUM_CHEFS; j++) {
+            if (chefList->size() == 0) {
+                throw NoChefException();
+            }
             auto iter = chefList->begin();
             std::advance(iter, rand() % chefList->size());
             s.chef[j] = &iter->second;
@@ -69,7 +72,16 @@ States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
 States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
                      bool silent) {
     // std::cout << "Here" << std::endl;
-    States s = generateStates(this->chefList, this->chefRecipePairs, chefs);
+    States s;
+    try {
+        s = generateStates(this->chefList, this->chefRecipePairs, chefs);
+    } catch (NoChefException &e) {
+        std::cout << e.what() << std::endl;
+        exit(1);
+    } catch (NoRecipeException &e) {
+        std::cout << e.what() << std::endl;
+        exit(1);
+    }
     int energy = getEnergyFunc(s, this->chefList, this->recipeList,
                                this->chefRecipePairs, false);
     // std::cout << "Initial energy: " << energy << std::endl;
@@ -81,10 +93,10 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
     while (step < this->stepMax) {
         if (progress) {
             if (silent) {
-                if (step % 500 == 0) {
-                    std::cout << "\r" << step << "/" << this->stepMax
-                              << std::flush;
-                }
+                // if (step % 500 == 0) {
+                //     std::cout << "\r" << step << "/" << this->stepMax
+                //               << std::flush;
+                // }
             } else {
                 std::cout << "\r" << step << "/" << this->stepMax << std::flush;
             }
@@ -93,9 +105,16 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
         try {
             newS = randomMoveFunc(s, this->chefList, this->recipeList,
                                   this->chefRecipePairs);
-        } catch (std::runtime_error &e) {
+
+        } catch (NoRecipeException &e) {
             std::cout << e.what() << std::endl;
-            exit(1);
+            print(this->bestState);
+            exit(0);
+        } catch (NoChefException &e) {
+            std::cout << e.what() << std::endl;
+            print(this->bestState);
+            exit(0);
+
         }
 
         // print(newS);
