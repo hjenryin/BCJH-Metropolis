@@ -26,5 +26,6 @@ jobs:
     - name: build
       run: mkdir build && cd ./build && ls -aR && cmake ../ && make
     - name: run
-      run: cd ./build && ./bcjh -s && ./bcjh -s && ./bcjh -s && ./bcjh -s && ./bcjh -s
+      run: cd ./build && ./bcjh -s && ./bcjh -s 
+      run: echo "已生成两个方案~"
 
