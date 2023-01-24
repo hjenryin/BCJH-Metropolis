@@ -3,9 +3,16 @@
 ## 使用方法（云端）
 
 - 注册Github账号，fork此仓库。
-- 如果先前已经fork了，可以同步commit。最新的commit中将包含相应规则。（更新可能延迟……）
+- 第一次fork请跳过这一步。
+  如果先前已经fork了，可以同步commit。最新的commit中将包含相应规则。（更新可能延迟……）具体如图：
+  - 如果提示commit behind，可以更新；仅提示commit ahead不用更新。
+  ![commit behind](img/commits_behind.png)
+    注意检查一下标黄这里的方向，如果方向反了，说明前一步写错了。
+  ![create_pr1](img/create_pr1.png)
+  ![create_pr2](img/create_pr2.png)
+  ![merge](img/merge.png)
 - 将白菜菊花下载的个人数据(`userData.txt`)重命名为 `userData.json`并上传到 `data/`文件夹内。
-- Commit完之后，前往Actions页面（如图所示）。这一步如果Actions里面没有东西，试着删掉文件重新上传一下。有些人确实出现了这个问题，但我也没有复现出来都是正常的orz说不定删掉重新弄一下就好了）
+- Commit完之后，前往Actions页面（如图所示）。这一步如果Actions里面没有东西，试着删掉文件重新上传一下。有些人确实出现了这个问题，但我也没有复现出来，都是正常的……说不定删掉重新弄一下就好了orz
 
   ![to_action](img/to_action.png)
   ![pick_workflow](img/pick_workflow.png)
