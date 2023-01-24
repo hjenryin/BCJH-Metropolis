@@ -26,7 +26,7 @@ jobs:
     #     file_pattern: "data/data.min.json"
     #     skip_dirty_check: false
     - name: build
-      run: mkdir build && cd ./build && cmake ../  $(nproc) && make $(nproc)
+      run: mkdir build && cd ./build && cmake ../  && make 
     - name: run
       run: cd ./build && ./bcjh -s && ./bcjh -s && python3 ../src/run.py
 
