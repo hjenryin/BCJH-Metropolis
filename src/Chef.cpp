@@ -6,16 +6,17 @@
 #include <map>
 #include "../config.hpp"
 #include "Calculator.hpp"
-#define jsonStr2Int(v) atoi(v.asCString())
+#include "utils/json.hpp"
+// #define jsonStr2Int(v) atoi(v.asCString())
 CookAbility Chef::globalAbilityBuff;
 int Chef::globalAbilityMale = 0;
 int Chef::globalAbilityFemale = 0;
 std::map<int, Skill> Skill::skillList;
 void initBuff(Json::Value usrBuff) {
     Chef::setGlobalBuff(CookAbility(usrBuff));
-    Chef::setGlobalAbilityMale(jsonStr2Int(usrBuff["Male"]));
-    Chef::setGlobalAbilityFemale(jsonStr2Int(usrBuff["Female"]));
-    Chef::setGlobalAbilityAll(jsonStr2Int(usrBuff["All"]));
+    Chef::setGlobalAbilityMale(getInt(usrBuff["Male"]));
+    Chef::setGlobalAbilityFemale(getInt(usrBuff["Female"]));
+    Chef::setGlobalAbilityAll(getInt(usrBuff["All"]));
 }
 void splitUltimateSkill(std::map<int, int> &ultimateSkills, Json::Value &ids) {
     for (auto pair : ids) {
@@ -116,21 +117,22 @@ CookAbility::CookAbility(Json::Value &v) {
     if (v.isMember("stirfry") && v.isMember("bake") && v.isMember("boil") &&
         v.isMember("fry") && v.isMember("knife")) {
         // std::cout << "yes1" << std::endl;
-        this->stirfry = v["stirfry"].asInt();
-        this->bake = v["bake"].asInt();
-        this->boil = v["boil"].asInt();
-        this->steam = v["steam"].asInt();
-        this->fry = v["fry"].asInt();
-        this->knife = v["knife"].asInt();
+        this->stirfry = getInt(v["stirfry"]);
+        this->bake = getInt(v["bake"]);
+        this->boil = getInt(v["boil"]);
+        this->steam = getInt(v["steam"]);
+        this->fry = getInt(v["fry"]);
+        this->knife = getInt(v["knife"]);
+
     } else if (v.isMember("Stirfry") && v.isMember("Bake") &&
                v.isMember("Boil") && v.isMember("Fry") && v.isMember("Knife")) {
         // std::cout << v << std::endl;
-        this->stirfry = atoi(v["Stirfry"].asCString());
-        this->bake = atoi(v["Bake"].asCString());
-        this->boil = atoi(v["Boil"].asCString());
-        this->steam = atoi(v["Steam"].asCString());
-        this->fry = atoi(v["Fry"].asCString());
-        this->knife = atoi(v["Knife"].asCString());
+        this->stirfry = getInt(v["Stirfry"]);
+        this->bake = getInt(v["Bake"]);
+        this->boil = getInt(v["Boil"]);
+        this->steam = getInt(v["Steam"]);
+        this->fry = getInt(v["Fry"]);
+        this->knife = getInt(v["Knife"]);
     } else {
         std::cout << "no" << std::endl;
         throw std::logic_error("CookAbility: Invalid Json");
