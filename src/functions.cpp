@@ -2,6 +2,7 @@
 #include "SARunner.hpp"
 #include "../config.hpp"
 #include "../rule.hpp"
+#include "exception.hpp"
 
 namespace r0 {
 States randomRecipe(States &, CList *, RList *, CRPairs *);
@@ -31,12 +32,17 @@ States r0::randomChef(States &s, CList *chefList, RList *recipeList,
     // std::cout << "Test Here" << std::endl;
     int chefNum = rand() % NUM_CHEFS;
     Chef *pChef;
+    int count = 0;
     do {
         auto iter = chefList->begin();
         std::advance(iter, rand() % chefList->size());
         pChef = &(iter->second);
-
-    } while (repeatChef(pChef, s.chef, chefNum));
+        count++;
+    } while (repeatChef(pChef, s.chef, chefNum) &&
+             count < RANDOM_SEARCH_TIMEOUT);
+    if (count >= RANDOM_SEARCH_TIMEOUT) {
+        throw NoChefException();
+    }
     s.chef[chefNum] = pChef;
     SARunner saRunner(chefList, recipeList, chefRecipePairs, ITER_RECIPE,
                       T_MAX_RECIPE, 0, e::sumPrice, r::randomRecipe,
@@ -74,13 +80,9 @@ States r0::randomRecipe(States &s, CList *chefList, RList *r,
     int recipeNum = rand() % (NUM_CHEFS * DISH_PER_CHEF);
     Chef *chef = s.chef[recipeNum / DISH_PER_CHEF];
     Recipe *recipe;
-    std::vector<Recipe *> *recipes = &(*chefRecipePairs)[chef];
-    do {
-        recipe = recipes->at(rand() % recipes->size());
-    } while (inArray(s.recipe, NUM_CHEFS * DISH_PER_CHEF, recipe));
-    s.recipe[recipeNum] = recipe;
-
-    // std::cout << recipeNum << "," << recipeId << std::endl;
+    auto recipes = &(*chefRecipePairs)[chef];
+    r00::unrepeatedRandomRecipe(recipes, s.recipe, NUM_CHEFS * DISH_PER_CHEF,
+                                recipeNum);
     return s;
 }
 
@@ -93,14 +95,9 @@ States r0::swapChefTool(States &s, CList *chefList, RList *recipeList,
     for (int i = chefNum * DISH_PER_CHEF;
          i < chefNum * DISH_PER_CHEF + DISH_PER_CHEF; i++) {
         if (!s.chef[chefNum]->isCapable(s.recipe[i])) {
-            auto iter = s.chef[chefNum]->recipeCapable.begin();
-            do {
-                iter = s.chef[chefNum]->recipeCapable.begin();
-                std::advance(iter,
-                             rand() % s.chef[chefNum]->recipeCapable.size());
-
-            } while (inArray(s.recipe, NUM_CHEFS * DISH_PER_CHEF, *iter));
-            s.recipe[i] = *iter;
+            auto rl = &s.chef[chefNum]->recipeCapable;
+            r00::unrepeatedRandomRecipe(rl, s.recipe, NUM_CHEFS * DISH_PER_CHEF,
+                                        i);
         }
     }
 
@@ -210,4 +207,18 @@ double f::zipf(int stepMax, int step, double tMax, double tMin) {
 }
 double f::one_over_n(int stepMax, int step, double tMax, double tMin) {
     return tMax / std::pow(step + 1, 0.1);
+}
+
+void r00::unrepeatedRandomRecipe(std::vector<Recipe *> *rl, Recipe **rs,
+                                 int size, int index) {
+    int count = 0;
+    Recipe *r;
+    do {
+        r = rl->at(rand() % rl->size());
+        count++;
+    } while (inArray(rs, size, r) && count < RANDOM_SEARCH_TIMEOUT);
+    if (count >= RANDOM_SEARCH_TIMEOUT) {
+        throw NoRecipeException();
+    }
+    rs[index] = r;
 }
