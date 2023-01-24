@@ -8,6 +8,7 @@
 #include <cmath>
 #include <random>
 #include <fstream>
+#include "exception.hpp"
 SARunner::SARunner(CList *chefList, RList *recipeList, CRPairs *chefRecipePairs,
                    int stepMax, int tMax, int tMin, e::GetEnergy getEnergyFunc,
                    r::RandomMove randomMoveFunc,
@@ -39,26 +40,22 @@ States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
     } else {
         for (int i = 0; i < NUM_CHEFS; i++) {
             Chef *chef = chefs[i];
-            // if (chefList->find(chef->id) == chefList->end()) {
-
-            //     std::cout << "Chef not found:" << chef->id << "in"
-            //               << chefList->size() << std::endl;
-            //     auto iter = chefList->begin();
-
-            //     exit(1);
-            // }
             s.chef[i] = chef;
         }
-
-        // s.chef = chefId;
     }
     int r = 0;
     for (int j = 0; j < NUM_CHEFS; j++) {
         auto recipeList = &(*chefRecipePairs)[s.chef[j]];
         for (int i = 0; i < DISH_PER_CHEF; i++) {
+            int count = 0;
             do {
                 s.recipe[r] = (*recipeList)[rand() % recipeList->size()];
-            } while (inArray(s.recipe, r, s.recipe[r]));
+                count++;
+            } while (inArray(s.recipe, r, s.recipe[r]) &&
+                     count < RANDOM_SEARCH_TIMEOUT);
+            if (count >= RANDOM_SEARCH_TIMEOUT) {
+                throw NoRecipeException();
+            }
             r++;
         }
     }
@@ -92,8 +89,15 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
                 std::cout << "\r" << step << "/" << this->stepMax << std::flush;
             }
         }
-        States newS = randomMoveFunc(s, this->chefList, this->recipeList,
-                                     this->chefRecipePairs);
+        States newS;
+        try {
+            newS = randomMoveFunc(s, this->chefList, this->recipeList,
+                                  this->chefRecipePairs);
+        } catch (std::runtime_error &e) {
+            std::cout << e.what() << std::endl;
+            exit(1);
+        }
+
         // print(newS);
         int newEnergy = getEnergyFunc(newS, this->chefList, this->recipeList,
                                       this->chefRecipePairs, false);

@@ -13,6 +13,10 @@ struct States {
     Chef *chef[NUM_CHEFS];
     Recipe *recipe[DISH_PER_CHEF * NUM_CHEFS];
 };
+namespace r00 {
+// void unrepeatedRandomChef(CList *, Chef **&, int);
+void unrepeatedRandomRecipe(std::vector<Recipe *> *, Recipe **, int, int);
+} // namespace r00
 
 void swap(Recipe *&a, Recipe *&b);
 
