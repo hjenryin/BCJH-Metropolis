@@ -105,6 +105,7 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
         try {
             newS = randomMoveFunc(s, this->chefList, this->recipeList,
                                   this->chefRecipePairs);
+
         } catch (NoRecipeException &e) {
             std::cout << e.what() << std::endl;
             print(this->bestState);
@@ -113,6 +114,7 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
             std::cout << e.what() << std::endl;
             print(this->bestState);
             exit(0);
+
         }
 
         // print(newS);
