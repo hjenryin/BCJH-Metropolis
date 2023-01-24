@@ -15,16 +15,16 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: update
-      continue-on-error: true
-      run: python3 data/checkUpdate.py
-    - name: commit
-      continue-on-error: true
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with: 
-        commit_message: 自动拉取图鉴网数据
-        file_pattern: "data/data.min.json"
-        skip_dirty_check: false
+#     - name: update
+#       continue-on-error: true
+#       run: python3 data/checkUpdate.py
+#     - name: commit
+#       continue-on-error: true
+#       uses: stefanzweifel/git-auto-commit-action@v4
+#       with: 
+#         commit_message: 自动拉取图鉴网数据
+#         file_pattern: "data/data.min.json"
+#         skip_dirty_check: false
     - name: build
       run: mkdir build && cd ./build && ls -aR && cmake ../ && make
     - name: run
