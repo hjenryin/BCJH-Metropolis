@@ -10,10 +10,13 @@ aux_source_directory(${CMAKE_SOURCE_DIR}/src src)
 
 
 file(GLOB src_list_cpp ${CMAKE_SOURCE_DIR}/src/*.cpp 
-                       ${CMAKE_SOURCE_DIR}/src/*/*.cpp)
+                       ${CMAKE_SOURCE_DIR}/src/*/*.cpp
+                      )
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/src/include)	
+# add_subdirectory(${CMAKE_SOURCE_DIR}/src/include)	
+# add_subdirectory(${CMAKE_SOURCE_DIR}/src/utils)	
 
 add_executable(bcjh ${src_list_cpp})
-target_link_libraries(bcjh jsoncpp)
+# target_link_libraries(bcjh jsoncpp)
+# target_link_libraries(bcjh jsonhelper)
 

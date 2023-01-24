@@ -6,7 +6,7 @@
 #include "Chef.hpp"
 #include "Recipe.hpp"
 #include <vector>
-
+#include "utils/json.hpp"
 Recipe::Recipe(Json::Value &recipe) {
     this->name = recipe["name"].asString();
     this->id = recipe["recipeId"].asInt();
@@ -104,7 +104,7 @@ void loadRecipe(std::map<int, Recipe> &recipeList) {
     }
 }
 
-#define jsonStr2Int(v) atoi(v.asCString())
+// #define jsonStr2Int(v) atoi(v.asCString())
 RarityBuff Recipe::rarityBuff[5];
 void Recipe::initRarityBuff(Json::Value &usrBuff) {
     RarityBuff r[5];
@@ -113,16 +113,16 @@ void Recipe::initRarityBuff(Json::Value &usrBuff) {
     r[2].dishNum = 25;
     r[3].dishNum = 20;
     r[4].dishNum = 15;
-    r[0].dishNum += jsonStr2Int(usrBuff["MaxLimit_1"]);
-    r[1].dishNum += jsonStr2Int(usrBuff["MaxLimit_2"]);
-    r[2].dishNum += jsonStr2Int(usrBuff["MaxLimit_3"]);
-    r[3].dishNum += jsonStr2Int(usrBuff["MaxLimit_4"]);
-    r[4].dishNum += jsonStr2Int(usrBuff["MaxLimit_5"]);
-    r[0].dishBuff = jsonStr2Int(usrBuff["PriceBuff_1"]);
-    r[1].dishBuff = jsonStr2Int(usrBuff["PriceBuff_2"]);
-    r[2].dishBuff = jsonStr2Int(usrBuff["PriceBuff_3"]);
-    r[3].dishBuff = jsonStr2Int(usrBuff["PriceBuff_4"]);
-    r[4].dishBuff = jsonStr2Int(usrBuff["PriceBuff_5"]);
+    r[0].dishNum += getInt(usrBuff["MaxLimit_1"]);
+    r[1].dishNum += getInt(usrBuff["MaxLimit_2"]);
+    r[2].dishNum += getInt(usrBuff["MaxLimit_3"]);
+    r[3].dishNum += getInt(usrBuff["MaxLimit_4"]);
+    r[4].dishNum += getInt(usrBuff["MaxLimit_5"]);
+    r[0].dishBuff = getInt(usrBuff["PriceBuff_1"]);
+    r[1].dishBuff = getInt(usrBuff["PriceBuff_2"]);
+    r[2].dishBuff = getInt(usrBuff["PriceBuff_3"]);
+    r[3].dishBuff = getInt(usrBuff["PriceBuff_4"]);
+    r[4].dishBuff = getInt(usrBuff["PriceBuff_5"]);
     for (int i = 0; i < 5; i++) {
         rarityBuff[i] = r[i];
     }
