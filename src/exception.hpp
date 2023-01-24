@@ -6,14 +6,14 @@ class NoChefException : public std::exception {
   public:
     virtual const char *what() const throw() {
         return "拥有的厨师太少，请尝试关闭config.hpp中的AVOID_CHEF_1/2/"
-               "3选项，如果仍失败，请手动计算。";
+               "3选项，如果仍出现此提示，得到的结果可能不理想，建议手动计算。";
     }
     NoChefException() throw() {}
 };
 class NoRecipeException : public std::exception {
   public:
     virtual const char *what() const throw() {
-        return "拥有的菜谱太少，请手动计算。";
+        return "拥有的菜谱太少，得到的结果可能不理想，建议手动计算。";
     }
     NoRecipeException() throw() {}
 };
