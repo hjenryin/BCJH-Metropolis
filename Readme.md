@@ -28,7 +28,7 @@ _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**
 - 第一次fork请跳过这一步。
   如果先前已经fork了，可以同步commit。最新的commit中将包含相应规则。（更新可能延迟……）具体如图：
 
-  - 如果提示commit behind，可以更新；仅提示commit ahead不用更新。
+  - 如果提示commit behind，可以更新；仅提示commit ahead不要更新。
     ![commit behind](img/commits_behind.png)
     注意检查一下标黄这里的方向，如果方向反了，说明前一步写错了。
     ![create_pr1](img/create_pr1.png)
