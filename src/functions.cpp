@@ -46,7 +46,7 @@ States r0::randomChef(States &s, CList *chefList, RList *recipeList,
     s.chef[chefNum] = pChef;
     SARunner saRunner(chefList, recipeList, chefRecipePairs, ITER_RECIPE,
                       T_MAX_RECIPE, 0, e::sumPrice, r::randomRecipe,
-                      f::t_dist_slow);
+                      f::t_dist_fast);
     return saRunner.run(s.chef);
 }
 States r0::swapRecipe(States &s, CList *chefList, RList *r,
@@ -192,7 +192,7 @@ double f::linear(int stepMax, int step, double tMax, double tMin) {
     return (tMax - tMin) * (1 - step / (double)stepMax) + tMin;
 }
 double f::t_dist_fast(int stepMax, int step, double tMax, double tMin) {
-    return tMax / (1 + step * step / 100000.0);
+    return tMax / (1 + step * step / 300000.0);
 }
 double f::t_dist_slow(int stepMax, int step, double tMax, double tMin) {
     return tMax / (1 + step * step / 1000000.0);

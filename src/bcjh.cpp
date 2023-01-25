@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 
     SARunner saRunner(&chefList, &recipeList, &chefRecipePairs, ITER_CHEF,
                       T_MAX_CHEF, 0, e::getOptimalPrice, r::randomChef,
-                      f::t_dist_slow);
+                      f::t_dist_fast);
     States s = saRunner.run(NULL, verbose, true, silent);
     std::cout << std::endl;
     saRunner.print(s, verbose);
