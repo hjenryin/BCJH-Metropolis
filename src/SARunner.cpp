@@ -114,7 +114,6 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
             std::cout << e.what() << std::endl;
             print(this->bestState);
             exit(0);
-
         }
 
         // print(newS);
@@ -122,11 +121,11 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
                                       this->chefRecipePairs, false);
         double prob = 0;
         int delta = energy - newEnergy;
-        if (delta / t > 30) {
-            prob = 0;
+        if (delta / t < -30) {
+            prob = 1.01;
         } else {
-            prob = 1.0 / (1 + std::exp(delta / (3 * t + 0.0)));
-            //  prob = std::exp((newEnergy - energy) / (t + 0.0));
+            // prob = 1.0 / (1 + std::exp(delta / (3 * t + 0.0)));
+            prob = std::exp(-delta / t);
         }
         if (prob > (double)rand() / RAND_MAX) {
             s = newS;
