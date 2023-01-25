@@ -225,8 +225,24 @@ States r::randomChef(States s, CList *chefList, RList *recipeList,
     double r = (double)rand() / RAND_MAX;
     if (r < 0.1) {
         return r0::swapChefTool(s, chefList, recipeList, chefRecipePairs);
-    } else {
+    } else if (r > 0.15) {
         return r0::randomChef(s, chefList, recipeList, chefRecipePairs);
+    } else {
+        int chefIndex1 = rand() % NUM_CHEFS;
+        int chefIndex2;
+        do {
+            chefIndex2 = rand() % NUM_CHEFS;
+        } while (chefIndex1 == chefIndex2);
+        States newS = s;
+        newS.chef[chefIndex1] = s.chef[chefIndex2];
+        newS.chef[chefIndex2] = s.chef[chefIndex1];
+        for (int i = 0; i < DISH_PER_CHEF; i++) {
+            newS.recipe[chefIndex1 * DISH_PER_CHEF + i] =
+                s.recipe[chefIndex2 * DISH_PER_CHEF + i];
+            newS.recipe[chefIndex2 * DISH_PER_CHEF + i] =
+                s.recipe[chefIndex1 * DISH_PER_CHEF + i];
+        }
+        return newS;
     }
 }
 
