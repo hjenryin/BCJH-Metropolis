@@ -53,8 +53,7 @@ int getPrice(Chef &chef, Recipe &recipe, bool verbose) {
     return totalPrice;
 }
 
-BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule rule,
-                     bool verbose) {
+BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule r, bool verbose) {
     // std::cout << chef.name << " " << recipe.name << std::endl;
     int grade = chef->skill.ability / recipe->cookAbility;
     // std::cout << grade << std::endl;
@@ -84,17 +83,10 @@ BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule rule,
         gradebuff = 100;
     }
     auto rb = recipe->rarityBuff[recipe->rarity - 1];
-
-    Skill addBuff = rule.addRule.skillBuff;
-    Skill baseBuff = rule.baseRule.skillBuff;
-    int intentionAddBuff = recipe->flavor * addBuff.flavorBuff +
-                           recipe->cookAbility * addBuff.abilityBuff +
-                           recipe->materials * addBuff.materialBuff +
-                           rule.addRule.buff;
-    int intentionBaseBuff = recipe->flavor * baseBuff.flavorBuff +
-                            recipe->cookAbility * baseBuff.abilityBuff +
-                            recipe->materials * baseBuff.materialBuff +
-                            rule.baseRule.buff;
+    r.lenientRule.merge(r.strictRule); // vscode报错不认友元，但是编译没问题
+    BanquetLenientRule rule = r.lenientRule;
+    int intentionAddBuff = rule.addRule.buff;
+    int intentionBaseBuff = rule.baseRule.buff;
     int skillBuff = recipe->flavor * chef->skill.flavorBuff +
                     recipe->cookAbility * chef->skill.abilityBuff +
                     recipe->materials * chef->skill.materialBuff + rb.dishBuff +
