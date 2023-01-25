@@ -61,10 +61,12 @@ BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule rule,
     int gradebuff = 0;
     switch (grade) {
     case 0: {
-        // BanquetInfo b = {-10000000, recipe->rarity - rule.addRule.full};
-        std::cout << "Grade 0" << std::endl;
-        exit(0);
-        // return b;
+        if (verbose)
+            std::cout << "Grade 0" << std::endl;
+        {
+            BanquetInfo b = {0, 0};
+            return b;
+        }
     }
     case 1:
         gradebuff = 0;
@@ -95,9 +97,9 @@ BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule rule,
                             rule.baseRule.buff;
     int skillBuff = recipe->flavor * chef->skill.flavorBuff +
                     recipe->cookAbility * chef->skill.abilityBuff +
-                    recipe->materials * chef->skill.materialBuff + rb.dishBuff;
-    int buff = gradebuff + skillBuff + intentionAddBuff +
-               (chef->coinBuffOn ? chef->skill.coinBuff : 0);
+                    recipe->materials * chef->skill.materialBuff + rb.dishBuff +
+                    (chef->coinBuffOn ? chef->skill.coinBuff : 0);
+    int buff = gradebuff + skillBuff + intentionAddBuff;
     int singlePrice =
         std::ceil((recipe->price + rule.baseRule.directAdd) *
                   (1.0 + intentionBaseBuff / 100.0) * (1.0 + buff / 100.0));

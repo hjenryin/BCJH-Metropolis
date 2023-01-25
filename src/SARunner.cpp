@@ -62,15 +62,11 @@ States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
             r++;
         }
     }
-
-    // std::cout << "******\nInitial State: \n";
-    // print(s);
-    // std::cout << "************" << std::endl;
     return s;
 }
 
 States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
-                     bool silent) {
+                     bool silent, const char *filename) {
     // std::cout << "Here" << std::endl;
     States s;
     try {
@@ -158,6 +154,20 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
         file.close();
         // std::cout <<
         system("python3 ../src/plot.py &");
+    }
+    if (filename) {
+
+        std::fstream file;
+        std::string fn(filename);
+        std::cout << "Saving to file: " << fn + ".csv" << std::endl;
+        file.open(fn + ".csv", std::ios::out);
+        for (int i = 0; i < step; i++) {
+            file << this->history[i].energy << "," << this->history[i].t
+                 << std::endl;
+        }
+        file.close();
+        std::string cmd = "python3 ../src/plot.py -f " + fn;
+        system(cmd.c_str());
     }
 
     return this->bestState;
