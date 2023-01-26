@@ -69,9 +69,10 @@ int banquetRule(BanquetRule *const &rule, States &s) {
     }
     ////////
     for (int i = 6; i < 8; i++) {
-        if (s.recipe[i]->cookAbility.steam > 0 &&
-            s.recipe[i + 1]->flavor.tasty == true) {
-            lenientRule[i]->addRule.full += 8;
+        if (s.recipe[i]->cookAbility.steam > 0) {
+            if (s.recipe[i + 1]->flavor.tasty == true) {
+                lenientRule[i + 1]->addRule.full += 8;
+            }
             break;
         }
     }
