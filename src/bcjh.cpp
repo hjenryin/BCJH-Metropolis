@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
             verbose = true;
         }
     }
-    // seed = 1674678021;
+    // seed = 1674723744;
     if (true)
         std::cout << "随机种子：" << seed << std::endl;
     srand(seed);
