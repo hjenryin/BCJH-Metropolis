@@ -5,3 +5,5 @@ data/userData.json
 
 vcpkg/
 out/
+in/in.txt
+in/out.txt

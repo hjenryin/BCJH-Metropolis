@@ -58,10 +58,18 @@ class BanquetLenientRule {
     BanquetAddRule addRule;
     BanquetBaseRule baseRule;
     BanquetLenientRule() = default;
-    void oneMore() { this->add(*this); }
+    void oneMore() { this->duplicateTime += 1; }
 
   private:
+    int duplicateTime = 0;
+    void execOneMore() {
+        while (this->duplicateTime > 0) {
+            this->add(*this);
+            this->duplicateTime -= 1;
+        }
+    }
     void merge(BanquetStrictRule &rule) {
+        execOneMore();
         addRule.add(rule.addRule);
         baseRule.add(rule.baseRule);
     }
