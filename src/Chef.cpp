@@ -104,6 +104,7 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
     if (ultimateSkillId != -1) {
         this->addSkill(ultimateSkillId);
     }
+    this->tool = -1;
 }
 
 void Chef::print() {
@@ -268,6 +269,7 @@ void loadChefTools(const std::map<int, Chef> &chefList,
 }
 Chef Chef::addTool(AbilityEnum a) {
     Chef newChef(*this);
+    newChef.tool = a;
     switch (a) {
     case STIRFRY:
         newChef.skill.ability.stirfry += 100;

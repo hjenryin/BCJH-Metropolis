@@ -14,7 +14,7 @@ struct BanquetInfo {
  */
 class BanquetBaseRule {
   public:
-    Skill skillBuff;   // 基础售价+%（有条件）
+    Skill skillBuff; // 基础售价+%（从前一轮继承，不参与“意图生效次数”）
     int buff = 0;      // 基础售价+%（无条件）
     int directAdd = 0; // 基础售价+数额
     BanquetBaseRule() = default;
@@ -36,7 +36,7 @@ class BanquetAddRule {
     int buff = 0;        // 售价+%（无条件）
     BanquetAddRule() = default;
     void add(BanquetAddRule &rule) {
-        skillBuff.add(rule.skillBuff);
+        // skillBuff.add(rule.skillBuff);
         if (fullAdd) {
             full += rule.full;
         } else {
