@@ -1,0 +1,6 @@
+[submodule "build/foodgame.github.io"]
+	path = build/foodgame.github.io
+	url = https://github.com/foodgame/foodgame.github.io.git
+[submodule "foodgame.github.io"]
+	path = foodgame.github.io
+	url = https://github.com/foodgame/foodgame.github.io.git

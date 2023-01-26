@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
             verbose = true;
         }
     }
-    // seed = 1674572046;
+    // seed = 1674678021;
     if (true)
         std::cout << "随机种子：" << seed << std::endl;
     srand(seed);
@@ -43,15 +43,22 @@ int main(int argc, char *argv[]) {
     }
 
     SARunner saRunner(&chefList, &recipeList, &chefRecipePairs, ITER_CHEF,
-                      T_MAX_CHEF, 0, e::getOptimalPrice, r::randomChef,
-                      f::t_dist_slow);
+                      T_MAX_CHEF, 0, e::getTotalPrice, r::randomChef,
+                      f::t_dist_fast);
     States s = saRunner.run(NULL, verbose, true, silent);
     std::cout << std::endl;
-    saRunner.print(s, verbose);
-    std::cout << "Score: "
-              << e::sumPrice(s, &chefList, &recipeList, &chefRecipePairs)
-              << "\n***************" << std::endl;
+    int score =
+        e0::sumPrice(s, &chefList, &recipeList, &chefRecipePairs, false, true);
 
+    saRunner.print(s, verbose);
+    std::cout << "**************\nScore: " << score << "\n***************"
+              << std::endl;
+    if (!silent) {
+        SARunner saRunnerPrint(&chefList, &recipeList, &chefRecipePairs,
+                               ITER_RECIPE, T_MAX_RECIPE, 0, e::getTotalPrice,
+                               r::randomRecipe, f::t_dist_fast);
+        saRunnerPrint.run(s.chef, false, false, true, "../out/recipe");
+    }
     return 0;
 }
 

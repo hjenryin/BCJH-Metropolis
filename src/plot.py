@@ -1,6 +1,13 @@
 from matplotlib import pyplot as plt
 import numpy as np
-with open("../out/history.csv") as f:
+import argparse
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-f", type=str, default="../out/history")
+fn = parser.parse_args().f
+print("plotting", fn)
+with open(fn+".csv") as f:
     data = f.readlines()
 for i in range(len(data)):
     data[i] = data[i].strip()
@@ -21,4 +28,4 @@ ax2.set_ylim(0, np.max(temperature)*1.1)
 ax1.plot(t, score, label="score", color="orange")
 ax2.plot(t, temperature, label="temperature")
 fig.legend()
-fig.savefig("../out/plot.png")
+fig.savefig(fn+".png")
