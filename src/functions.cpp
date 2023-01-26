@@ -11,13 +11,9 @@ States randomChef(States &, CList *, RList *, CRPairs *);
 States swapChefTool(States &, CList *, RList *, CRPairs *);
 } // namespace r0
 
-int e::getOptimalPrice(States s, CList *chefList, RList *recipeList,
-                       CRPairs *chefRecipePairs, bool verbose) {
-    // SARunner saRunner(chefList, recipeList, chefRecipePairs, 500, 100, 0,
-    //                   e::sumPrice, r::randomRecipe, f::t_dist);
-    // saRunner.run(s.chef);
-    // return saRunner.bestEnergy;
-    return e::sumPrice(s, chefList, recipeList, chefRecipePairs, verbose);
+int e::getTotalPrice(States s, CList *chefList, RList *recipeList,
+                     CRPairs *chefRecipePairs, bool verbose) {
+    return e0::sumPrice(s, chefList, recipeList, chefRecipePairs, verbose);
 }
 bool repeatChef(Chef *chef, Chef *chefs[NUM_CHEFS], int except) {
     for (int i = 0; i < NUM_CHEFS; i++) {
@@ -45,7 +41,7 @@ States r0::randomChef(States &s, CList *chefList, RList *recipeList,
     }
     s.chef[chefNum] = pChef;
     SARunner saRunner(chefList, recipeList, chefRecipePairs, ITER_RECIPE,
-                      T_MAX_RECIPE, 0, e::sumPrice, r::randomRecipe,
+                      T_MAX_RECIPE, 0, e::getTotalPrice, r::randomRecipe,
                       f::t_dist_slow);
     return saRunner.run(s.chef);
 }
@@ -103,9 +99,75 @@ States r0::swapChefTool(States &s, CList *chefList, RList *recipeList,
 
     return s;
 }
-
-int e::sumPrice(States s, CList *chefList, RList *recipeList,
-                CRPairs *chefRecipePairs, bool verbose) {
+/**
+ * @brief Warning: this function involves a large copy constructor.
+ *
+ * @return whether after deduction, the price is still the same
+ */
+bool deductTool(States s, CList *chefList, RList *recipeList,
+                CRPairs *chefRecipePairs, int chefId, int deduction) {
+    Chef chef(*s.chef[chefId]);
+    int tool = chef.tool;
+    int *cookAbility;
+    switch (tool) {
+    case STIRFRY:
+        cookAbility = &chef.skill.ability.stirfry;
+        break;
+    case BOIL:
+        cookAbility = &chef.skill.ability.boil;
+        break;
+    case FRY:
+        cookAbility = &chef.skill.ability.fry;
+        break;
+    case STEAM:
+        cookAbility = &chef.skill.ability.steam;
+        break;
+    case BAKE:
+        cookAbility = &chef.skill.ability.bake;
+        break;
+    case KNIFE:
+        cookAbility = &chef.skill.ability.knife;
+        break;
+    default:
+        throw "Toolerror";
+    }
+    *cookAbility -= deduction;
+    int bestPrice =
+        e0::sumPrice(s, chefList, recipeList, chefRecipePairs, false, false);
+    States newState = s;
+    newState.chef[chefId] = &chef;
+    int newPrice = e0::sumPrice(newState, chefList, recipeList, chefRecipePairs,
+                                false, false);
+    return newPrice == bestPrice;
+}
+/**
+ * @brief
+ * @param exactChefTool whether to use the exact tool deduction.Warning: it
+ * should only be set true at the end of the function as it modifies the name of
+ * the chefs.
+ */
+int e0::sumPrice(States s, CList *chefList, RList *recipeList,
+                 CRPairs *chefRecipePairs, bool verbose, bool exactChefTool) {
+    if (exactChefTool) {
+        // std::cout << "exactChefTool" << std::endl;
+        for (int i = 0; i < NUM_CHEFS; i++) {
+            if (deductTool(s, chefList, recipeList, chefRecipePairs, i, 40)) {
+                if (deductTool(s, chefList, recipeList, chefRecipePairs, i,
+                               70)) {
+                    if (deductTool(s, chefList, recipeList, chefRecipePairs, i,
+                                   100)) {
+                        s.chef[i]->name += "(0)";
+                    } else {
+                        s.chef[i]->name += "(30)";
+                    }
+                } else {
+                    s.chef[i]->name += "(60)";
+                }
+            } else {
+                s.chef[i]->name += "(100)";
+            }
+        }
+    }
     if (BANQUET) {
         BanquetRule rule[9];
         int bestFull = banquetRule(rule, s);
@@ -114,7 +176,8 @@ int e::sumPrice(States s, CList *chefList, RList *recipeList,
         int totalFull = 0;
         for (int i = 0; i < 9; i++) {
             if (verbose && i % 3 == 0) {
-                std::cout << "************" << std::endl;
+
+                std::cout << "VERBOSE************" << std::endl;
                 s.chef[i / 3]->print();
                 std::cout << "************" << std::endl;
             }
@@ -162,8 +225,24 @@ States r::randomChef(States s, CList *chefList, RList *recipeList,
     double r = (double)rand() / RAND_MAX;
     if (r < 0.1) {
         return r0::swapChefTool(s, chefList, recipeList, chefRecipePairs);
-    } else {
+    } else if (r > 0.15) {
         return r0::randomChef(s, chefList, recipeList, chefRecipePairs);
+    } else {
+        int chefIndex1 = rand() % NUM_CHEFS;
+        int chefIndex2;
+        do {
+            chefIndex2 = rand() % NUM_CHEFS;
+        } while (chefIndex1 == chefIndex2);
+        States newS = s;
+        newS.chef[chefIndex1] = s.chef[chefIndex2];
+        newS.chef[chefIndex2] = s.chef[chefIndex1];
+        for (int i = 0; i < DISH_PER_CHEF; i++) {
+            newS.recipe[chefIndex1 * DISH_PER_CHEF + i] =
+                s.recipe[chefIndex2 * DISH_PER_CHEF + i];
+            newS.recipe[chefIndex2 * DISH_PER_CHEF + i] =
+                s.recipe[chefIndex1 * DISH_PER_CHEF + i];
+        }
+        return newS;
     }
 }
 
@@ -192,7 +271,7 @@ double f::linear(int stepMax, int step, double tMax, double tMin) {
     return (tMax - tMin) * (1 - step / (double)stepMax) + tMin;
 }
 double f::t_dist_fast(int stepMax, int step, double tMax, double tMin) {
-    return tMax / (1 + step * step / 100000.0);
+    return tMax / (1 + step * step / 300000.0);
 }
 double f::t_dist_slow(int stepMax, int step, double tMax, double tMin) {
     return tMax / (1 + step * step / 1000000.0);
