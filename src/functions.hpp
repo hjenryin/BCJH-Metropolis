@@ -20,7 +20,14 @@ void unrepeatedRandomRecipe(std::vector<Recipe *> *, Recipe **, int, int);
 
 void swap(Recipe *&a, Recipe *&b);
 
-template <typename T> bool inArray(T **array, int size, T *value);
+template <typename T> bool inArray(T **array, int size, T *value) {
+    for (int i = 0; i < size; i++) {
+        if (array[i] == value) {
+            return true;
+        }
+    }
+    return false;
+}
 bool chefCanCook(CRPairs *, Chef *, Recipe *);
 
 namespace r {
