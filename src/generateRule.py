@@ -2,6 +2,10 @@ import json
 from typing import List, Tuple
 
 
+class NoIntentError(Exception):
+    pass
+
+
 def addEndline(s: str) -> str:
     if s != "":
         if not s.endswith("\n"):
@@ -71,9 +75,13 @@ tail = """
 
 with open("/home/hjenryin/PJ/bcjh1/data/data.min.json", "r") as f:
     data = json.load(f)
-    rules = data["rules"]
-    intentions = data["intents"]
-    buffs = data["buffs"]
+
+    if "intents" in data.keys():
+        intentions = data["intents"]
+        rules = data["rules"]
+        buffs = data["buffs"]
+    else:
+        raise "文件中没有宴会规则。"
 
 
 def getIntention(intentId):
@@ -102,7 +110,7 @@ def getRule():
 
 def parseConditionValue(v):
     # print(v)
-    ability = ["Fry", "Boil", "Steam", "Bake", "StirFry", "Knife"]
+    ability = ["Fry", "Boil", "Steam", "Bake", "Stirfry", "Knife"]
     flavor = ["Sweet", "Spicy", "Salty", "Tasty", "Sour", "Bitter"]
     if v in ability:
         return "ability", v.lower()
@@ -199,7 +207,11 @@ def parseEffect(roundNum, offset, rule, strict):
         c = c.add(r+"baseRule.buff+= %d;" % int(ev), "")
     elif et == "BasicPriceChange":
         c = c.add(r+"baseRule.directAdd+= %d;" % int(ev), "")
+    elif et == "SetSatietyValue":
+        c = c.add(r+"addRule.full=%d;" % int(ev)+r +
+                  "addRule.fullAdd=false;", "")
     else:
+        print(et)
         raise NotImplementedError
     return c0.print()
 
@@ -219,20 +231,30 @@ def parseRule(roundNum, offset, rule, strict) -> Tuple[str, bool]:
 
 
 def parseRules(roundNum, roundRules):
-    c0 = Code(f"// 第{i+1}轮", "")
+    c0 = Code(f"// 第{roundNum+1}轮", "")
     c = c0
-    for rule in roundRule:
-        word = parseRule(i, None, getIntention(rule), False)
+    for rule in roundRules:
+        word = parseRule(roundNum, None, getIntention(rule), False)
         c = c.addBack(word)
 
     return c0.print()
 
 
-rule = getRule()["IntentList"]  # 会改head,tail，要在Code前面调用
-c0 = Code(head, tail)
-for i, roundRule in enumerate(rule):
-    c = c0
-    c = c.addFront(parseRules(i, roundRule))
+def generateRule():
+    rule = getRule()["IntentList"]  # 会改head,tail，要在Code前面调用
+    c0 = Code(head, tail)
+    for i, roundRule in enumerate(rule):
+        c = c0
+        c = c.addFront(parseRules(i, roundRule))
+
+    print(c0.print())
 
 
-print(c0.print())
+try:
+    generateRule()
+except Exception as e:
+    if isinstance(e, NotImplementedError):
+        print("出现了未知的新规则，需要手动实现。")
+    else:
+        print("出现了未知的错误。")
+        print(e)
