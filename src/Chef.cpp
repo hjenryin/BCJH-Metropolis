@@ -104,6 +104,7 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
     if (ultimateSkillId != -1) {
         this->addSkill(ultimateSkillId);
     }
+    this->tool = -1;
 }
 
 void Chef::print() {
@@ -173,17 +174,17 @@ void Skill::loadJson(Json::Value &v) {
                     skill->abilityBuff.fry = value;
                 } else if (type == "UseKnife") {
                     skill->abilityBuff.knife = value;
-                } else if (type == "Sweet") {
+                } else if (type == "UseSweet") {
                     skill->flavorBuff.sweet = value;
-                } else if (type == "Sour") {
+                } else if (type == "UseSour") {
                     skill->flavorBuff.sour = value;
-                } else if (type == "Salty") {
+                } else if (type == "UseSalty") {
                     skill->flavorBuff.salty = value;
-                } else if (type == "Bitter") {
+                } else if (type == "UseBitter") {
                     skill->flavorBuff.bitter = value;
-                } else if (type == "Spicy") {
+                } else if (type == "UseSpicy") {
                     skill->flavorBuff.spicy = value;
-                } else if (type == "Tasty") {
+                } else if (type == "UseTasty") {
                     skill->flavorBuff.tasty = value;
                 } else if (type == "UseVegetable") {
                     skill->materialBuff.vegetable = value;
@@ -268,6 +269,7 @@ void loadChefTools(const std::map<int, Chef> &chefList,
 }
 Chef Chef::addTool(AbilityEnum a) {
     Chef newChef(*this);
+    newChef.tool = a;
     switch (a) {
     case STIRFRY:
         newChef.skill.ability.stirfry += 100;
