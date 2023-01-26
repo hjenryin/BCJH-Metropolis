@@ -27,9 +27,9 @@ jobs:
     #     skip_dirty_check: false
     
     
-#     - name: build
-#       run: mkdir build && cd ./build && cmake ../   && make -j$(nproc)
+    - name: build
+      run: mkdir build && cd ./build && cmake ../   && make -j$(nproc)
     - name: run
-#       run: cd ./build && ./bcjh -s && ./bcjh -s 
-      run: echo "计算器规则有问题，修复中"
+      run: cd ./build && ./bcjh -s && ./bcjh -s 
+#       run: echo "计算器规则有问题，修复中"
 
