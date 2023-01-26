@@ -1,6 +1,6 @@
-// 兔年年兽第五关
+// 兔年年兽第六关
 
-// 本代码由 generateRule.py 自动生成
+// 本代码由 ./src/generateRule.py 自动生成
 #ifndef RULE_HPP
 #define RULE_HPP
 #include "src/Calculator.hpp"
@@ -23,22 +23,6 @@ int banquetRule(BanquetRule *const &rule, States &s) {
     }
 
     // 第1轮
-    // 条件：第三道菜：第三道菜意图生效次数加一
-    for (int i = 0; i < 3; i++) {
-        if (i == 2) {
-            // 效果：第三道菜：第三道菜意图生效次数加一
-            lenientRule[i]->oneMore();
-            break;
-        }
-    }
-    // 条件：辣：本道料理售价+100%
-    for (int i = 0; i < 3; i++) {
-        if (s.recipe[i]->flavor.spicy == true) {
-            // 效果：辣：本道料理售价+100%
-            lenientRule[i]->addRule.buff += 100;
-            break;
-        }
-    }
     // 条件：三道切：下阶段炒技法料理售价+100%
     if (s.recipe[0]->cookAbility.knife > 0 &&
         s.recipe[1]->cookAbility.knife > 0 &&
@@ -61,25 +45,6 @@ int banquetRule(BanquetRule *const &rule, States &s) {
         }
     }
     // 第2轮
-    // 条件：切：本道料理基础售价+500
-    for (int i = 3; i < 6; i++) {
-        if (s.recipe[i]->cookAbility.knife > 0) {
-            // 效果：切：本道料理基础售价+500
-            lenientRule[i]->baseRule.directAdd += 500;
-            break;
-        }
-    }
-    // 条件：4火：下道料理意图生效次数加一
-    for (int i = 3; i < 6; i++) {
-        if (s.recipe[i]->rarity == 4) {
-            // 效果：4火：下道料理意图生效次数加一
-            if (i + 1 < 6) {
-                // 效果：本道料理意图生效次数加一
-                lenientRule[i + 1]->oneMore();
-            }
-            break;
-        }
-    }
     // 条件：3火：本道料理饱腹感+3
     for (int i = 3; i < 6; i++) {
         if (s.recipe[i]->rarity == 3) {
@@ -97,22 +62,6 @@ int banquetRule(BanquetRule *const &rule, States &s) {
         }
     }
     // 第3轮
-    // 条件：1火：本道料理基础售价+1000
-    for (int i = 6; i < 9; i++) {
-        if (s.recipe[i]->rarity == 1) {
-            // 效果：1火：本道料理基础售价+1000
-            lenientRule[i]->baseRule.directAdd += 1000;
-            break;
-        }
-    }
-    // 条件：4火：本道料理售价+50%
-    for (int i = 6; i < 9; i++) {
-        if (s.recipe[i]->rarity == 4) {
-            // 效果：4火：本道料理售价+50%
-            lenientRule[i]->addRule.buff += 50;
-            break;
-        }
-    }
     // 条件：炒：本道料理售价+150%
     for (int i = 6; i < 9; i++) {
         if (s.recipe[i]->cookAbility.stirfry > 0) {
