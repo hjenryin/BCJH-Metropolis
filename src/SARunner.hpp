@@ -50,10 +50,11 @@ class SARunner {
     SARunner(
         CList *chefList, RList *recipeList, CRPairs *chefRecipePairs,
         int stepMax, int tMax, int tMin,
-        e::GetEnergy getEnergyFunc = e::sumPrice,
+        e::GetEnergy getEnergyFunc = e::getTotalPrice,
         r::RandomMove randomMoveFunc = r::randomRecipe,
         f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative);
     States run(Chef *chefs[NUM_CHEFS] = NULL, bool verbose = false,
-               bool progress = false, bool silent = false);
+               bool progress = false, bool silent = false,
+               const char *fn = NULL);
 };
 #endif

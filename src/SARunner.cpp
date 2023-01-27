@@ -62,15 +62,11 @@ States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
             r++;
         }
     }
-
-    // std::cout << "******\nInitial State: \n";
-    // print(s);
-    // std::cout << "************" << std::endl;
     return s;
 }
 
 States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
-                     bool silent) {
+                     bool silent, const char *filename) {
     // std::cout << "Here" << std::endl;
     States s;
     try {
@@ -114,7 +110,6 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
             std::cout << e.what() << std::endl;
             print(this->bestState);
             exit(0);
-
         }
 
         // print(newS);
@@ -122,11 +117,11 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
                                       this->chefRecipePairs, false);
         double prob = 0;
         int delta = energy - newEnergy;
-        if (delta / t > 30) {
-            prob = 0;
+        if (delta / t < -30) {
+            prob = 1.01;
         } else {
-            prob = 1.0 / (1 + std::exp(delta / (3 * t + 0.0)));
-            //  prob = std::exp((newEnergy - energy) / (t + 0.0));
+            // prob = 1.0 / (1 + std::exp(delta / (3 * t + 0.0)));
+            prob = std::exp(-delta / t);
         }
         if (prob > (double)rand() / RAND_MAX) {
             s = newS;
@@ -159,6 +154,20 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
         file.close();
         // std::cout <<
         system("python3 ../src/plot.py &");
+    }
+    if (filename) {
+
+        std::fstream file;
+        std::string fn(filename);
+        std::cout << "Saving to file: " << fn + ".csv" << std::endl;
+        file.open(fn + ".csv", std::ios::out);
+        for (int i = 0; i < step; i++) {
+            file << this->history[i].energy << "," << this->history[i].t
+                 << std::endl;
+        }
+        file.close();
+        std::string cmd = "python3 ../src/plot.py -f " + fn;
+        system(cmd.c_str());
     }
 
     return this->bestState;

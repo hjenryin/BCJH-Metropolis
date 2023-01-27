@@ -25,8 +25,11 @@ jobs:
     #     commit_message: 自动拉取图鉴网数据
     #     file_pattern: "data/data.min.json"
     #     skip_dirty_check: false
+    
+    
     - name: build
       run: mkdir build && cd ./build && cmake ../   && make -j$(nproc)
     - name: run
       run: cd ./build && ./bcjh -s && ./bcjh -s 
+#       run: echo "计算器规则有问题，修复中"
 

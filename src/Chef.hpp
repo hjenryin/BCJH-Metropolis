@@ -22,6 +22,7 @@ class Chef {
     bool male;
     bool female;
     int id;
+    int tool = -1;
     std::string name;
     Skill skill;
     std::vector<Recipe *> recipeCapable;
