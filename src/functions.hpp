@@ -20,7 +20,14 @@ void unrepeatedRandomRecipe(std::vector<Recipe *> *, Recipe **, int, int);
 
 void swap(Recipe *&a, Recipe *&b);
 
-template <typename T> bool inArray(T **array, int size, T *value);
+template <typename T> bool inArray(T **array, int size, T *value) {
+    for (int i = 0; i < size; i++) {
+        if (array[i] == value) {
+            return true;
+        }
+    }
+    return false;
+}
 bool chefCanCook(CRPairs *, Chef *, Recipe *);
 
 namespace r {
@@ -30,13 +37,12 @@ States randomChef(States, CList *, RList *, CRPairs *);
 
 } // namespace r
 namespace e0 {
-int sumPrice(States s, CList *c, RList *r, CRPairs *p, bool vb = false,
+int sumPrice(States s, CList *c, RList *r, CRPairs *p, int log = false,
              bool exactChefTool = false);
 }
 namespace e {
 
 typedef int (*GetEnergy)(States, CList *, RList *, CRPairs *, bool);
-
 int getTotalPrice(States s, CList *c, RList *r, CRPairs *p, bool vb = false);
 } // namespace e
 
