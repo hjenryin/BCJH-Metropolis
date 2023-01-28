@@ -4,18 +4,51 @@ on:
   push:
     paths:
     - "data/userData.json"
-#     应该怎么让此文件被删除的时候不运行workflow啊？
+  workflow_dispatch:
 
 jobs:
+  sync_with_upstream:
+    runs-on: ubuntu-latest
+    name: Sync main with upstream latest
+
+    steps:
+    # Step 1: run a standard checkout action, provided by github
+    - name: Checkout main
+      uses: actions/checkout@v3
+      with:
+        ref: main
+        # submodules: 'recursive'     ### may be needed in your situation
+
+    # Step 2: run this sync action - specify the upstream repo, upstream branch to sync with, and target sync branch
+    - name: Pull (Fast-Forward) upstream changes
+      id: sync
+
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+      with:
+        upstream_repository: hjenryin/BCJH-Metropolis
+        upstream_branch: main
+        target_branch: main
+        git_pull_args: '--no-rebase -s recursive -XOurs'
+        github_token: ${{ secrets.GITHUB_TOKEN }}   # optional, for accessing repos that require authentication
+
+    # Step 3: Display a message if 'sync' step had new commits (simple test)
+    - name: Check for new commits
+      if: steps.sync.outputs.has_new_commits
+      run: echo "There were new commits."
+
+    # Step 4: Print a helpful timestamp for your records (not required, just nice)
+    - name: Timestamp
+      run: date
+
   buildTest:
     permissions:
       contents: write
     runs-on: ubuntu-latest
+    needs: sync_with_upstream
 
     steps:
+    
     - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.ref_name }}
     
     # - name: update
     #   run: python3 data/checkUpdate.py
