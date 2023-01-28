@@ -65,8 +65,8 @@ States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
     return s;
 }
 
-States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
-                     bool silent, const char *filename) {
+States SARunner::run(Chef *chefs[NUM_CHEFS], bool progress, bool silent,
+                     const char *filename) {
     // std::cout << "Here" << std::endl;
     States s;
     try {
@@ -89,10 +89,10 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
     while (step < this->stepMax) {
         if (progress) {
             if (silent) {
-                // if (step % 500 == 0) {
-                //     std::cout << "\r" << step << "/" << this->stepMax
-                //               << std::flush;
-                // }
+                if (step % 500 == 0) {
+                    std::cout << "\r" << step << "/" << this->stepMax
+                              << std::flush;
+                }
             } else {
                 std::cout << "\r" << step << "/" << this->stepMax << std::flush;
             }
@@ -111,7 +111,7 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
             print(this->bestState);
             exit(0);
         }
-
+        // std::cin >> step;
         // print(newS);
         int newEnergy = getEnergyFunc(newS, this->chefList, this->recipeList,
                                       this->chefRecipePairs, false);
@@ -142,8 +142,6 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool verbose, bool progress,
         this->history[step].states = s;
         step++;
     }
-    // std::cout << " * Best energy: " << this->bestEnergy << std::endl;
-    // print(this->bestState, verbose);
     if (progress && !silent) {
         std::fstream file;
         file.open("../out/history.csv", std::ios::out);
