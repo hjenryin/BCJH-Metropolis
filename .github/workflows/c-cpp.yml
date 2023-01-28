@@ -20,10 +20,10 @@ jobs:
         # submodules: 'recursive'     ### may be needed in your situation
 
     # Step 2: run this sync action - specify the upstream repo, upstream branch to sync with, and target sync branch
-    - name: Pull (Fast-Forward) upstream changes
+    - name: Pull (Merge) upstream changes
       id: sync
 
-      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+      uses: aormsby/Fork-Sync-With-Upstream-action@v2.1
       with:
         upstream_repository: hjenryin/BCJH-Metropolis
         upstream_branch: main
