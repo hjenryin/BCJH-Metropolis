@@ -137,6 +137,15 @@ class Skill {
         std::cout << "CoinBuff: " << this->coinBuff << std::endl;
     }
 };
-enum AbilityEnum { STIRFRY, BAKE, BOIL, STEAM, FRY, KNIFE };
+enum AbilityEnum {
+    NO_TOOL = -2,
+    NOT_EQUIPPED = -1,
+    STIRFRY,
+    BAKE,
+    BOIL,
+    STEAM,
+    FRY,
+    KNIFE
+};
 
 #endif

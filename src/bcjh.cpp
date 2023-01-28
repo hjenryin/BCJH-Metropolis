@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <fstream>
+#include <time.h>
 bool Chef::coinBuffOn = true;
 void initChefRecipePairs(CRPairs &, std::map<int, Chef> &,
                          std::map<int, Recipe> &);

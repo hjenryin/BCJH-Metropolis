@@ -128,6 +128,8 @@ bool deductTool(States s, CList *chefList, RList *recipeList,
     case KNIFE:
         cookAbility = &chef.skill.ability.knife;
         break;
+    case NO_TOOL:
+        return true;
     default:
         throw "Toolerror";
     }
@@ -263,14 +265,7 @@ void swap(Recipe *&a, Recipe *&b) {
     a = b;
     b = temp;
 }
-template <typename T> bool inArray(T **array, int size, T *value) {
-    for (int i = 0; i < size; i++) {
-        if (array[i] == value) {
-            return true;
-        }
-    }
-    return false;
-}
+
 bool chefCanCook(CRPairs *p, Chef *chef, Recipe *recipe) {
     return std::find((*p)[chef].begin(), (*p)[chef].end(), recipe) !=
            (*p)[chef].end();
