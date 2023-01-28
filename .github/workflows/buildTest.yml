@@ -2,6 +2,8 @@ name: C/C++ CI
 
 on:
   push:
+    branches:
+    - "main"
     paths:
     - "data/userData.json"
   workflow_dispatch:
