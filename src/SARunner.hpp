@@ -53,8 +53,7 @@ class SARunner {
         e::GetEnergy getEnergyFunc = e::getTotalPrice,
         r::RandomMove randomMoveFunc = r::randomRecipe,
         f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative);
-    States run(Chef *chefs[NUM_CHEFS] = NULL, bool verbose = false,
-               bool progress = false, bool silent = false,
-               const char *fn = NULL);
+    States run(Chef *chefs[NUM_CHEFS] = NULL, bool progress = false,
+               bool silent = false, const char *fn = NULL);
 };
 #endif
