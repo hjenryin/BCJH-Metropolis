@@ -1,0 +1,85 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches:
+    - "main"
+    paths:
+    - "data/userData.json"
+  workflow_dispatch:
+
+jobs:
+  sync_with_upstream:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    name: Sync main with upstream latest
+
+    steps:
+    # Step 1: run a standard checkout action, provided by github
+    - name: Checkout main
+      uses: actions/checkout@v3
+      with:
+        ref: main
+        # submodules: 'recursive'     ### may be needed in your situation
+  # REQUIRED step
+    # Step 2: run the sync action
+    - name: Sync upstream changes
+      id: sync
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+      with:
+        target_sync_branch: main
+        # REQUIRED 'target_repo_token' exactly like this!
+        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+        upstream_sync_branch: main
+        upstream_sync_repo: hjenryin/BCJH-Metropolis
+#         upstream_repo_access_token: ${{ secrets.UPSTREAM_REPO_SECRET }}
+        upstream_pull_args: '--allow-unrelated-histories --no-rebase -s recursive -Xours'
+    
+    # Step 2: run this sync action - specify the upstream repo, upstream branch to sync with, and target sync branch
+#     - name: Pull (Merge) upstream changes
+#       id: sync0
+
+#       uses: aormsby/Fork-Sync-With-Upstream-action@v2.1
+#       with:
+#         upstream_repository: hjenryin/BCJH-Metropolis
+#         upstream_branch: main
+#         target_branch: main
+#         git_pull_args: '--allow-unrelated-histories --no-rebase -s recursive -XOurs'
+#         github_token: ${{ secrets.GITHUB_TOKEN }}   # optional, for accessing repos that require authentication
+
+    # Step 3: Display a message if 'sync' step had new commits (simple test)
+    - name: Check for new commits
+      if: steps.sync.outputs.has_new_commits
+      run: echo "There were new commits."
+
+    # Step 4: Print a helpful timestamp for your records (not required, just nice)
+    - name: Timestamp
+      run: date
+
+  buildTest:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    needs: sync_with_upstream
+
+    steps:
+    
+    - uses: actions/checkout@v3
+    
+    # - name: update
+    #   run: python3 data/checkUpdate.py
+    # - name: commit
+    #   uses: stefanzweifel/git-auto-commit-action@v4
+    #   with: 
+    #     commit_message: 自动拉取图鉴网数据
+    #     file_pattern: "data/data.min.json"
+    #     skip_dirty_check: false
+    
+    
+    - name: build
+      run: mkdir build && cd ./build && cmake ../   && make -j$(nproc)
+    - name: run
+      run: cd ./build && ./bcjh -s && ./bcjh -s 
+#       run: echo "计算器规则有问题，修复中"
+

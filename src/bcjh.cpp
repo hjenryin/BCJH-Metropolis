@@ -14,12 +14,12 @@
 bool Chef::coinBuffOn = true;
 void initChefRecipePairs(CRPairs &, std::map<int, Chef> &,
                          std::map<int, Recipe> &);
-void run(CList &, RList &, CRPairs &, bool, bool);
+void run(CList &, RList &, CRPairs &, int, bool);
 void calculator(CList &, RList &, CRPairs &);
 int main(int argc, char *argv[]) {
     int opt;
     bool silent = false;
-    bool verbose = false;
+    int log = 0; // 0x0: 无输出 0x1: 正常输出 0x10: 详细输出
     const char *optstring = "svch";
     int seed = time(NULL);
     bool calculate = false;
@@ -28,12 +28,12 @@ int main(int argc, char *argv[]) {
             silent = true;
         }
         if (opt == 'v') {
-            verbose = true;
+            log += 0x10;
         }
         if (opt == 'c') {
             calculate = true;
         }
-        if (opt = 'h') {
+        if (opt == 'h') {
             std::cout << "-s: 进度条逢500更新" << std::endl;
             std::cout << "-v: 输出详细信息" << std::endl;
             std::cout << "-c: 从文件中读取配置，计算分数" << std::endl;
@@ -54,29 +54,30 @@ int main(int argc, char *argv[]) {
         chef->second.loadRecipeCapable(recipeList);
     }
     if (!calculate) {
-        run(chefList, recipeList, chefRecipePairs, verbose, silent);
+        run(chefList, recipeList, chefRecipePairs, log, silent);
     } else {
         calculator(chefList, recipeList, chefRecipePairs);
     }
 }
-void run(CList &chefList, RList &recipeList, CRPairs &chefRecipePairs,
-         bool verbose, bool silent) {
+void run(CList &chefList, RList &recipeList, CRPairs &chefRecipePairs, int log,
+         bool silent) {
     SARunner saRunner(&chefList, &recipeList, &chefRecipePairs, ITER_CHEF,
                       T_MAX_CHEF, 0, e::getTotalPrice, r::randomChef,
                       f::t_dist_fast);
-    States s = saRunner.run(NULL, verbose, true, silent);
-    std::cout << std::endl;
-    int score =
-        e0::sumPrice(s, &chefList, &recipeList, &chefRecipePairs, false, true);
+    // std::cout << log << std::endl;
+    States s = saRunner.run(NULL, true, silent);
 
-    saRunner.print(s, verbose);
+    std::cout << std::endl;
+    log += 0x1;
+    int score =
+        e0::sumPrice(s, &chefList, &recipeList, &chefRecipePairs, log, true);
     std::cout << "**************\nScore: " << score << "\n***************"
               << std::endl;
     if (!silent) {
         SARunner saRunnerPrint(&chefList, &recipeList, &chefRecipePairs,
                                ITER_RECIPE, T_MAX_RECIPE, 0, e::getTotalPrice,
                                r::randomRecipe, f::t_dist_fast);
-        saRunnerPrint.run(s.chef, false, false, true, "../out/recipe");
+        saRunnerPrint.run(s.chef, false, silent, "../out/recipe");
     }
 }
 
