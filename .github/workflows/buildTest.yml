@@ -30,7 +30,7 @@ jobs:
         upstream_sync_branch: main
         upstream_sync_repo: hjenryin/BCJH-Metropolis
 #         upstream_repo_access_token: ${{ secrets.UPSTREAM_REPO_SECRET }}
-        upstream_pull_args: '--allow-unrelated-histories --no-rebase -s recursive -XOurs'
+        upstream_pull_args: '--allow-unrelated-histories --no-rebase -s recursive -Xours'
     
     # Step 2: run this sync action - specify the upstream repo, upstream branch to sync with, and target sync branch
 #     - name: Pull (Merge) upstream changes
