@@ -147,7 +147,7 @@ bool deductTool(States s, CList *chefList, RList *recipeList,
  * the chefs.
  */
 int e0::sumPrice(States s, CList *chefList, RList *recipeList,
-                 CRPairs *chefRecipePairs, bool verbose, bool exactChefTool) {
+                 CRPairs *chefRecipePairs, int log, bool exactChefTool) {
     if (exactChefTool) {
         // std::cout << "exactChefTool" << std::endl;
         for (int i = 0; i < NUM_CHEFS; i++) {
@@ -174,18 +174,30 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList,
         BanquetInfo bi[9];
         int totalScore = 0;
         int totalFull = 0;
+        int scoreCache = 0;
+        int fullCache = 0;
         for (int i = 0; i < 9; i++) {
-            if (verbose && i % 3 == 0) {
-
+            if ((log & 0x10) && i % 3 == 0) {
                 std::cout << "VERBOSE************" << std::endl;
                 s.chef[i / 3]->print();
                 std::cout << "************" << std::endl;
             }
-            bi[i] = getPrice(s.chef[i / 3], s.recipe[i], rule[i], verbose);
+            bi[i] = getPrice(s.chef[i / 3], s.recipe[i], rule[i], (log & 0x10));
             totalFull += bi[i].full;
             totalScore += bi[i].price;
+            scoreCache += bi[i].price;
+            fullCache += bi[i].full;
+            if ((log & 0x1) && i % 3 == 2) {
+                std::cout << "厨师：" << s.chef[i / 3]->name << " -> "
+                          << fullCache << " / " << scoreCache << std::endl;
+                scoreCache = 0;
+                fullCache = 0;
+                std::cout << "菜谱：" << s.recipe[i - 2]->name << "；"
+                          << s.recipe[i - 1]->name << "；" << s.recipe[i]->name
+                          << std::endl;
+            }
         }
-
+        // std::cout << "log:" << log << std::endl;
         switch (totalFull - bestFull) {
         case 0:
             return std::ceil(totalScore * 1.3);
@@ -198,14 +210,14 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList,
         int r = 0;
 
         for (int i = 0; i < NUM_CHEFS; i++) {
-            if (verbose) {
+            if ((log & 0x10)) {
                 std::cout << "************" << std::endl;
                 s.chef[i]->print();
                 std::cout << "************" << std::endl;
             }
             for (int j = 0; j < DISH_PER_CHEF; j++) {
 
-                energy += getPrice(*s.chef[i], *s.recipe[r++], verbose);
+                energy += getPrice(*s.chef[i], *s.recipe[r++], (log & 0x10));
             }
         }
         return energy;
@@ -251,14 +263,7 @@ void swap(Recipe *&a, Recipe *&b) {
     a = b;
     b = temp;
 }
-template <typename T> bool inArray(T **array, int size, T *value) {
-    for (int i = 0; i < size; i++) {
-        if (array[i] == value) {
-            return true;
-        }
-    }
-    return false;
-}
+
 bool chefCanCook(CRPairs *p, Chef *chef, Recipe *recipe) {
     return std::find((*p)[chef].begin(), (*p)[chef].end(), recipe) !=
            (*p)[chef].end();
