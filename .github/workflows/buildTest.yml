@@ -18,18 +18,31 @@ jobs:
       with:
         ref: main
         # submodules: 'recursive'     ### may be needed in your situation
-
-    # Step 2: run this sync action - specify the upstream repo, upstream branch to sync with, and target sync branch
-    - name: Pull (Merge) upstream changes
+  # REQUIRED step
+    # Step 2: run the sync action
+    - name: Sync upstream changes
       id: sync
-
-      uses: aormsby/Fork-Sync-With-Upstream-action@v2.1
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
       with:
-        upstream_repository: hjenryin/BCJH-Metropolis
-        upstream_branch: main
-        target_branch: main
-        git_pull_args: '--no-rebase -s recursive -XOurs'
-        github_token: ${{ secrets.GITHUB_TOKEN }}   # optional, for accessing repos that require authentication
+        target_sync_branch: main
+        # REQUIRED 'target_repo_token' exactly like this!
+        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+        upstream_sync_branch: main
+        upstream_sync_repo: hjenryin/BCJH-Metropolis
+        upstream_repo_access_token: ${{ secrets.UPSTREAM_REPO_SECRET }}
+        upstream_pull_args: '--allow-unrelated-histories --no-rebase -s recursive -XOurs'
+    
+    # Step 2: run this sync action - specify the upstream repo, upstream branch to sync with, and target sync branch
+#     - name: Pull (Merge) upstream changes
+#       id: sync0
+
+#       uses: aormsby/Fork-Sync-With-Upstream-action@v2.1
+#       with:
+#         upstream_repository: hjenryin/BCJH-Metropolis
+#         upstream_branch: main
+#         target_branch: main
+#         git_pull_args: '--allow-unrelated-histories --no-rebase -s recursive -XOurs'
+#         github_token: ${{ secrets.GITHUB_TOKEN }}   # optional, for accessing repos that require authentication
 
     # Step 3: Display a message if 'sync' step had new commits (simple test)
     - name: Check for new commits
