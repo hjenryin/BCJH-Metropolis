@@ -18,17 +18,17 @@ jobs:
       with:
         ref: main
         # submodules: 'recursive'     ### may be needed in your situation
-    - run: git config pull.rebase false
+
     # Step 2: run this sync action - specify the upstream repo, upstream branch to sync with, and target sync branch
     - name: Pull (Fast-Forward) upstream changes
       id: sync
 
-      uses: aormsby/Fork-Sync-With-Upstream-action@v2.1
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
       with:
         upstream_repository: hjenryin/BCJH-Metropolis
         upstream_branch: main
         target_branch: main
-        git_pull_args: '-s recursive -XOurs'
+        git_pull_args: '--no-rebase -s recursive -XOurs'
         github_token: ${{ secrets.GITHUB_TOKEN }}   # optional, for accessing repos that require authentication
 
     # Step 3: Display a message if 'sync' step had new commits (simple test)
