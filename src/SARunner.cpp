@@ -24,6 +24,7 @@ SARunner::SARunner(CList *chefList, RList *recipeList, CRPairs *chefRecipePairs,
     this->history = new History[stepMax];
     this->getEnergyFunc = getEnergyFunc;
 }
+SARunner::~SARunner() { delete[] this->history; }
 States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
                                 Chef *chefs[NUM_CHEFS]) {
     States s;
