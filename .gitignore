@@ -2,6 +2,7 @@
 build/
 data/backup/
 data/userData.json
+config.hpp
 
 vcpkg/
 out/
