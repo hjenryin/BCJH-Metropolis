@@ -128,6 +128,8 @@ bool deductTool(States s, CList *chefList, RList *recipeList,
     case KNIFE:
         cookAbility = &chef.skill.ability.knife;
         break;
+    case NO_TOOL:
+        return true;
     default:
         throw "Toolerror";
     }
