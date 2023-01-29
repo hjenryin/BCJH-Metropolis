@@ -45,7 +45,7 @@ jobs:
 #         upstream_repository: hjenryin/BCJH-Metropolis
 #         upstream_branch: main
 #         target_branch: main
-#         git_pull_args: '--allow-unrelated-histories --no-rebase -s recursive -XOurs'
+#         git_pull_args: '--allow-unrelated-histories --rebase -s recursive -XOurs'
 #         github_token: ${{ secrets.GITHUB_TOKEN }}   # optional, for accessing repos that require authentication
 
     # Step 3: Display a message if 'sync' step had new commits (simple test)
