@@ -165,7 +165,7 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool progress, bool silent,
                  << std::endl;
         }
         file.close();
-        std::string cmd = "python3 ../src/plot.py -f " + fn;
+        std::string cmd = "python3 ../src/plot.py -f " + fn + " &";
         system(cmd.c_str());
     }
 
