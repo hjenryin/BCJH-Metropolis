@@ -2,21 +2,26 @@
 
 ## 使用方法（本地）
 
-建议使用linux平台（如WSL）。如有条件，强烈建议这种本地运行（运行可加速、可多次重复）。
+如果在windows平台，需要使用MinGW编译，并将 `data/data.min.json` 改为ANSI编码。如有条件，强烈建议这种本地运行（运行可加速、可多次重复）。
 _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**_
 
 - 在 `./config.hpp` 中设置参数
 - 在 `./rule.hpp` 中建立规则
 - 在 `./data` 下保存 `data.min.json` （下载地址：https://foodgame.github.io/data/data.min.json ）和 `userData.json`（我采用的是白菜菊花里面的，不知道其他图鉴网的结构是不是一样的？）
-- 编译、运行：建议在WSL（Linux）下运行。先前在Windows下出现中文乱码现象，不知道如何修复orz
+- 如果需要，在 `toolEquipped.hpp` 配置已经戴上不愿碎掉的厨具。（配置方法参见 `toolEquipped.hpp`）
+- 编译、运行：
 
-  - 在根目录新建 `build` 文件夹
+  - 在根目录新建 `build` 文件夹并 `cd` 至build
   - ```
-    cd build
+    # linux
     cmake ..
     make
-    ./bcjh
+
+    # windows
+    cmake .. -G "MinGW Makefiles"
+    mingw32-make
     ```
+  - 使用 `./bcjh` (linux) 或 `./bcjh.exe` (windows) 运行。
 - （可选）可视化：运行结束之后就可以在 `./out/history.png` 和 `./out/recipe.png` 看到自己厨师和最后一道菜的历史路径。如果结果不理想，可以调整 `./config.hpp` 中的参数，以及 `./src/functions.hpp .cpp` 中 `namespace f` 里的退火函数。
 
   ![样例](./out/history.png)
@@ -28,13 +33,13 @@ _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**
 - 将白菜菊花下载的个人数据(`userData.txt`)重命名为 `userData.json`并上传到 `data/`文件夹内。因为先前已经有50人次更新错方向😣因而弃用原本的更新方式。如果有规则更新，此时将会自动更新。
 
   ⚠️如果你先前就已fork过，仍需手动更新一次，之后可以自动更新。手动更新方法：
+
   - 如果提示commit behind，可以更新；**没有commit behind仅提示commit ahead不要更新!**
     ![commit behind](img/commits_behind.png)
     ⚠️**注意检查一下标黄这里的方向，如果方向反了，说明前一步写错了!**
     ![create_pr1](img/create_pr1.png)
     ![create_pr2](img/create_pr2.png)
     ![merge](img/merge.png)
-    
 - Commit完之后，前往Actions页面（如图所示）。这一步如果Actions里面没有东西，试着删掉文件重新上传一下。有些人确实出现了这个问题，但我也没有复现出来，都是正常的……说不定删掉重新弄一下就好了orz
 
   ![to_action](img/to_action.png)
