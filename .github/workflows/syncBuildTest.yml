@@ -71,7 +71,7 @@ jobs:
     - name: build
       run: if [ -f "data/userData.json" ]; then mkdir build && cd ./build && cmake ../   && make -j$(nproc);fi
     - name: run
-      run: cd ./build && ./bcjh -s && ./bcjh -s && echo ${{ env.info }}
+      run:  echo $info && cd ./build && ./bcjh -s && ./bcjh -s
 #       run: echo "计算器规则有问题，修复中"
       env:
         info: "——————————————\n公告栏\n现在计算器不用手动同步啦！直接运行就会自动同步!\n——————————————"
