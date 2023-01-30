@@ -2,12 +2,16 @@ name: C/C++ CI
 
 on:
   push:
+    branches:
+    - "main"
     paths:
     - "data/userData.json"
   workflow_dispatch:
 
 jobs:
   sync_with_upstream:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     name: Sync main with upstream latest
 
@@ -30,7 +34,7 @@ jobs:
         upstream_sync_branch: main
         upstream_sync_repo: hjenryin/BCJH-Metropolis
 #         upstream_repo_access_token: ${{ secrets.UPSTREAM_REPO_SECRET }}
-        upstream_pull_args: '--allow-unrelated-histories --no-rebase -s recursive -XOurs'
+        upstream_pull_args: '--allow-unrelated-histories --no-rebase -s recursive -Xours'
     
     # Step 2: run this sync action - specify the upstream repo, upstream branch to sync with, and target sync branch
 #     - name: Pull (Merge) upstream changes
@@ -41,7 +45,7 @@ jobs:
 #         upstream_repository: hjenryin/BCJH-Metropolis
 #         upstream_branch: main
 #         target_branch: main
-#         git_pull_args: '--allow-unrelated-histories --no-rebase -s recursive -XOurs'
+#         git_pull_args: '--allow-unrelated-histories --rebase -s recursive -XOurs'
 #         github_token: ${{ secrets.GITHUB_TOKEN }}   # optional, for accessing repos that require authentication
 
     # Step 3: Display a message if 'sync' step had new commits (simple test)
