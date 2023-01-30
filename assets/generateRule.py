@@ -73,7 +73,7 @@ tail = """
 #endif
 """
 
-with open("/home/hjenryin/PJ/bcjh1/data/data.min.json", "r") as f:
+with open("../data/data.min.json", "r") as f:
     data = json.load(f)
 
     if "intents" in data.keys():
