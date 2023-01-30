@@ -90,10 +90,10 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool progress, bool silent,
     while (step < this->stepMax) {
         if (progress) {
             if (silent) {
-                if (step % 500 == 0) {
-                    std::cout << "\r" << step << "/" << this->stepMax
-                              << std::flush;
-                }
+                // if (step % 500 == 0) {
+                //     std::cout << "\r" << step << "/" << this->stepMax
+                //               << std::flush;
+                // }
             } else {
                 std::cout << "\r" << step << "/" << this->stepMax << std::flush;
             }
