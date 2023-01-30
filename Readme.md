@@ -1,5 +1,14 @@
 # 基于模拟退火的爆炒江湖宴会计算器
 
+## 公告
+目前计算器自动更新出现问题，需要手动更新，与最初版本方法一样。
+  - 如果提示commit behind，可以更新；**没有commit behind仅提示commit ahead不要更新!**
+    ![commit behind](img/commits_behind.png)
+    ⚠️**注意检查一下标黄这里的方向，如果方向反了，说明前一步写错了!**
+    ![create_pr1](img/create_pr1.png)
+    ![create_pr2](img/create_pr2.png)
+    ![merge](img/merge.png)
+
 ## 使用方法（本地）
 
 如果在windows平台，需要使用MinGW编译，并将 `data/data.min.json` 改为ANSI编码。如有条件，强烈建议这种本地运行（运行可加速、可多次重复）。
