@@ -69,7 +69,7 @@ jobs:
     
     
     - name: build
-      run: if [ -f "data/userData.json"]; then mkdir build && cd ./build && cmake ../   && make -j$(nproc);fi
+      run: if [ -f "data/userData.json" ]; then mkdir build && cd ./build && cmake ../   && make -j$(nproc);fi
     - name: run
       run: cd ./build && ./bcjh -s && ./bcjh -s && echo ${{ env.info }}
 #       run: echo "计算器规则有问题，修复中"
