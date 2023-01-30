@@ -1,5 +1,6 @@
 // 兔年年兽第七关
 
+
 // 本代码由 ./src/generateRule.py 自动生成
 #ifndef RULE_HPP
 #define RULE_HPP
@@ -23,17 +24,20 @@ int banquetRule(BanquetRule *const &rule, States &s) {
     }
 
     // 第1轮
+
     // 条件：三道切：下阶段烤技法料理售价+100%
     if (s.recipe[0]->cookAbility.knife > 0 &&
         s.recipe[1]->cookAbility.knife > 0 &&
         s.recipe[2]->cookAbility.knife > 0) {
         // 效果：三道切：下阶段烤技法料理售价+100%
+
         for (int i = 3; i < 6; i++) {
             if (s.recipe[i]->cookAbility.bake > 0) {
                 strictRule[i]->addRule.buff += 100;
             }
         }
     }
+
     // 条件：三道炒：下阶段煮技法料理饱腹感-1
     if (s.recipe[0]->cookAbility.stirfry > 0 &&
         s.recipe[1]->cookAbility.stirfry > 0 &&
@@ -76,6 +80,7 @@ int banquetRule(BanquetRule *const &rule, States &s) {
         if (s.recipe[i]->cookAbility.stirfry > 0) {
             // 效果：炒：本道料理基础售价+500
             lenientRule[i]->baseRule.directAdd += 500;
+
             break;
         }
     }
