@@ -48,15 +48,6 @@ jobs:
 #         git_pull_args: '--allow-unrelated-histories --rebase -s recursive -XOurs'
 #         github_token: ${{ secrets.GITHUB_TOKEN }}   # optional, for accessing repos that require authentication
 
-    # Step 3: Display a message if 'sync' step had new commits (simple test)
-    - name: Check for new commits
-      if: steps.sync.outputs.has_new_commits
-      run: echo "There were new commits."
-
-    # Step 4: Print a helpful timestamp for your records (not required, just nice)
-    - name: Timestamp
-      run: date
-
   buildTest:
     permissions:
       contents: write
@@ -78,8 +69,10 @@ jobs:
     
     
     - name: build
-      run: mkdir build && cd ./build && cmake ../   && make -j$(nproc)
+      run: if [ -f "data/userData.json"]; then mkdir build && cd ./build && cmake ../   && make -j$(nproc);fi
     - name: run
-      run: cd ./build && ./bcjh -s && ./bcjh -s 
+      run: cd ./build && ./bcjh -s && ./bcjh -s && echo ${{ env.info }}
 #       run: echo "计算器规则有问题，修复中"
+      env:
+        info: "——————————————\n公告栏\n现在计算器不用手动同步啦！直接运行就会自动同步!\n——————————————"
 
