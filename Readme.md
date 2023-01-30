@@ -31,16 +31,7 @@ _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**
 
 - 注册Github账号，fork此仓库。
 - 将白菜菊花下载的个人数据(`userData.txt`)重命名为 `userData.json`并上传到 `data/`文件夹内。因为先前已经有50人次更新错方向😣因而弃用原本的更新方式。如果有规则更新，此时将会自动更新。
-
-  ⚠️如果你先前就已fork过，仍需手动更新一次，之后可以自动更新。手动更新方法：
-
-  - 如果提示commit behind，可以更新；**没有commit behind仅提示commit ahead不要更新!**
-    ![commit behind](img/commits_behind.png)
-    ⚠️**注意检查一下标黄这里的方向，如果方向反了，说明前一步写错了!**
-    ![create_pr1](img/create_pr1.png)
-    ![create_pr2](img/create_pr2.png)
-    ![merge](img/merge.png)
-- Commit完之后，前往Actions页面（如图所示）。这一步如果Actions里面没有东西，试着删掉文件重新上传一下。有些人确实出现了这个问题，但我也没有复现出来，都是正常的……说不定删掉重新弄一下就好了orz
+- 上传完之后，前往Actions页面（如图所示）。这一步如果Actions里面没有东西，试着删掉文件重新上传一下。有些人确实出现了这个问题，但我也没有复现出来，都是正常的……说不定删掉重新弄一下就好了orz
 
   ![to_action](img/to_action.png)
   ![pick_workflow](img/pick_workflow.png)
