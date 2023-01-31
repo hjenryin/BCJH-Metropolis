@@ -9,7 +9,6 @@ void toolEquipped(Chef *chef) {
         chef->skill.materialBuff.vegetable += 10; // 蔬菜售价+10%
         chef->tool = NO_TOOL;               // 不允许装备其他厨具
     }
-
 }
 
 #endif
