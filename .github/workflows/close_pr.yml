@@ -18,4 +18,4 @@ jobs:
     - uses: superbrothers/close-pull-request@v3
       with:
         # Optional. Post a issue comment just before closing a pull request.
-        comment: "检测到PR中包含对data/**的改动，一般情况下是其他用户更新错了方向导致的，因此关闭此PR。如果有其他情况也请联系我~"
+        comment: "检测到PR中包含对data/**的改动，一般情况下是其他用户更新错了方向导致的，因此关闭此PR。如果有其他情况也请回复或联系我。"

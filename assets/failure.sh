@@ -1,0 +1,1 @@
+echo "workflow有更新，请查看https://github.com/hjenryin/BCJH-Metropolis/blob/main/assets/manuallyUpdate.md 进行手动更新。"
