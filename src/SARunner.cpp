@@ -24,6 +24,7 @@ SARunner::SARunner(CList *chefList, RList *recipeList, CRPairs *chefRecipePairs,
     this->history = new History[stepMax];
     this->getEnergyFunc = getEnergyFunc;
 }
+SARunner::~SARunner() { delete[] this->history; }
 States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
                                 Chef *chefs[NUM_CHEFS]) {
     States s;
@@ -89,10 +90,10 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool progress, bool silent,
     while (step < this->stepMax) {
         if (progress) {
             if (silent) {
-                if (step % 500 == 0) {
-                    std::cout << "\r" << step << "/" << this->stepMax
-                              << std::flush;
-                }
+                // if (step % 500 == 0) {
+                //     std::cout << "\r" << step << "/" << this->stepMax
+                //               << std::flush;
+                // }
             } else {
                 std::cout << "\r" << step << "/" << this->stepMax << std::flush;
             }
@@ -164,7 +165,7 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool progress, bool silent,
                  << std::endl;
         }
         file.close();
-        std::string cmd = "python3 ../src/plot.py -f " + fn;
+        std::string cmd = "python3 ../src/plot.py -f " + fn + " &";
         system(cmd.c_str());
     }
 
