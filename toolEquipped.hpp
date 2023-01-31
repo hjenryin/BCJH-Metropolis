@@ -3,7 +3,7 @@
 #include "src/Chef.hpp"
 
 void toolEquipped(Chef *chef) {
-//    return; // 以下为示例代码，可自行修改。完成后注释此行。
+    return; // 以下为示例代码，可自行修改。完成后注释此行。
     if (chef->name == "达浪") {                   // 金锄头
         chef->skill.ability.add(30);              // 全技法+30
         chef->skill.materialBuff.vegetable += 15; // 蔬菜售价+15%
