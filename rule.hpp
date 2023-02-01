@@ -1,5 +1,6 @@
 // 兔年年兽第八关
 
+
 // 本代码由 ./src/generateRule.py 自动生成
 #ifndef RULE_HPP
 #define RULE_HPP
@@ -122,6 +123,7 @@ break;}
 return 12;
 
     
+
 }
 
 #endif
