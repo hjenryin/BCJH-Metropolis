@@ -50,14 +50,14 @@ int main(int argc, char *argv[]) {
         loadChef(chefList0);
         loadRecipe(recipeList);
         loadChefTools(chefList0, chefList);
-    } catch (Json::LogicError &e) {
-        std::cout << "json文件格式不正确。请确认文件来自白菜菊花而非图鉴网。\n";
-        throw e;
     } catch (Json::RuntimeError &e) {
         std::cout << "json文件格式不正确。请确认：1. "
                      "已经上传了文件。2."
                      "如果文件内容是手动复制的，确认文件已经复制完整。\n";
-        throw e;
+        exit(1);
+    } catch (Json::LogicError &e) {
+        std::cout << "json文件格式不正确。请确认文件来自白菜菊花而非图鉴网。\n";
+        exit(1);
     }
 
     CRPairs chefRecipePairs;
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
         int s = 0;
         // do {
         s = run(chefList, recipeList, chefRecipePairs, log, silent);
-        // } while (s < 718000);
+        // } while (s < 660000);
     } else {
         calculator(chefList, recipeList, chefRecipePairs);
     }
