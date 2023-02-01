@@ -15,7 +15,7 @@
 bool Chef::coinBuffOn = true;
 void initChefRecipePairs(CRPairs &, std::map<int, Chef> &,
                          std::map<int, Recipe> &);
-void run(CList &, RList &, CRPairs &, int, bool);
+int run(CList &, RList &, CRPairs &, int, bool);
 void calculator(CList &, RList &, CRPairs &);
 int main(int argc, char *argv[]) {
     int opt;
@@ -35,33 +35,47 @@ int main(int argc, char *argv[]) {
             calculate = true;
         }
         if (opt == 'h') {
-            std::cout << "-s: 进度条逢500更新" << std::endl;
+            std::cout << "-s: 无进度条" << std::endl;
             std::cout << "-v: 输出详细信息" << std::endl;
             std::cout << "-c: 从文件中读取配置，计算分数" << std::endl;
         }
     }
-    // seed = 1674729618;
+    // seed = 1675055589;
     if (true)
         std::cout << "随机种子：" << seed << std::endl;
     srand(seed);
     std::map<int, Chef> chefList0, chefList;
     std::map<int, Recipe> recipeList;
-    loadChef(chefList0);
-    loadRecipe(recipeList);
-    loadChefTools(chefList0, chefList);
+    try {
+        loadChef(chefList0);
+        loadRecipe(recipeList);
+        loadChefTools(chefList0, chefList);
+    } catch (Json::RuntimeError &e) {
+        std::cout << "json文件格式不正确。请确认：1. "
+                     "已经上传了文件。2."
+                     "如果文件内容是手动复制的，确认文件已经复制完整。\n";
+        exit(1);
+    } catch (Json::LogicError &e) {
+        std::cout << "json文件格式不正确。请确认文件来自白菜菊花而非图鉴网。\n";
+        exit(1);
+    }
+
     CRPairs chefRecipePairs;
     initChefRecipePairs(chefRecipePairs, chefList, recipeList);
     for (auto chef = chefList.begin(); chef != chefList.end(); chef++) {
         chef->second.loadRecipeCapable(recipeList);
     }
     if (!calculate) {
-        run(chefList, recipeList, chefRecipePairs, log, silent);
+        int s = 0;
+        // do {
+        s = run(chefList, recipeList, chefRecipePairs, log, silent);
+        // } while (s < 660000);
     } else {
         calculator(chefList, recipeList, chefRecipePairs);
     }
 }
-void run(CList &chefList, RList &recipeList, CRPairs &chefRecipePairs, int log,
-         bool silent) {
+int run(CList &chefList, RList &recipeList, CRPairs &chefRecipePairs, int log,
+        bool silent) {
     SARunner saRunner(&chefList, &recipeList, &chefRecipePairs, ITER_CHEF,
                       T_MAX_CHEF, 0, e::getTotalPrice, r::randomChef,
                       f::t_dist_fast);
@@ -80,6 +94,7 @@ void run(CList &chefList, RList &recipeList, CRPairs &chefRecipePairs, int log,
                                r::randomRecipe, f::t_dist_fast);
         saRunnerPrint.run(s.chef, false, silent, "../out/recipe");
     }
+    return score;
 }
 
 void initChefRecipePairs(CRPairs &chefRecipePairs,
