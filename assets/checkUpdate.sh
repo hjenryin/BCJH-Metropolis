@@ -1,3 +1,4 @@
+git pull
 python3 data/checkUpdate.py
 python3 assets/generateRule.py > rule_tmp.hpp
 if [ $? -eq 0 ]; then
