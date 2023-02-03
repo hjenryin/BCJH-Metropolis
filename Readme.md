@@ -1,8 +1,5 @@
 # 基于模拟退火的爆炒江湖宴会计算器
 
-## 公告
-
-更改了自动更新的实现方式。所有人需要按照新方法手动更新一次，方能进行自动更新。请参阅[手动更新方式](https://github.com/hjenryin/BCJH-Metropolis/blob/main/assets/manuallyUpdate.md)。
 
 ## 使用方法（本地）
 
