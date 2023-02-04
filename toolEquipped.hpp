@@ -25,7 +25,13 @@
 void toolEquipped(Chef *chef) {
 
     return; // 以下为示例代码，可自行修改。完成后注释此行。
-
+    
+    ///////////// 不希望任何厨师装备厨具：
+    
+    chef->tool = NO_TOOL;
+    
+    ///////////// 自定义厨师装备的厨具：
+    
     auto skill = chef->skill; // 这句不用管，放着就好。
 
     if (chef->name == "达浪") {             // 金锄头
@@ -43,5 +49,6 @@ void toolEquipped(Chef *chef) {
         skill.materialBuff.creation += 15;
         chef->tool = NO_TOOL;
     }
+       
 }
 #endif
