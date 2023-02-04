@@ -53,16 +53,22 @@ def find_recipe_name(name):
 
 
 def getChef(ls):
-    m = "Chef: (.+)\-(.)\((\d+)\)"
+    m1 = "厨师：(.+)\-(.)\((\d+)\)"
+    m2 = "厨师：(.+)\("
     for l in ls:
-        chef = re.match(m, l)
+        chef = re.search(m1, l)
         if chef:
             print(find_chef_name(chef.group(1)),
                   tool2id(chef.group(2)), end=" ")
+            return
+        chef = re.search(m2, l)
+        if chef:
+            print(find_chef_name(chef.group(1)),
+                  -2, end=" ")
 
 
 def getRecipe(ls):
-    m = "Recipe 0: (.+)1: (.+)2: (.+)"
+    m = "菜谱：(.+)；(.+)；(.+)"
     for l in ls:
         recipe = re.match(m, l)
         if recipe:
