@@ -1,17 +1,18 @@
 # 基于模拟退火的爆炒江湖宴会计算器
 
 ## 公告
-规则已经基本实现自动更新。也就是说，只要图鉴网计算器更新了，运行一下就可以自动得到最新规则，不用等我上传最新规则了。
+
+* 规则已经基本实现自动更新。也就是说，只要图鉴网计算器更新了，运行一下就可以自动得到最新规则，不用等我上传最新规则了。
+* 新增限时任务模式。
 
 ## 使用方法（本地）
 
 如果在windows平台，需要使用MinGW编译，并将 `data/data.min.json` 改为ANSI编码。如有条件，强烈建议这种本地运行（运行可加速、可多次重复）。
 _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**_
 
-- 在 `./config.hpp` 中设置参数
-- 在 `./rule.hpp` 中建立规则
-- 在 `./data` 下保存 `data.min.json` （下载地址：https://foodgame.github.io/data/data.min.json ）和 `userData.json`（我采用的是白菜菊花里面的，不知道其他图鉴网的结构是不是一样的？）
-- 如果需要，在 `toolEquipped.hpp` 配置已经戴上不愿碎掉的厨具。（配置方法参见 `toolEquipped.hpp`）
+- 在 `./config.hpp` 中设置参数，方法参见[此文](https://github.com/hjenryin/BCJH-Metropolis/blob/main/assets/config.md)。
+- 在 `./data` 下保存 `data.min.json` （[由此下载](https://foodgame.github.io/data/data.min.json)）和 `userData.json`（我采用的是白菜菊花里面的，不知道其他图鉴网的结构是不是一样的？）
+- 如果需要，在 `toolEquipped.hpp` 配置已经戴上不愿碎掉的厨具。（配置方法参见[此处](https://github.com/hjenryin/BCJH-Metropolis/blob/main/toolEquipped.hpp)）
 - 编译、运行：
 
   - 在根目录新建 `build` 文件夹并 `cd` 至build
@@ -33,6 +34,7 @@ _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**
 ## 使用方法（云端）
 
 - 注册Github账号，fork此仓库。
+- 配置 `config.hpp` （参见[此文](https://github.com/hjenryin/BCJH-Metropolis/blob/main/assets/config.md)）。
 - 将白菜菊花下载的个人数据(`userData.txt`)重命名为 `userData.json`并上传到 `data/`文件夹内。如果有规则更新，此时将会自动更新。
 - 上传完之后，前往Actions页面（如图所示）。这一步如果Actions里面没有东西，试着删掉文件重新上传一下。有些人确实出现了这个问题，但我也没有复现出来，都是正常的……说不定删掉重新弄一下就好了orz
 
@@ -46,12 +48,13 @@ _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**
 - 如果使用正常营业模式，可以预知会出现以下问题：
 
   - “场上所有厨师技法加成”仅对本人生效。
+- 如果使用限时任务模式，计算器的速度会下降，目前尚不清楚是什么原因造成的。
 - 即使是在宴会模式下，也可以预知会出现一下问题：
 
   - **无法得到最优解！只能得到一个比较好的解，有助于开阔思路。**
   - 无法设置专精。
   - 无法选择菜品数量（默认拉满）。
-  - rule.hpp导入规则功能尚在测试。
+  - banquetRule.hpp的生成时，可能遇到不认识的规则。
   - 合成套餐和原套餐的矛盾无法避免。
   - 一些规则奇奇怪怪的厨师（应该就汤圆年糕）的技能没有实现。
 - 可能有一定门槛。（这可能有助于防止这类辅助工具的滥用导致分数膨胀？）（你问我为什么不用其他语言写？python一个晚上就写好了，结果因为有涉及json读写很多类型没法推断，jit用不了，算这个太慢了，所以就用c++写了）

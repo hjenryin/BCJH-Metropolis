@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
         int s = 0;
         // do {
         s = run(chefList, recipeList, chefRecipePairs, log, silent);
-        // } while (s < 660000);
+        // } while (s < 1210000);
     } else {
         calculator(chefList, recipeList, chefRecipePairs);
     }

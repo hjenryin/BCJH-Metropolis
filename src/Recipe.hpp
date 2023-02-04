@@ -8,8 +8,9 @@
 #include <exception>
 #include "Chef.hpp"
 #include "Values.hpp"
+#include <map>
 
-struct RarityBuff {
+struct dishBuff {
     int dishNum;
     int dishBuff = 0;
 };
@@ -25,7 +26,7 @@ class Materials {
                   << "; Meat: " << this->meat << "; Fish: " << this->fish
                   << "; Creation: " << this->creation << std::endl;
     }
-    int operator*(MaterialBuff &buff) {
+    int operator*(MaterialCategoryBuff &buff) {
         int sum = 0;
         if (this->vegetable) {
             sum += buff.vegetable;
@@ -85,16 +86,17 @@ class Flavor {
 
 class Recipe {
   private:
-    Materials getMaterials(Json::Value &materialsJson);
     Flavor getFlavor(Json::Value &flavorJson);
+    void getMaterials(Json::Value &materialsJson);
 
   public:
-    static RarityBuff rarityBuff[5];
+    static dishBuff rarityBuff[5];
     std::string name;
     int id;
     int rarity;
     int price;
-    Materials materials;
+    std::map<int, int> materials;
+    Materials materialCategories;
     CookAbility cookAbility;
     Flavor flavor;
     Recipe(Json::Value &recipe);

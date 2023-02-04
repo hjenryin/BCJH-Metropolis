@@ -1,8 +1,9 @@
 #include "functions.hpp"
 #include "SARunner.hpp"
 #include "../config.hpp"
-#include "../rule.hpp"
+#include "banquetRule.hpp"
 #include "exception.hpp"
+#include "activityRule.hpp"
 
 namespace r0 {
 States randomRecipe(States &, CList *, RList *, CRPairs *);
@@ -13,7 +14,8 @@ States swapChefTool(States &, CList *, RList *, CRPairs *);
 
 int e::getTotalPrice(States s, CList *chefList, RList *recipeList,
                      CRPairs *chefRecipePairs, bool verbose) {
-    return e0::sumPrice(s, chefList, recipeList, chefRecipePairs, verbose);
+    return e0::sumPrice(s, chefList, recipeList, chefRecipePairs, verbose,
+                        false);
 }
 bool repeatChef(Chef *chef, Chef *chefs[NUM_CHEFS], int except) {
     for (int i = 0; i < NUM_CHEFS; i++) {
@@ -170,7 +172,7 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList,
             }
         }
     }
-    if (BANQUET) {
+    if (MODE == 1) {
         BanquetRule rule[9];
         int bestFull = banquetRule(rule, s);
         BanquetInfo bi[9];
@@ -207,28 +209,50 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList,
             int delta = std::abs(totalFull - bestFull);
             return std::ceil(totalScore * (1 - 0.05 * delta));
         }
-    } else {
+    } else if (MODE == 2 || MODE == 0) {
+        ActivityBuff activityBuff;
+        auto p = &activityBuff;
+        activityRule(p);
+        if (MODE == 0)
+            p = NULL;
         int energy = 0;
         int r = 0;
-
         for (int i = 0; i < NUM_CHEFS; i++) {
             if ((log & 0x10)) {
-                std::cout << "************" << std::endl;
+                std::cout << "VERBOSE************" << std::endl;
                 s.chef[i]->print();
                 std::cout << "************" << std::endl;
             }
+            int scoreCache = 0;
+            if (log & 0x1)
+                std::cout << "厨师：" << s.chef[i]->name << std::endl
+                          << "菜谱：";
             for (int j = 0; j < DISH_PER_CHEF; j++) {
-
-                energy += getPrice(*s.chef[i], *s.recipe[r++], (log & 0x10));
+                if (log & 0x1)
+                    std::cout << s.recipe[r]->name << "；";
+                scoreCache +=
+                    getPrice(*s.chef[i], *s.recipe[r++], p, (log & 0x10));
             }
+            energy += scoreCache;
+            if (log & 0x1)
+                std::cout << " -> " << scoreCache << std::endl;
         }
+
         return energy;
+    } else {
+        std::cout
+            << "config.hpp中MODE设置错误。0为正常营业，1为宴会，2为限时任务"
+            << std::endl;
+        exit(1);
     }
 }
 States r::randomRecipe(States s, CList *chefList, RList *recipeList,
                        CRPairs *chefRecipePairs) {
     double r = (double)rand() / RAND_MAX;
-    if (r < 0.1) {
+    double p_randomRecipe = 1;
+    if (MODE == 1)
+        p_randomRecipe = 0.9;
+    if (r > p_randomRecipe) {
         return r0::swapRecipe(s, chefList, recipeList, chefRecipePairs);
     } else {
         return r0::randomRecipe(s, chefList, recipeList, chefRecipePairs);
@@ -237,11 +261,14 @@ States r::randomRecipe(States s, CList *chefList, RList *recipeList,
 States r::randomChef(States s, CList *chefList, RList *recipeList,
                      CRPairs *chefRecipePairs) {
     double r = (double)rand() / RAND_MAX;
+    double p_randomChef = 0.9;
+    if (MODE == 1)
+        p_randomChef = 0.85;
     if (r < 0.1) {
         return r0::swapChefTool(s, chefList, recipeList, chefRecipePairs);
-    } else if (r > 0.15) {
+    } else if (r >= 1 - p_randomChef) {
         return r0::randomChef(s, chefList, recipeList, chefRecipePairs);
-    } else {
+    } else { // swap Chef
         int chefIndex1 = rand() % NUM_CHEFS;
         int chefIndex2;
         do {
