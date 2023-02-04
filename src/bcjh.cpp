@@ -122,7 +122,11 @@ void calculator(CList &chefList, RList &recipeList, CRPairs &p) {
     for (int i = 0; i < NUM_CHEFS; i++) {
         int c, t;
         f >> c >> t;
+        if (t == NO_TOOL) {
+            t = 0;
+        }
         s.chef[i] = &chefList[c * 6 + t];
+        s.chef[i]->print();
     }
     for (int i = 0; i < NUM_CHEFS * DISH_PER_CHEF; i++) {
         int r;
