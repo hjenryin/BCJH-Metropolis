@@ -3,7 +3,7 @@
 ## 公告
 
 * 规则已经基本实现自动更新。也就是说，只要图鉴网计算器更新了，运行一下就可以自动得到最新规则，不用等我上传最新规则了。
-* 新增限时任务模式。
+* 新增限时任务模式，方法参见[此文](https://github.com/hjenryin/BCJH-Metropolis/blob/main/assets/config.md)。
 
 ## 使用方法（本地）
 
