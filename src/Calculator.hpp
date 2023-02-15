@@ -83,7 +83,13 @@ struct BanquetRule {
     BanquetStrictRule
         strictRule; // 描述“下阶段blahblah”的规则，即不受“意图生效次数”的影响
 };
-int getPrice(Chef &chef, Recipe &recipe, bool verbose = false);
+struct ActivityBuff {
+    std::map<int, int> materialBuff;
+    std::map<int, int> rarityBuff; // 几火就是几，不用减一
+};
+int getPrice(Chef &chef, Recipe &recipe, ActivityBuff *p = NULL,
+             bool verbose = false);
 BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule rule,
                      bool verbose = false);
+
 #endif

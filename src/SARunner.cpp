@@ -9,6 +9,8 @@
 #include <random>
 #include <fstream>
 #include "exception.hpp"
+// #include "activityRule.hpp"
+#include <limits.h>
 SARunner::SARunner(CList *chefList, RList *recipeList, CRPairs *chefRecipePairs,
                    int stepMax, int tMax, int tMin, e::GetEnergy getEnergyFunc,
                    r::RandomMove randomMoveFunc,
@@ -23,6 +25,15 @@ SARunner::SARunner(CList *chefList, RList *recipeList, CRPairs *chefRecipePairs,
     this->tMin = tMin;
     this->history = new History[stepMax];
     this->getEnergyFunc = getEnergyFunc;
+#ifdef SEARCH_TARGET_SCORE
+    if (MODE != 2) {
+        std::cout << "config.hpp中改了不该改的东西，请改回来" << std::endl;
+        exit(1);
+    }
+    this->targetScore = SEARCH_TARGET_SCORE;
+#else
+    this->targetScore = INT_MAX;
+#endif
 }
 SARunner::~SARunner() { delete[] this->history; }
 States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
@@ -105,12 +116,10 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool progress, bool silent,
 
         } catch (NoRecipeException &e) {
             std::cout << e.what() << std::endl;
-            print(this->bestState);
-            exit(0);
+            break;
         } catch (NoChefException &e) {
             std::cout << e.what() << std::endl;
-            print(this->bestState);
-            exit(0);
+            break;
         }
         // std::cin >> step;
         // print(newS);
@@ -141,6 +150,9 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool progress, bool silent,
         this->history[step].energy = energy;
         this->history[step].t = t;
         this->history[step].states = s;
+        if (energy >= this->targetScore) {
+            break;
+        }
         step++;
     }
     if (progress && !silent) {

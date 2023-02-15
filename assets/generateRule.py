@@ -43,10 +43,11 @@ class Code:
 
 
 head = """
-// 本代码由 ./src/generateRule.py 自动生成
+// 本代码由 ./assets/generateRule.py 自动生成
 #ifndef RULE_HPP
 #define RULE_HPP
-#include "src/Calculator.hpp"
+#include "Calculator.hpp"
+#include "functions.hpp"
 
 /**
  * @brief

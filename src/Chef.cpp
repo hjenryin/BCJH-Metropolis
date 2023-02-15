@@ -33,7 +33,11 @@ void loadUltimateSkills(std::map<int, int> &ultimateSkills,
     splitUltimateSkill(ultimateSkills, usrBuff["Self"]["id"]);
 }
 void loadChef(std::map<int, Chef> &chefList) {
-
+    if (MODE == 2) {
+        Chef::coinBuffOn = false;
+    } else {
+        Chef::coinBuffOn = true;
+    }
     Json::Value usrData;
     Json::Value gameData;
     std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);

@@ -25,6 +25,7 @@ class SARunner {
     std::map<int, Chef> *chefList;
     std::map<int, Recipe> *recipeList;
     e::GetEnergy getEnergyFunc;
+    int targetScore;
 
     States bestState;
     History *history;

@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
         int s = 0;
         // do {
         s = run(chefList, recipeList, chefRecipePairs, log, silent);
-        // } while (s < 660000);
+        // } while (s < 1210000);
     } else {
         calculator(chefList, recipeList, chefRecipePairs);
     }
@@ -122,7 +122,11 @@ void calculator(CList &chefList, RList &recipeList, CRPairs &p) {
     for (int i = 0; i < NUM_CHEFS; i++) {
         int c, t;
         f >> c >> t;
+        if (t == NO_TOOL) {
+            t = 0;
+        }
         s.chef[i] = &chefList[c * 6 + t];
+        s.chef[i]->print();
     }
     for (int i = 0; i < NUM_CHEFS * DISH_PER_CHEF; i++) {
         int r;

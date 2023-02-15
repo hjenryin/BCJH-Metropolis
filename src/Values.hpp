@@ -2,21 +2,21 @@
 #define VALUE_HPP
 #include <iostream>
 #include "include/json/json.h"
-class MaterialBuff {
+class MaterialCategoryBuff {
   public:
     int vegetable;
     int meat;
     int fish;
     int creation;
-    MaterialBuff() : vegetable(0), meat(0), fish(0), creation(0) {}
-    void add(const MaterialBuff &m) {
+    MaterialCategoryBuff() : vegetable(0), meat(0), fish(0), creation(0) {}
+    void add(const MaterialCategoryBuff &m) {
         this->vegetable += m.vegetable;
         this->meat += m.meat;
         this->fish += m.fish;
         this->creation += m.creation;
     }
     void print() {
-        std::cout << "MaterialBuff: Vegetable: " << this->vegetable
+        std::cout << "MaterialCategoryBuff: Vegetable: " << this->vegetable
                   << "; Meat: " << this->meat << "; Fish: " << this->fish
                   << "; Creation: " << this->creation << std::endl;
     }
@@ -107,17 +107,17 @@ class Skill {
     CookAbility ability;
     AbilityBuff abilityBuff;
     FlavorBuff flavorBuff;
-    MaterialBuff materialBuff;
+    MaterialCategoryBuff materialBuff;
     int coinBuff;
     Skill(CookAbility ability, AbilityBuff abilityBuff, FlavorBuff flavorBuff,
-          MaterialBuff materialBuff, int coinBuff)
+          MaterialCategoryBuff materialBuff, int coinBuff)
         : ability(ability), abilityBuff(abilityBuff), flavorBuff(flavorBuff),
           materialBuff(materialBuff), coinBuff(coinBuff) {}
     Skill() {
         this->ability = CookAbility();
         this->abilityBuff = AbilityBuff();
         this->flavorBuff = FlavorBuff();
-        this->materialBuff = MaterialBuff();
+        this->materialBuff = MaterialCategoryBuff();
         this->coinBuff = 0;
     }
     Skill getSkill(int id) { return skillList[id]; }
