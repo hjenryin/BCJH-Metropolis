@@ -12,11 +12,19 @@
  * @return int : 过线分数
  */
 void activityRule(ActivityBuff *buff) {
-
-    buff->materialBuff[13] = 100;
-    buff->materialBuff[30] = 100;
-    buff->rarityBuff[4] = -100;
-    buff->rarityBuff[5] = -100;
+    int materialAdd[] = {3, 4, 5, 7, 8, 9, 38, 39};
+    int materialSub[] = {2, 24, 37, 41, 42};
+    for (int i : materialAdd) {
+        buff->materialBuff[i] = 200;
+    }
+    for (int i : materialSub) {
+        buff->materialBuff[i] = -200;
+    }
+    buff->rarityBuff[4] = 100;
+    buff->rarityBuff[5] = -200;
+    buff->rarityBuff[3] = 300;
+    buff->flavorBuff[SALTY] = 200;
+    buff->flavorBuff[SOUR] = 100;
 }
-const int activityThreshold = 15000;
+const int activityThreshold = 24000;
 #endif

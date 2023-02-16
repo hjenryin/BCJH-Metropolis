@@ -22,16 +22,35 @@ Recipe::Recipe(Json::Value &recipe) {
     this->getMaterials(recipe["materials"]);
     this->flavor = this->getFlavor(recipe["condiment"]);
 }
+// Flavor Recipe::getFlavor(Json::Value &flavorJson) {
+//     std::string flavorStr = flavorJson.asString();
+//     Flavor flavor;
+//     flavor.sweet = flavorStr.find("Sweet") != std::string::npos;
+//     flavor.salty = flavorStr.find("Salty") != std::string::npos;
+//     flavor.sour = flavorStr.find("Sour") != std::string::npos;
+//     flavor.bitter = flavorStr.find("Bitter") != std::string::npos;
+//     flavor.spicy = flavorStr.find("Spicy") != std::string::npos;
+//     flavor.tasty = flavorStr.find("Tasty") != std::string::npos;
+//     return flavor;
+// }
 Flavor Recipe::getFlavor(Json::Value &flavorJson) {
     std::string flavorStr = flavorJson.asString();
-    Flavor flavor;
-    flavor.sweet = flavorStr.find("Sweet") != std::string::npos;
-    flavor.salty = flavorStr.find("Salty") != std::string::npos;
-    flavor.sour = flavorStr.find("Sour") != std::string::npos;
-    flavor.bitter = flavorStr.find("Bitter") != std::string::npos;
-    flavor.spicy = flavorStr.find("Spicy") != std::string::npos;
-    flavor.tasty = flavorStr.find("Tasty") != std::string::npos;
-    return flavor;
+    Flavor f;
+    if (flavorStr.find("Sweet") != std::string::npos)
+        f.value = SWEET;
+    else if (flavorStr.find("Salty") != std::string::npos)
+        f.value = SALTY;
+    else if (flavorStr.find("Sour") != std::string::npos)
+        f.value = SOUR;
+    else if (flavorStr.find("Bitter") != std::string::npos)
+        f.value = BITTER;
+    else if (flavorStr.find("Spicy") != std::string::npos)
+        f.value = SPICY;
+    else if (flavorStr.find("Tasty") != std::string::npos)
+        f.value = TASTY;
+    else
+        f.value = UNIDENTIFIED;
+    return f;
 }
 const struct MaterialList {
     int meat[16] = {1, 3, 4, 5, 7, 8, 9, 12, 26, 27, 28, 38, 39, 40, 43, 44};
