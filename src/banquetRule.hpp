@@ -1,6 +1,6 @@
 // 兔年年兽第九关
 
-// 本代码由 ./src/generateRule.py 自动生成
+// 本代码由 ./assets/generateRule.py 自动生成
 #ifndef RULE_HPP
 #define RULE_HPP
 #include "Calculator.hpp"
@@ -70,7 +70,7 @@ int banquetRule(BanquetRule *const &rule, States &s) {
     // 第2轮
     // 条件：辣：本道料理基础售价+500
     for (int i = 3; i < 6; i++) {
-        if (s.recipe[i]->flavor.spicy == true) {
+        if (s.recipe[i]->flavor.value == SPICY) {
             // 效果：辣：本道料理基础售价+500
             lenientRule[i]->baseRule.directAdd += 500;
             break;
@@ -78,11 +78,11 @@ int banquetRule(BanquetRule *const &rule, States &s) {
     }
     // 条件：苦：下道料理为辣时售价+100%
     for (int i = 3; i < 6; i++) {
-        if (s.recipe[i]->flavor.bitter == true) {
+        if (s.recipe[i]->flavor.value == BITTER) {
             // 效果：苦：下道料理为辣时售价+100%
             if (i + 1 < 6) {
                 // 条件：辣：本道料理售价+100%
-                if (s.recipe[i + 1]->flavor.spicy == true) {
+                if (s.recipe[i + 1]->flavor.value == SPICY) {
                     // 效果：辣：本道料理售价+100%
                     lenientRule[i + 1]->addRule.buff += 100;
                     break;
@@ -93,7 +93,7 @@ int banquetRule(BanquetRule *const &rule, States &s) {
     }
     // 条件：甜：本道料理售价+100%
     for (int i = 3; i < 6; i++) {
-        if (s.recipe[i]->flavor.sweet == true) {
+        if (s.recipe[i]->flavor.value == SWEET) {
             // 效果：甜：本道料理售价+100%
             lenientRule[i]->addRule.buff += 100;
             break;
@@ -101,7 +101,7 @@ int banquetRule(BanquetRule *const &rule, States &s) {
     }
     // 条件：酸：本道料理饱腹感-5
     for (int i = 3; i < 6; i++) {
-        if (s.recipe[i]->flavor.sour == true) {
+        if (s.recipe[i]->flavor.value == SOUR) {
             // 效果：酸：本道料理饱腹感-5
             lenientRule[i]->addRule.full += -5;
             break;

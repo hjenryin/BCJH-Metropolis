@@ -1,3 +1,5 @@
+# 文件应从根目录运行
+
 import json
 from typing import List, Tuple
 
@@ -9,11 +11,12 @@ class NoIntentError(Exception):
 def addEndline(s: str) -> str:
     if s != "":
         if not s.endswith("\n"):
-            return s+"\n"
+            return s + "\n"
     return s
 
 
 class Code:
+
     def __init__(self, head: str, end: str):
         self.head = head
         self.end = end
@@ -24,12 +27,12 @@ class Code:
         return self.body
 
     def addFront(self, word: str):
-        self.head = addEndline(self.head)+word
+        self.head = addEndline(self.head) + word
         return self
 
     def addBack(self, word: str):
 
-        self.end = addEndline(word)+self.end
+        self.end = addEndline(word) + self.end
         return self
 
     def print(self) -> str:
@@ -74,7 +77,7 @@ tail = """
 #endif
 """
 
-with open("./data/data.min.json", "r") as f:
+with open("data/data.min.json", "r") as f:
     data = json.load(f)
 
     if "intents" in data.keys():
@@ -103,8 +106,8 @@ def getRule():
     for rule in rules:
         if "IntentList" in rule.keys():
             # print(rule["IntentList"])
-            head = "// "+rule["Title"]+"\n"+head
-            tail = "return "+str(rule["Satiety"])+";\n"+tail
+            head = "// " + rule["Title"] + "\n" + head
+            tail = "return " + str(rule["Satiety"]) + ";\n" + tail
 
             return rule
 
@@ -128,10 +131,10 @@ def parseCondition(roundNum, offset, rule, strict):
             raise NotImplementedError
     i = "i"
     if offset:
-        i = "i+"+str(offset)
+        i = "i+" + str(offset)
     s = ""
     if "desc" in rule.keys():
-        s = "// 条件："+rule["desc"]
+        s = "// 条件：" + rule["desc"]
     c0 = Code(s, "")
     c = c0
     ct = rule["conditionType"]
@@ -140,8 +143,9 @@ def parseCondition(roundNum, offset, rule, strict):
         strict = True
         t, v = parseConditionValue(cv)
         if t == "ability":
-            c = c.add("if (s.recipe[%d]->cookAbility.%s > 0 && s.recipe[%d]->cookAbility.%s > 0 && s.recipe[%d]->cookAbility.%s > 0) {" % (
-                roundNum, v, roundNum+1, v, roundNum+2, v), "}")
+            c = c.add(
+                "if (s.recipe[%d]->cookAbility.%s > 0 && s.recipe[%d]->cookAbility.%s > 0 && s.recipe[%d]->cookAbility.%s > 0) {"
+                % (roundNum, v, roundNum + 1, v, roundNum + 2, v), "}")
             word = parseEffect(roundNum, offset, rule, strict)
             c = c.add(word, "")
 
@@ -149,19 +153,21 @@ def parseCondition(roundNum, offset, rule, strict):
             raise NotImplementedError
     else:
         if not offset:
-            c = c.add("for (int i = %d; i < %d; i++) {" %
-                      (roundNum*3, roundNum*3+3), "}")
-        if ct == "Order":
-            c = c.add("if (%s == %d) {" % (i, roundNum*3+int(cv)-1), end)
-        elif ct == "Rarity":
             c = c.add(
-                "if (s.recipe[%s]->rarity == %d) {" % (i, int(cv)), end)
+                "for (int i = %d; i < %d; i++) {" %
+                (roundNum * 3, roundNum * 3 + 3), "}")
+        if ct == "Order":
+            c = c.add("if (%s == %d) {" % (i, roundNum * 3 + int(cv) - 1), end)
+        elif ct == "Rarity":
+            c = c.add("if (s.recipe[%s]->rarity == %d) {" % (i, int(cv)), end)
         elif ct == "CondimentSkill":
             c = c.add(
-                "if (s.recipe[%s]->flavor.%s == true) {" % (i, cv.lower()), end)
+                "if (s.recipe[%s]->flavor.value == %s) {" % (i, cv.upper()),
+                end)
         elif ct == "CookSkill":
-            c = c.add("if (s.recipe[%s]->cookAbility.%s > 0) {" % (i,
-                                                                   cv.lower()), end)
+            c = c.add(
+                "if (s.recipe[%s]->cookAbility.%s > 0) {" % (i, cv.lower()),
+                end)
         else:
             raise NotImplementedError
         word = parseEffect(roundNum, offset, rule, strict)
@@ -181,36 +187,36 @@ def parseEffect(roundNum, offset, rule, strict):
         r = f"lenientRule[{i}]->"
     s = ""
     if "desc" in rule.keys():
-        s = "// 效果："+rule["desc"]
+        s = "// 效果：" + rule["desc"]
     c0 = Code(s, "")
     c = c0
     et = rule["effectType"]
     ev = rule["effectValue"]
     if et == "SatietyChange":
-        c = c.add(r+"addRule.full+= %d;" % int(ev), "")
+        c = c.add(r + "addRule.full+= %d;" % int(ev), "")
     elif et == "PriceChangePercent":
-        c = c.add(r+"addRule.buff+= %d;" % int(ev), "")
+        c = c.add(r + "addRule.buff+= %d;" % int(ev), "")
     elif et == "IntentAdd":
         if ev == 100:
             # print("oneMore")
-            c = c.add(r+"oneMore();", "")
+            c = c.add(r + "oneMore();", "")
         else:
             raise NotImplementedError
     elif et == "CreateIntent":
         # 是不是就是为下道料理create？
-        c = c.add("if (i+1<%d){" % (roundNum*3+3), "}")
+        c = c.add("if (i+1<%d){" % (roundNum * 3 + 3), "}")
         word = parseRule(roundNum, 1, getIntention(ev), strict)
         c = c.add(word, "")
     elif et == "CreateBuff":
-        word = parseRule(roundNum+1, None, getBuff(ev), strict)
+        word = parseRule(roundNum + 1, None, getBuff(ev), strict)
         c = c.add(word, "")
     elif et == "BasicPriceChangePercent":
-        c = c.add(r+"baseRule.buff+= %d;" % int(ev), "")
+        c = c.add(r + "baseRule.buff+= %d;" % int(ev), "")
     elif et == "BasicPriceChange":
-        c = c.add(r+"baseRule.directAdd+= %d;" % int(ev), "")
+        c = c.add(r + "baseRule.directAdd+= %d;" % int(ev), "")
     elif et == "SetSatietyValue":
-        c = c.add(r+"addRule.full=%d;" % int(ev)+r +
-                  "addRule.fullAdd=false;", "")
+        c = c.add(
+            r + "addRule.full=%d;" % int(ev) + r + "addRule.fullAdd=false;", "")
     else:
         print(et)
         raise NotImplementedError

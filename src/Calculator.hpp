@@ -86,6 +86,7 @@ struct BanquetRule {
 struct ActivityBuff {
     std::map<int, int> materialBuff;
     std::map<int, int> rarityBuff; // 几火就是几，不用减一
+    std::map<FlavorEnum, int> flavorBuff;
 };
 int getPrice(Chef &chef, Recipe &recipe, ActivityBuff *p = NULL,
              bool verbose = false);
