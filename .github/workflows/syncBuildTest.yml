@@ -24,20 +24,20 @@ jobs:
 
   # REQUIRED step
     # Step 2: run the sync action
-    - name: Sync upstream changes
-      id: sync
-      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
-      with:
-        target_sync_branch: main
-        # REQUIRED 'target_repo_token' exactly like this!
-        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
-        upstream_sync_branch: main
-        upstream_sync_repo: hjenryin/BCJH-Metropolis
-        upstream_pull_args: '--allow-unrelated-histories --no-rebase -s recursive -Xours'
+    # - name: Sync upstream changes
+    #   id: sync
+    #   uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+    #   with:
+    #     target_sync_branch: main
+    #     # REQUIRED 'target_repo_token' exactly like this!
+    #     target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+    #     upstream_sync_branch: main
+    #     upstream_sync_repo: hjenryin/BCJH-Metropolis
+    #     upstream_pull_args: '--allow-unrelated-histories --no-rebase -s recursive -Xours'
     
-    - name: OnFailure
-      if: failure()
-      run: sh assets/failure.sh
+    # - name: OnFailure
+    #   if: failure()
+    #   run: sh assets/failure.sh
    
   buildTest:
     permissions:
