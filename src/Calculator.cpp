@@ -41,7 +41,7 @@ int getPrice(Chef &chef, Recipe &recipe, ActivityBuff *activityBuff,
             }
         }
         for (auto &i : activityBuff->flavorBuff) {
-            if (recipe.flavor.value == i.first) {
+            if (recipe.flavor.get(i.first)) {
                 activityBuffValue += i.second;
             }
         }
