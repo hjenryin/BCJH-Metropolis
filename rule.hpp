@@ -25,102 +25,89 @@ int banquetRule(BanquetRule *const &rule, States &s) {
 
     // 第1轮
 
-    // 条件：三道切：下阶段烤技法料理售价+100%
+    // 条件：三道切：下阶段切技法料理售价+100%
     if (s.recipe[0]->cookAbility.knife > 0 &&
         s.recipe[1]->cookAbility.knife > 0 &&
         s.recipe[2]->cookAbility.knife > 0) {
-        // 效果：三道切：下阶段烤技法料理售价+100%
-
         for (int i = 3; i < 6; i++) {
-            if (s.recipe[i]->cookAbility.bake > 0) {
+            if (s.recipe[i]->cookAbility.knife > 0) {
                 strictRule[i]->addRule.buff += 100;
             }
         }
     }
-
-    // 条件：三道炒：下阶段煮技法料理饱腹感-1
-    if (s.recipe[0]->cookAbility.stirfry > 0 &&
-        s.recipe[1]->cookAbility.stirfry > 0 &&
-        s.recipe[2]->cookAbility.stirfry > 0) {
-        // 效果：三道炒：下阶段煮技法料理饱腹感-1
+    // 条件：三道煮：下阶段煮技法料理售价+100%
+    if (s.recipe[0]->cookAbility.boil > 0 &&
+        s.recipe[1]->cookAbility.boil > 0 &&
+        s.recipe[2]->cookAbility.boil > 0) {
         for (int i = 3; i < 6; i++) {
             if (s.recipe[i]->cookAbility.boil > 0) {
-                strictRule[i]->addRule.full += -1;
+                strictRule[i]->addRule.buff += 100;
             }
         }
     }
+    // 条件：三道蒸：下阶段蒸技法料理售价+100%
+    if (s.recipe[0]->cookAbility.steam > 0 &&
+        s.recipe[1]->cookAbility.steam > 0 &&
+        s.recipe[2]->cookAbility.steam > 0) {
+        for (int i = 3; i < 6; i++) {
+            if (s.recipe[i]->cookAbility.steam > 0) {
+                strictRule[i]->addRule.buff += 100;
+            }
+        }
+    }
+    // 条件：苦味料理: 本道料理售价+100%
     for (int i = 0; i < 3; i++) {
-        if (s.recipe[i]->rarity == 3) {
-            // 效果：1火：本道料理基础售价+50%
-            strictRule[i]->addRule.full += -5;
-            break;
-        }
-    }
-    
-    if (s.recipe[2]->flavor.tasty) {
-        // 效果：1火：本道料理基础售价+50%
-        lenientRule[2]->baseRule.directAdd +=500;
-    }
-    
-    
-    // 第2轮
-    // 条件：1火：本道料理基础售价+50%
-    for (int i = 3; i < 6; i++) {
-        if (s.recipe[i]->rarity == 1) {
-            // 效果：1火：本道料理基础售价+50%
-            lenientRule[i]->baseRule.buff += 50;
-            break;
-        }
-    }
-    // 条件：第一道菜：第一道菜意图生效次数加一
-    for (int i = 3; i < 6; i++) {
-        if (i == 3) {
-            // 效果：第一道菜：第一道菜意图生效次数加一
-            lenientRule[i]->oneMore();
-            break;
-        }
-    }
-    for (int i = 3; i < 6; i++) {
-        if (s.recipe[i]->flavor.tasty) {
-            // 效果：1火：本道料理基础售价+50%
-            lenientRule[i]->addRule.full += -3;
-            break;
-        }
-    }
-    lenientRule[4]->addRule.buff += 100;
-    // 第3轮
-    // 条件：切：本道料理售价+100%
-    for (int i = 6; i < 9; i++) {
-        if (s.recipe[i]->cookAbility.knife > 0) {
-            // 效果：切：本道料理售价+100%
+        if (s.recipe[i]->flavor.bitter) {
             lenientRule[i]->addRule.buff += 100;
             break;
         }
     }
-    // 条件：炒：本道料理基础售价+500
-    for (int i = 6; i < 9; i++) {
-        if (s.recipe[i]->cookAbility.stirfry > 0) {
-            // 效果：炒：本道料理基础售价+500
-            lenientRule[i]->baseRule.directAdd += 500;
-
+    
+    // 第2轮
+    // 条件：甜味料理: 饱腹感+3
+    for (int i = 3; i < 6; i++) {
+        if (s.recipe[i]->flavor.sweet) {
+            lenientRule[i]->addRule.full += 3;
             break;
         }
     }
+    // 条件：苦味料理：本道料理基础售价+50%
+    for (int i = 3; i < 6; i++) {
+        if (s.recipe[i]->flavor.bitter) {
+            lenientRule[i]->baseRule.buff += 50;
+            break;
+        }
+    }
+    // 条件：第三道菜：第三道菜基础售价+200
+    lenientRule[5]->baseRule.directAdd += 200;
+    // 条件：第三道菜：第三道菜意图生效次数+1
+    lenientRule[5]->oneMore();
+
+    // 第3轮
+    // 条件：苦味料理: 本道料理售价+100%
+    for (int i = 6; i < 9; i++) {
+        if (s.recipe[i]->flavor.bitter) {
+            lenientRule[i]->addRule.buff += 100;
+            break;
+        }
+    }
+    // 条件：三火：本道料理饱腹感+2
     for (int i = 6; i < 9; i++) {
         if (s.recipe[i]->rarity == 3) {
-            // 效果：第一道菜：第一道菜意图生效次数加一
-            lenientRule[i]->oneMore();
+            lenientRule[i]->addRule.full += 2;
             break;
         }
     }
+    // 条件：炒：本道料理基础售价+50%
     for (int i = 6; i < 9; i++) {
-        if (s.recipe[i]->rarity == 4) {
-            // 效果：第一道菜：第一道菜意图生效次数加一
-            strictRule[i]->addRule.full += -2;
+        if (s.recipe[i]->cookAbility.stirfry > 0) {
+            lenientRule[i]->baseRule.buff += 50;
             break;
         }
     }
-    return 12;
+    // 条件：第二道菜：第二道菜意图生效次数+1
+    lenientRule[7]->oneMore();
+    return 32;//饱腹感
 }
 
 #endif
