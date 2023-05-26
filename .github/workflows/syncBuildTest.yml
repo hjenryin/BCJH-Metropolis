@@ -48,8 +48,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: update
-      run: sh assets/checkUpdate.sh
     - name: commit
       uses: stefanzweifel/git-auto-commit-action@v4
       with: 
