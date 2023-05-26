@@ -2,7 +2,7 @@
 
 #ifndef RULE_HPP
 #define RULE_HPP
-#include "src/Calculator.hpp"
+#include "Calculator.hpp"
 
 /**
  * @brief
