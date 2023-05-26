@@ -47,14 +47,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
-    - name: update
-      run: sh assets/checkUpdate.sh
+    #- name: update 现在只会更新宴会规则，但是我们需要风云宴，手写一下
+    #  run: sh assets/checkUpdate.sh
     - name: commit
       uses: stefanzweifel/git-auto-commit-action@v4
       with: 
         commit_message: 自动拉取图鉴网数据并更新规则
-        file_pattern: "data/data.min.json rule.hpp"
+        file_pattern: "data/data.min.json"
         skip_dirty_check: false
 
     - name: buildTest
