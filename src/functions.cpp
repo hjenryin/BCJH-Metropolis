@@ -201,31 +201,31 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList,
                           << std::endl;
             }
         }
-        BanquetRule rule2[9];
+        BanquetRule rule2[18];
         int bestFull2 = banquetRule2(rule2, s);
-        BanquetInfo bi2[9];
+        BanquetInfo bi2[18];
         int totalScore2 = 0;
         int totalFull2 = 0;
         int scoreCache2 = 0;
         int fullCache2 = 0;
-        for (int i = 0; i < 9; i++) {
+        for (int i = 9; i < 18; i++) {
             if ((log & 0x10) && i % 3 == 0) {
                 std::cout << "VERBOSE************" << std::endl;
-                s.chef[3 + i / 3]->print();
+                s.chef[i / 3]->print();
                 std::cout << "************" << std::endl;
             }
-            bi2[i] = getPrice(s.chef[3 + i / 3], s.recipe[3 * DISH_PER_CHEF + i], rule2[i], (log & 0x10));
+            bi2[i] = getPrice(s.chef[i / 3], s.recipe[i], rule2[i], (log & 0x10));
             totalFull2 += bi2[i].full;
             totalScore2 += bi2[i].price;
             scoreCache2 += bi2[i].price;
             fullCache2 += bi2[i].full;
             if ((log & 0x1) && i % 3 == 2) {
-                std::cout << "厨师：" << s.chef[3 + i / 3]->name << " -> "
+                std::cout << "厨师：" << s.chef[i / 3]->name << " -> "
                           << fullCache2 << " / " << scoreCache2 << std::endl;
                 scoreCache2 = 0;
                 fullCache2 = 0;
-                std::cout << "菜谱：" << s.recipe[3 * DISH_PER_CHEF + i - 2]->name << "；"
-                          << s.recipe[3 * DISH_PER_CHEF + i - 1]->name << "；" << s.recipe[3 * DISH_PER_CHEF + i]->name
+                std::cout << "菜谱：" << s.recipe[i - 2]->name << "；"
+                          << s.recipe[i - 1]->name << "；" << s.recipe[i]->name
                           << std::endl;
             }
         }
