@@ -62,24 +62,24 @@ class Flavor {
     }
     FlavorEnum get_flavor() {
         if (this-> sweet){
-            return FlavorEnum[0];
+            return FlavorEnum::SWEET;
         }
         if (this-> salty){
-            return FlavorEnum[1];
+            return FlavorEnum::SALTY;
         }
         if (this-> sour){
-            return FlavorEnum[2];
+            return FlavorEnum::SOUR;
         }
         if (this-> bitter){
-            return FlavorEnum[3];
+            return FlavorEnum::BITTER;
         }
         if (this-> spicy){
-            return FlavorEnum[4];
+            return FlavorEnum::SPICY;
         }
         if (this-> tasty){
-            return FlavorEnum[5];
+            return FlavorEnum::TASTY;
         }
-        return UNIDENTIFIED;
+        return FlavorEnum::UNIDENTIFIED;
     }
     int operator*(FlavorBuff &buff) {
         int sum = 0;
