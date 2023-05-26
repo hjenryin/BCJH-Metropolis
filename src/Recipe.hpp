@@ -60,6 +60,27 @@ class Flavor {
                   << "; Bitter: " << this->bitter << "; Spicy: " << this->spicy
                   << "; Tasty: " << this->tasty << std::endl;
     }
+    FlavorEnum get_flavor() {
+        if (this-> sweet){
+            return FlavorEnum[0];
+        }
+        if (this-> salty){
+            return FlavorEnum[1];
+        }
+        if (this-> sour){
+            return FlavorEnum[2];
+        }
+        if (this-> bitter){
+            return FlavorEnum[3];
+        }
+        if (this-> spicy){
+            return FlavorEnum[4];
+        }
+        if (this-> tasty){
+            return FlavorEnum[5];
+        }
+        return UNIDENTIFIED;
+    }
     int operator*(FlavorBuff &buff) {
         int sum = 0;
         if (this->sweet) {
