@@ -1,7 +1,5 @@
-// 兔年年兽第七关
+//风云宴 苏妲己
 
-
-// 本代码由 ./src/generateRule.py 自动生成
 #ifndef RULE_HPP
 #define RULE_HPP
 #include "src/Calculator.hpp"
