@@ -201,14 +201,53 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList,
                           << std::endl;
             }
         }
+        BanquetRule rule2[9];
+        int bestFull2 = banquetRule2(rule2, s);
+        BanquetInfo bi2[9];
+        int totalScore2 = 0;
+        int totalFull2 = 0;
+        int scoreCache2 = 0;
+        int fullCache2 = 0;
+        for (int i = 0; i < 9; i++) {
+            if ((log & 0x10) && i % 3 == 0) {
+                std::cout << "VERBOSE************" << std::endl;
+                s.chef[3 + i / 3]->print();
+                std::cout << "************" << std::endl;
+            }
+            bi2[i] = getPrice(s.chef[3 + i / 3], s.recipe[3 * DISH_PER_CHEF + i], rule2[i], (log & 0x10));
+            totalFull2 += bi2[i].full;
+            totalScore2 += bi2[i].price;
+            scoreCache2 += bi2[i].price;
+            fullCache2 += bi2[i].full;
+            if ((log & 0x1) && i % 3 == 2) {
+                std::cout << "厨师：" << s.chef[3 + i / 3]->name << " -> "
+                          << fullCache2 << " / " << scoreCache2 << std::endl;
+                scoreCache2 = 0;
+                fullCache2 = 0;
+                std::cout << "菜谱：" << s.recipe[3 * DISH_PER_CHEF + i - 2]->name << "；"
+                          << s.recipe[3 * DISH_PER_CHEF + i - 1]->name << "；" << s.recipe[3 * DISH_PER_CHEF + i]->name
+                          << std::endl;
+            }
+        }
         // std::cout << "log:" << log << std::endl;
+        int ans = 0;
         switch (totalFull - bestFull) {
         case 0:
-            return std::ceil(totalScore * 1.3);
+            ans += std::ceil(totalScore * 1.3);
+            break;
         default:
             int delta = std::abs(totalFull - bestFull);
-            return std::ceil(totalScore * (1 - 0.05 * delta));
+            ans += std::ceil(totalScore * (1 - 0.05 * delta));
         }
+        switch (totalFull2 - bestFull2) {
+        case 0:
+            ans += std::ceil(totalScore2 * 1.3);
+            break;
+        default:
+            int delta = std::abs(totalFull2 - bestFull2);
+            ans += std::ceil(totalScore2 * (1 - 0.05 * delta));
+        }
+        return ans;
     } else if (MODE == 2 || MODE == 0) {
         ActivityBuff activityBuff;
         auto p = &activityBuff;
