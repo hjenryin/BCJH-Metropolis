@@ -78,9 +78,13 @@ int banquetRule(BanquetRule *const &rule, States &s) {
     }
     // 条件：第三道菜：第三道菜基础售价+200
     lenientRule[5]->baseRule.directAdd += 200;
-    // 条件：第三道菜：第三道菜意图生效次数+1
-    lenientRule[5]->oneMore();
-
+    // 条件：五火：本道料理售价-100%
+    for (int i = 3; i < 6; i++) {
+        if (s.recipe[i]->rarity == 5) {
+            lenientRule[i]->addRule.buff += -100;
+            break;
+        }
+    }
     // 第3轮
     // 条件：苦味料理: 本道料理售价+100%
     for (int i = 6; i < 9; i++) {
