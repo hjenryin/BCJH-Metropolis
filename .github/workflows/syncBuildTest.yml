@@ -38,7 +38,6 @@ jobs:
   #   - name: OnFailure
   #     if: failure()
   #     run: sh assets/failure.sh
-sh assets/failure.sh
 
    
   buildTest:
