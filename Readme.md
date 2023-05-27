@@ -2,8 +2,8 @@
 
 ## 公告
 
-* 规则已经基本实现自动更新。也就是说，只要图鉴网计算器更新了，运行一下就可以自动得到最新规则，不用等我上传最新规则了。
-* 新增限时任务模式，方法参见[此文](https://github.com/hjenryin/BCJH-Metropolis/blob/main/assets/config.md)。
+* 更新了同时计算多贵客风云宴的功能，只需要更改./src/banquetRule.hpp和./config.hpp就可以实现任意数量的贵客的宴会，2人，甚至更多
+* 停用了规则的自动更新，更新规则需要自己编写./src/banquetRule.hpp
 
 ## 使用方法（本地）
 
@@ -20,7 +20,7 @@ _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**
     # linux
     cmake ..
     make
-
+    
     # windows
     cmake .. -G "MinGW Makefiles"
     mingw32-make
