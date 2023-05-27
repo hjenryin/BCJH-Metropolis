@@ -150,7 +150,7 @@ bool deductTool(States s, CList *chefList, RList *recipeList,
  * should only be set true at the end of the function as it modifies the name of
  * the chefs.
  */
-int e0::sumPrice(States s, CList *chefList, RList *recipeList,
+void e0::sumPrice(States s, CList *chefList, RList *recipeList,
                  CRPairs *chefRecipePairs, int log, bool exactChefTool) {
     if (exactChefTool) {
         // std::cout << "exactChefTool" << std::endl;
