@@ -1,8 +1,10 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-#define NUM_CHEFS 6
+#define NUM_GUESTS 2
 #define DISH_PER_CHEF 3
+#define CHEFS_PER_GUEST 3
+#define NUM_CHEFS (NUM_GUESTS * CHEFS_PER_GUEST)
 
 #define MODE 1 // 1:宴会模式; 2:限时任务
 #define TARGET_SCORE_APPROXIMATE 2000000
@@ -10,8 +12,8 @@
 // 如果是限时任务，这里输分数线
 // 如果是宴会模式，不用特别准，差两倍/一半以内都可以
 
-#define ITER_CHEF 7000   // 选择厨师时的迭代次数
-#define ITER_RECIPE 10000 // 对于每一组厨师，选择菜谱时的迭代次数
+#define ITER_CHEF 12000   // 选择厨师时的迭代次数
+#define ITER_RECIPE 12000 // 对于每一组厨师，选择菜谱时的迭代次数
 
 #define AVOID_CHEF_1 true
 #define AVOID_CHEF_2 true

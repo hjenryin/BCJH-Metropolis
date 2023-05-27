@@ -173,79 +173,53 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList,
         }
     }
     if (MODE == 1) {
-        BanquetRule rule[9];
-        int bestFull = banquetRule(rule, s);
-        BanquetInfo bi[9];
+        BanquetRule rule[NUM_CHEFS * DISH_PER_CHEF];
+        int bestFull[NUM_GUESTS];
+        banquetRule(rule, s, bestFull);
         int totalScore = 0;
         int totalFull = 0;
         int scoreCache = 0;
         int fullCache = 0;
-        for (int i = 0; i < 9; i++) {
-            if ((log & 0x10) && i % 3 == 0) {
-                std::cout << "VERBOSE************" << std::endl;
-                s.chef[i / 3]->print();
-                std::cout << "************" << std::endl;
-            }
-            bi[i] = getPrice(s.chef[i / 3], s.recipe[i], rule[i], (log & 0x10));
-            totalFull += bi[i].full;
-            totalScore += bi[i].price;
-            scoreCache += bi[i].price;
-            fullCache += bi[i].full;
-            if ((log & 0x1) && i % 3 == 2) {
-                std::cout << "厨师：" << s.chef[i / 3]->name << " -> "
-                          << fullCache << " / " << scoreCache << std::endl;
-                scoreCache = 0;
-                fullCache = 0;
-                std::cout << "菜谱：" << s.recipe[i - 2]->name << "；"
-                          << s.recipe[i - 1]->name << "；" << s.recipe[i]->name
-                          << std::endl;
-            }
-        }
-        BanquetRule rule2[18];
-        int bestFull2 = banquetRule2(rule2, s);
-        BanquetInfo bi2[18];
-        int totalScore2 = 0;
-        int totalFull2 = 0;
-        int scoreCache2 = 0;
-        int fullCache2 = 0;
-        for (int i = 9; i < 18; i++) {
-            if ((log & 0x10) && i % 3 == 0) {
-                std::cout << "VERBOSE************" << std::endl;
-                s.chef[i / 3]->print();
-                std::cout << "************" << std::endl;
-            }
-            bi2[i] = getPrice(s.chef[i / 3], s.recipe[i], rule2[i], (log & 0x10));
-            totalFull2 += bi2[i].full;
-            totalScore2 += bi2[i].price;
-            scoreCache2 += bi2[i].price;
-            fullCache2 += bi2[i].full;
-            if ((log & 0x1) && i % 3 == 2) {
-                std::cout << "厨师：" << s.chef[i / 3]->name << " -> "
-                          << fullCache2 << " / " << scoreCache2 << std::endl;
-                scoreCache2 = 0;
-                fullCache2 = 0;
-                std::cout << "菜谱：" << s.recipe[i - 2]->name << "；"
-                          << s.recipe[i - 1]->name << "；" << s.recipe[i]->name
-                          << std::endl;
-            }
-        }
-        // std::cout << "log:" << log << std::endl;
         int ans = 0;
-        switch (totalFull - bestFull) {
-        case 0:
-            ans += std::ceil(totalScore * 1.3);
-            break;
-        default:
-            int delta = std::abs(totalFull - bestFull);
-            ans += std::ceil(totalScore * (1 - 0.05 * delta));
-        }
-        switch (totalFull2 - bestFull2) {
-        case 0:
-            ans += std::ceil(totalScore2 * 1.3);
-            break;
-        default:
-            int delta = std::abs(totalFull2 - bestFull2);
-            ans += std::ceil(totalScore2 * (1 - 0.05 * delta));
+        int d = 0;
+        int d2 = 0;
+        for (int g = 0; g < NUM_GUESTS; g++) {
+            d = DISH_PER_CHEF * CHEFS_PER_GUEST * g;
+            d2 = CHEFS_PER_GUEST * g;
+            totalScore = 0;
+            totalFull = 0;
+            scoreCache = 0;
+            fullCache = 0;
+            for (int i = 0; i < 9; i++) {
+                if ((log & 0x10) && i % 3 == 0) {
+                std::cout << "VERBOSE************" << std::endl;
+                s.chef[d2 + i / 3]->print();
+                std::cout << "************" << std::endl;
+                }
+                bi[d + i] = getPrice(s.chef[d2 + i / 3], s.recipe[d + i], rule[d + i], (log & 0x10));
+                totalFull += bi[d + i].full;
+                totalScore += bi[d + i].price;
+                scoreCache += bi[d + i].price;
+                fullCache += bi[d + i].full;
+                if ((log & 0x1) && i % 3 == 2) {
+                    std::cout << "厨师：" << s.chef[d2 + i / 3]->name << " -> "
+                            << fullCache << " / " << scoreCache << std::endl;
+                    scoreCache = 0;
+                    fullCache = 0;
+                    std::cout << "菜谱：" << s.recipe[d + i - 2]->name << "；"
+                            << s.recipe[d + i - 1]->name << "；" << s.recipe[d + i]->name
+                            << std::endl;
+                }
+            } 
+            std::cout << std::endl;
+            switch (totalFull - bestFull[g]) {
+            case 0:
+                ans += std::ceil(totalScore * 1.3);
+                break;
+            default:
+                int delta = std::abs(totalFull - bestFull[g]);
+                ans += std::ceil(totalScore * (1 - 0.05 * delta));
+            }           
         }
         return ans;
     } else if (MODE == 2 || MODE == 0) {
