@@ -1,15 +1,15 @@
-//风云宴 玉贵人 苏妲己
-
 #ifndef RULE_HPP
 #define RULE_HPP
 #include "Calculator.hpp"
+
 
 /**
  * @brief
  *
  * @param rule
  * @param s
- * @return int : the optimal `full` value
+ * @param bestfull
+ * @return void
  */
 void banquetRule(BanquetRule *const &rule, States &s, int *bestfull) {
     BanquetStrictRule
@@ -20,7 +20,8 @@ void banquetRule(BanquetRule *const &rule, States &s, int *bestfull) {
         strictRule[i] = &rule[i].strictRule;
         lenientRule[i] = &rule[i].lenientRule;
     }
-
+    
+    //风云宴 玉贵人 苏妲己
     int d = 0;
     bestfull[0] = 19;//饱腹感
     //第一个贵客
