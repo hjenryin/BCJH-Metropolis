@@ -2,8 +2,8 @@
 
 ## 公告
 
-* 规则已经基本实现自动更新。也就是说，只要图鉴网计算器更新了，运行一下就可以自动得到最新规则，不用等我上传最新规则了。
-* 新增限时任务模式，方法参见[此文](https://github.com/hjenryin/BCJH-Metropolis/blob/main/assets/config.md)。
+* 停用了规则自动更新，修复了宴会无法使用的bug
+* 请自己编写在./src/banquetRule.hpp编写规则
 
 ## 使用方法（本地）
 
@@ -20,7 +20,7 @@ _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**
     # linux
     cmake ..
     make
-
+    
     # windows
     cmake .. -G "MinGW Makefiles"
     mingw32-make
