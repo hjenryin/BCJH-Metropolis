@@ -220,7 +220,7 @@ void banquetRule(BanquetRule *const &rule, States &s, int *bestfull) {
         }
     }
     // 条件：第二道菜：第二道菜意图生效次数+1
-    lenientRule[d + 1]->oneMore();
+    lenientRule[d + 7]->oneMore();
     return;
 }
 #endif
