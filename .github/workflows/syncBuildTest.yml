@@ -47,8 +47,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    #- name: update 现在只会更新宴会规则，但是我们需要风云宴，手写一下
-    #  run: sh assets/checkUpdate.sh
+    - name: update 现在只会更新宴会规则，但是我们需要风云宴，手写一下
+      run: sh assets/checkUpdate.sh
     - name: commit
       uses: stefanzweifel/git-auto-commit-action@v4
       with: 
