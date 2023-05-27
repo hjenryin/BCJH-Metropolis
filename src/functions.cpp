@@ -212,7 +212,6 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList,
                             << std::endl;
                 }
             } 
-            std::cout << std::endl;
             switch (totalFull - bestFull[g]) {
             case 0:
                 ans += std::ceil(totalScore * 1.3);
