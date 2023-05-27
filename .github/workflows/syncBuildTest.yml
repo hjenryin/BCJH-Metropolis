@@ -3,7 +3,7 @@ name: C/C++ CI
 on:
   push:
     branches:
-    - "multiguest"
+    - "main"
     paths:
     - "data/userData.json"
   workflow_dispatch:
@@ -17,10 +17,10 @@ jobs:
 
     steps:
     # Step 1: run a standard checkout action, provided by github
-    - name: Checkout multiguest
+    - name: Checkout main
       uses: actions/checkout@v3
       with:
-        ref: multiguest
+        ref: main
 
   # # REQUIRED step
   #   # Step 2: run the sync action
@@ -38,6 +38,8 @@ jobs:
   #   - name: OnFailure
   #     if: failure()
   #     run: sh assets/failure.sh
+sh assets/failure.sh
+
    
   buildTest:
     permissions:
