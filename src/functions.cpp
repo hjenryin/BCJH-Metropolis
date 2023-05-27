@@ -176,6 +176,7 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList,
         BanquetRule rule[NUM_CHEFS * DISH_PER_CHEF];
         int bestFull[NUM_GUESTS];
         banquetRule(rule, s, bestFull);
+        BanquetInfo bi[NUM_CHEFS * DISH_PER_CHEF];
         int totalScore = 0;
         int totalFull = 0;
         int scoreCache = 0;
