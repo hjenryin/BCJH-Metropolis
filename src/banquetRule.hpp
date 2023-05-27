@@ -223,3 +223,4 @@ void banquetRule(BanquetRule *const &rule, States &s, int *bestfull) {
     lenientRule[d + 1]->oneMore();
     return;
 }
+#endif
