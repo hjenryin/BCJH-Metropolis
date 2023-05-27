@@ -12,8 +12,8 @@
 // 如果是限时任务，这里输分数线
 // 如果是宴会模式，不用特别准，差两倍/一半以内都可以
 
-#define ITER_CHEF 8000   // 选择厨师时的迭代次数
-#define ITER_RECIPE 10000 // 对于每一组厨师，选择菜谱时的迭代次数
+#define ITER_CHEF 3000   // 选择厨师时的迭代次数
+#define ITER_RECIPE 3000 // 对于每一组厨师，选择菜谱时的迭代次数
 
 #define AVOID_CHEF_1 true
 #define AVOID_CHEF_2 true
