@@ -150,7 +150,7 @@ bool deductTool(States s, CList *chefList, RList *recipeList,
  * should only be set true at the end of the function as it modifies the name of
  * the chefs.
  */
-void e0::sumPrice(States s, CList *chefList, RList *recipeList,
+int e0::sumPrice(States s, CList *chefList, RList *recipeList,
                  CRPairs *chefRecipePairs, int log, bool exactChefTool) {
     if (exactChefTool) {
         // std::cout << "exactChefTool" << std::endl;
@@ -176,7 +176,7 @@ void e0::sumPrice(States s, CList *chefList, RList *recipeList,
         BanquetRule rule[NUM_CHEFS * DISH_PER_CHEF];
         int bestFull[NUM_GUESTS];
         banquetRule(rule, s, bestFull);
-        BanquetInfo bi[NUM_CHEFS * DISH_PER_CHEF];
+        BanquetInfo bi[NUM_CHEFS * DISH_PER_CHEF]
         int totalScore = 0;
         int totalFull = 0;
         int scoreCache = 0;

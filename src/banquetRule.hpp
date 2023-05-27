@@ -11,7 +11,7 @@
  * @param s
  * @return int : the optimal `full` value
  */
-int banquetRule(BanquetRule *const &rule, States &s, int *bestfull) {
+void banquetRule(BanquetRule *const &rule, States &s, int *bestfull) {
     BanquetStrictRule
         *strictRule[NUM_CHEFS *
                     DISH_PER_CHEF]; // 下一阶段的规则，不受意图生效次数的影响
