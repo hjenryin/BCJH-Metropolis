@@ -4,7 +4,7 @@
 
 ```
 #define MODE 1 // 1:宴会模式; 2:限时任务
-#define TARGET_SCORE_APPROXIMATE 1000000
+#define TARGET_SCORE_APPROXIMATE 2500000
 ```
 
 `MODE` 决定哪种模式（限时任务模式不会自动更新规则，宴会模式可以自动更新规则）
