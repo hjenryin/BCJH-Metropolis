@@ -37,19 +37,17 @@ Flavor Recipe::getFlavor(Json::Value &flavorJson) {
     std::string flavorStr = flavorJson.asString();
     Flavor f;
     if (flavorStr.find("Sweet") != std::string::npos)
-        f.value = SWEET;
+        f.sweet = true;
     else if (flavorStr.find("Salty") != std::string::npos)
-        f.value = SALTY;
+        f.salty = true;
     else if (flavorStr.find("Sour") != std::string::npos)
-        f.value = SOUR;
+        f.sour = true;
     else if (flavorStr.find("Bitter") != std::string::npos)
-        f.value = BITTER;
+        f.bitter = true;
     else if (flavorStr.find("Spicy") != std::string::npos)
-        f.value = SPICY;
+        f.spicy = true;
     else if (flavorStr.find("Tasty") != std::string::npos)
-        f.value = TASTY;
-    else
-        f.value = UNIDENTIFIED;
+        f.tasty = true;
     return f;
 }
 const struct MaterialList {
