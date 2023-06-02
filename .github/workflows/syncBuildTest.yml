@@ -54,7 +54,7 @@ jobs:
       uses: stefanzweifel/git-auto-commit-action@v4
       with: 
         commit_message: 自动拉取图鉴网数据并更新规则
-        file_pattern: "data/data.min.json rule.hpp"
+        file_pattern: "data/data.min.json"
         skip_dirty_check: false
 
     - name: buildTest
