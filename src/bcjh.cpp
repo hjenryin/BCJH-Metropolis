@@ -69,9 +69,9 @@ int main(int argc, char *argv[]) {
     }
     if (!calculate) {
         int s = 0;
-        do {
+        // do {
         s = run(chefList, recipeList, chefRecipePairs, log, silent);
-        } while (s < SEARCH_TARGET_SCORE);
+        // } while (s < 1210000);
     } else {
         calculator(chefList, recipeList, chefRecipePairs);
     }
