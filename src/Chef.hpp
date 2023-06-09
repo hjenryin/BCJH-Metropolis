@@ -9,6 +9,7 @@
 #include "Recipe.hpp"
 #include "Values.hpp"
 class Recipe;
+typedef std::vector<Chef> CList;
 
 class Chef {
   private:
@@ -26,6 +27,7 @@ class Chef {
     std::string name;
     Skill skill;
     std::vector<Recipe *> recipeCapable;
+    std::vector<Recipe *> recipeLearned;
 
     void loadRecipeCapable(std::map<int, Recipe> &recipeList);
     bool isCapable(Recipe *r);
@@ -48,9 +50,8 @@ class Chef {
     Chef addTool(AbilityEnum);
 };
 
-void loadChef(std::map<int, Chef> &chefList);
+void loadChef(CList &chefList);
 
-void loadChefTools(const std::map<int, Chef> &chefList,
-                   std::map<int, Chef> &newChefList);
+void loadChefTools(const CList &chefList, CList &newChefList);
 
 #endif

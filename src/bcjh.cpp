@@ -46,8 +46,8 @@ int main(int argc, char *argv[]) {
     if (true)
         std::cout << "随机种子：" << seed << std::endl;
     srand(seed);
-    std::map<int, Chef> chefList0, chefList;
-    std::map<int, Recipe> recipeList;
+    CList chefList0, chefList;
+    RList recipeList;
     try {
         loadChef(chefList0);
         loadRecipe(recipeList);
@@ -99,20 +99,18 @@ int run(CList &chefList, RList &recipeList, CRPairs &chefRecipePairs, int log,
     return score;
 }
 
-void initChefRecipePairs(CRPairs &chefRecipePairs,
-                         std::map<int, Chef> &chefList,
-                         std::map<int, Recipe> &recipeList) {
-    for (auto chef = chefList.begin(); chef != chefList.end(); chef++) {
-        for (auto recipe = recipeList.begin(); recipe != recipeList.end();
-             recipe++) {
-            int price = getPrice(chef->second, recipe->second);
+void initChefRecipePairs(CRPairs &chefRecipePairs, CList &chefList,
+                         RList &recipeList) {
+    for (auto chef : chefList) {
+        for (auto recipe : recipeList) {
+            int price = getPrice(chef, recipe);
             if (price > 0) {
                 // std::cout << &(chef->second) << std::endl;
-                chefRecipePairs[&chef->second].push_back(&recipe->second);
+                chefRecipePairs[&chef].push_back(&recipe);
             }
         }
-        if (chefRecipePairs[&chef->second].size() == 0) {
-            chefRecipePairs.erase(&chef->second);
+        if (chefRecipePairs[&chef].size() == 0) {
+            chefRecipePairs.erase(&chef);
         }
     }
     // std::cout << chefRecipePairs.size() << std::endl;

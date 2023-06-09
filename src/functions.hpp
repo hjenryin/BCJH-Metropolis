@@ -5,9 +5,9 @@
 #include <algorithm>
 #include <cmath>
 #include "../config.hpp"
+#include "../src/Chef.hpp"
 typedef std::map<Chef *, std::vector<Recipe *>> CRPairs;
-typedef std::map<int, Chef> CList;
-typedef std::map<int, Recipe> RList;
+
 class SARunner;
 struct States {
     Chef *chef[NUM_CHEFS];

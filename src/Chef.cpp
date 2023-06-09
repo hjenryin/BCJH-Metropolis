@@ -32,7 +32,7 @@ void loadUltimateSkills(std::map<int, int> &ultimateSkills,
     splitUltimateSkill(ultimateSkills, usrBuff["Partial"]["id"]);
     splitUltimateSkill(ultimateSkills, usrBuff["Self"]["id"]);
 }
-void loadChef(std::map<int, Chef> &chefList) {
+void loadChef(CList &chefList) {
     if (MODE == 2) {
         Chef::coinBuffOn = false;
     } else {
@@ -67,17 +67,14 @@ void loadChef(std::map<int, Chef> &chefList) {
             }
 
             if (ultimateSkills.find(id) != ultimateSkills.end()) {
-                chefList[id] = Chef(chef, ultimateSkills[id]);
+                chefList.push_back(Chef(chef, ultimateSkills[id]));
             } else {
-                chefList[id] = Chef(chef, -1);
+                chefList.push_back(Chef(chef, -1));
             }
         }
     }
-    auto chefP = chefList.begin();
-    while (chefP != chefList.end()) {
-        auto chef = &chefP->second;
-        toolEquipped(chef);
-        chefP++;
+    for (auto chef : chefList) {
+        toolEquipped(&chef);
     }
 }
 /**
@@ -268,8 +265,7 @@ int CookAbility::operator*(const AbilityBuff &a) {
     return grade;
 }
 
-void loadChefTools(const std::map<int, Chef> &chefList,
-                   std::map<int, Chef> &newChefList) {
+void loadChefTools(CList &chefList, CList &newChefList) {
     for (auto iter : chefList) {
         int id = iter.first;
         Chef chef = iter.second;

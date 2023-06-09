@@ -31,6 +31,12 @@ States r0::randomChef(States &s, CList *chefList, RList *recipeList,
     int chefNum = rand() % NUM_CHEFS;
     Chef *pChef;
     int count = 0;
+    auto learned = &(pChef->recipeLearned);
+    learned->clear();
+    int dishNum = chefNum * DISH_PER_CHEF;
+    for (int i = 0; i < DISH_PER_CHEF; i++) {
+        learned->push_back(s.recipe[dishNum + i]);
+    }
     do {
         auto iter = chefList->begin();
         std::advance(iter, rand() % chefList->size());
@@ -42,6 +48,9 @@ States r0::randomChef(States &s, CList *chefList, RList *recipeList,
         throw NoChefException();
     }
     s.chef[chefNum] = pChef;
+    for (int i = 0; i < DISH_PER_CHEF; i++) {
+        s.recipe[dishNum + i] = pChef->recipeLearned[i];
+    }
     SARunner saRunner(chefList, recipeList, chefRecipePairs, ITER_RECIPE,
                       T_MAX_RECIPE, 0, e::getTotalPrice, r::randomRecipe,
                       f::t_dist_slow);

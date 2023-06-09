@@ -22,8 +22,8 @@ class SARunner {
     int stepMax;
     int tMax;
     int tMin;
-    std::map<int, Chef> *chefList;
-    std::map<int, Recipe> *recipeList;
+    CList *chefList;
+    RList *recipeList;
     e::GetEnergy getEnergyFunc;
     int targetScore;
 

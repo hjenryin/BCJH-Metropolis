@@ -70,7 +70,7 @@ void Recipe::print() {
     this->cookAbility.print();
     this->flavor.print();
 }
-void loadRecipe(std::map<int, Recipe> &recipeList) {
+void loadRecipe(RList &recipeList) {
     Json::Value usrData;
     std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
     // std::cout << gameDataF.fail() << std::endl;
