@@ -17,6 +17,10 @@ int banquetRule4(BanquetStrictRule **, BanquetLenientRule **, States &, int);
 int banquetRule5(BanquetStrictRule **, BanquetLenientRule **, States &, int);
 //风云宴 铁拐李
 int banquetRule6(BanquetStrictRule **, BanquetLenientRule **, States &, int);
+//风云宴 何仙姑2
+int banquetRule7(BanquetStrictRule **, BanquetLenientRule **, States &, int);
+//风云宴 胡喜媚
+int banquetRule8(BanquetStrictRule **, BanquetLenientRule **, States &, int);
 
 
 /**
@@ -36,11 +40,8 @@ void banquetRule(BanquetRule *const &rule, States &s, int *bestfull) {
         strictRule[i] = &rule[i].strictRule;
         lenientRule[i] = &rule[i].lenientRule;
     }
-
-    
-    bestfull[0] = banquetRule0(strictRule, lenientRule, s, 0);
-    bestfull[1] = banquetRule5(strictRule, lenientRule, s, 1);
-    bestfull[2] = banquetRule6(strictRule, lenientRule, s, 2);
+    bestfull[0] = banquetRule7(strictRule, lenientRule, s, 0);           
+    bestfull[1] = banquetRule8(strictRule, lenientRule, s, 1);
     return;
 }
 
@@ -732,6 +733,203 @@ int banquetRule6(BanquetStrictRule **strictRule, BanquetLenientRule **lenientRul
         }
     }
     return 30;
+}
+
+//风云宴 何仙姑2
+int banquetRule7(BanquetStrictRule **strictRule, BanquetLenientRule **lenientRule, States &s, int rank) {
+    int d = rank * DISH_PER_CHEF * CHEFS_PER_GUEST;
+    // 第1轮
+    // 条件：三道炒：下两阶段切技法料理售价+50%
+    if (s.recipe[d + 0]->cookAbility.stirfry > 0 &&
+        s.recipe[d + 1]->cookAbility.stirfry > 0 &&
+        s.recipe[d + 2]->cookAbility.stirfry > 0) {
+        for (int i = d + 3; i < d + 9; i++) {
+            if (s.recipe[i]->cookAbility.knife > 0) {
+                strictRule[i]->addRule.buff += 50;
+            }
+        }
+    }
+    // 条件：三道切：下阶段切技法料理饱腹感-1
+    if (s.recipe[d + 0]->cookAbility.knife > 0 &&
+        s.recipe[d + 1]->cookAbility.knife > 0 &&
+        s.recipe[d + 2]->cookAbility.knife > 0) {
+        for (int i = d + 3; i < d + 6; i++) {
+            if (s.recipe[i]->cookAbility.knife > 0) {
+                strictRule[i]->addRule.full += -1;
+            }
+        }
+    }
+    // 条件：四火: 本道料理售价-100%
+    for (int i = d + 0; i < d + 3; i++) {
+        if (s.recipe[i]->rarity == 4) {
+            lenientRule[i]->addRule.buff += -100;
+            break;
+        }
+    }
+    // 条件：五火: 本道料理售价-100%
+    for (int i = d + 0; i < d + 3; i++) {
+        if (s.recipe[i]->rarity == 5) {
+            lenientRule[i]->addRule.buff += -100;
+            break;
+        }
+    }
+    
+    // 第2轮
+    // 条件：五火: 本道料理售价-100%
+    for (int i = d + 3; i < d + 6; i++) {
+        if (s.recipe[i]->rarity == 5) {
+            lenientRule[i]->addRule.buff += -100;
+            break;
+        }
+    }    
+    // 条件：神：下道料理意图生效次数+1
+    for (int i = d + 3; i < d + 5; i++) {
+        if (s.chef[i/3]->skill.ability / s.recipe[i]->cookAbility >= 4) {
+            lenientRule[i+1]->oneMore();
+            break;
+        }
+    }
+    // 条件：传：本道料理基础售价+50%
+    for (int i = d + 3; i < d + 6; i++) {
+        if (s.chef[i/3]->skill.ability / s.recipe[i]->cookAbility >= 5) {
+            lenientRule[i]->baseRule.buff += 50;
+            break;
+        }
+    }
+    // 条件：烤：本道料理基础售价+50%
+    for (int i = d + 3; i < d + 6; i++) {
+        if (s.recipe[i]->cookAbility.bake > 0) {
+            lenientRule[i]->baseRule.buff += 50;
+            break;
+        }
+    }
+
+    
+    // 第3轮   
+    // 条件：五火: 本道料理售价-100%
+    for (int i = d + 6; i < d + 9; i++) {
+        if (s.recipe[i]->rarity == 5) {
+            lenientRule[i]->addRule.buff += -100;
+            break;
+        }
+    }   
+    // 条件：传：本道料理饱腹感+3
+    for (int i = d + 6; i < d + 9; i++) {
+        if (s.chef[i/3]->skill.ability / s.recipe[i]->cookAbility >= 5) {
+            lenientRule[i]->addRule.full += 3;
+            break;
+        }
+    }
+    // 条件：三火: 本道料理饱腹感-3
+    for (int i = d + 6; i < d + 9; i++) {
+        if (s.recipe[i]->rarity == 3) {
+            lenientRule[i]->addRule.full += -3;
+            break;
+        }
+    }   
+    // 条件：苦: 本道料理饱腹感-5
+    for (int i = d + 6; i < d + 9; i++) {
+        if (s.recipe[i]->flavor.bitter) {
+            lenientRule[i]->addRule.full += -5;
+            break;
+        }
+    }   
+    return 25;
+}
+
+//风云宴 胡喜媚
+int banquetRule8(BanquetStrictRule **strictRule, BanquetLenientRule **lenientRule, States &s, int rank) {
+    int d = rank * DISH_PER_CHEF * CHEFS_PER_GUEST;
+    // 第1轮
+    // 条件：三火: 下道料理饱腹感-3
+    for (int i = d + 0; i < d + 2; i++) {
+        if (s.recipe[i]->rarity == 3) {
+            lenientRule[i+1]->addRule.full += -3;
+            break;
+        }
+    }
+    // 条件：四火: 下道料理饱腹感-2
+    for (int i = d + 0; i < d + 2; i++) {
+        if (s.recipe[i]->rarity == 4) {
+            lenientRule[i+1]->addRule.full += -2;
+            break;
+        }
+    }
+    // 条件：五火: 本道料理售价+100%
+    for (int i = d + 0; i < d + 3; i++) {
+        if (s.recipe[i]->rarity == 5) {
+            lenientRule[i]->addRule.buff += 100;
+            break;
+        }
+    }
+    // 条件：煮: 下道料理饱腹感-2
+    for (int i = d + 0; i < d + 2; i++) {
+        if (s.recipe[i]->cookAbility.boil > 0) {
+            lenientRule[i+1]->addRule.full += -2;
+            break;
+        }
+    }
+    
+    // 第2轮 
+    // 条件：神：下道料理意图生效次数+1
+    for (int i = d + 3; i < d + 5; i++) {
+        if (s.chef[i/3]->skill.ability / s.recipe[i]->cookAbility >= 4) {
+            lenientRule[i+1]->oneMore();
+            break;
+        }
+    }
+    // 条件：四火：本道料理饱腹感-3
+    for (int i = d + 3; i < d + 6; i++) {
+        if (s.recipe[i]->rarity == 4) {
+            lenientRule[i]->addRule.full += -3;
+            break;
+        }
+    }
+    // 条件：切：本道料理基础售价+50%
+    for (int i = d + 3; i < d + 6; i++) {
+        if (s.recipe[i]->cookAbility.knife) {
+            lenientRule[i]->baseRule.buff += 50;
+            break;
+        }
+    }
+    // 条件：酸：本道料理基础售价+50%
+    for (int i = d + 3; i < d + 6; i++) {
+        if (s.recipe[i]->flavor.sour) {
+            lenientRule[i]->baseRule.buff += 50;
+            break;
+        }
+    }
+    
+    // 第3轮    
+    // 条件：传：本道料理售价+100%
+    for (int i = d + 6; i < d + 9; i++) {
+        if (s.chef[i/3]->skill.ability / s.recipe[i]->cookAbility >= 5) {
+            lenientRule[i]->addRule.buff += 100;
+            break;
+        }
+    }
+    // 条件：五火：本道料理售价+100%
+    for (int i = d + 6; i < d + 9; i++) {
+        if (s.recipe[i]->rarity == 5) {
+            lenientRule[i]->addRule.buff += 100;
+            break;
+        }
+    }
+    // 条件：甜：本道料理饱腹感+2
+    for (int i = d + 6; i < d + 9; i++) {
+        if (s.recipe[i]->flavor.sweet) {
+            lenientRule[i]->addRule.full += 2;
+            break;
+        }
+    }
+    // 条件：切：本道料理饱腹感+2
+    for (int i = d + 6; i < d + 9; i++) {
+        if (s.recipe[i]->cookAbility.knife) {
+            lenientRule[i]->addRule.full += 2;
+            break;
+        }
+    }
+    return 15;
 }
 
 #endif
