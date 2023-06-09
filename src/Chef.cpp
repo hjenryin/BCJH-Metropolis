@@ -384,7 +384,7 @@ void Chef::modifyTool(AbilityEnum a) {
 }
 
 std::string getToolName(AbilityEnum tool) {
-    char *toolName;
+    std::string toolName;
     switch (tool) {
     case STIRFRY:
         toolName = "炒";
