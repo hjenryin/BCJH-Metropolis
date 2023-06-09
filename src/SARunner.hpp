@@ -16,22 +16,21 @@ struct History {
     double t;
 };
 class SARunner {
-    CRPairs *chefRecipePairs;
+
     r::RandomMove randomMoveFunc;
     f::CoolingSchedule coolingScheduleFunc;
     int stepMax;
     int tMax;
     int tMin;
-    std::map<int, Chef> *chefList;
-    std::map<int, Recipe> *recipeList;
+    CList *chefList;
+    RList *recipeList;
     e::GetEnergy getEnergyFunc;
     int targetScore;
 
     States bestState;
     History *history;
 
-    States generateStates(CList *chefList, CRPairs *chefRecipePairs,
-                          Chef *chefs[NUM_CHEFS]);
+    States generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]);
 
   public:
     int bestEnergy = 0;
@@ -41,7 +40,6 @@ class SARunner {
      *
      * @param chefList
      * @param recipeList
-     * @param chefRecipePairs
      * @param stepMax
      * @param tMax
      * @param tMin
@@ -49,13 +47,12 @@ class SARunner {
      * @param coolingScheduleFunc
      */
     SARunner(
-        CList *chefList, RList *recipeList, CRPairs *chefRecipePairs,
-        int stepMax, int tMax, int tMin,
+        CList *chefList, RList *recipeList, int stepMax, int tMax, int tMin,
         e::GetEnergy getEnergyFunc = e::getTotalPrice,
-        r::RandomMove randomMoveFunc = r::randomRecipe,
+        r::RandomMove randomMoveFun = r::randomRecipe,
         f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative);
-    States run(Chef *chefs[NUM_CHEFS] = NULL, bool progress = false,
-               bool silent = false, const char *fn = NULL);
+    States run(States *s = NULL, bool progress = false, bool silent = false,
+               const char *fn = NULL);
     ~SARunner();
 };
 #endif
