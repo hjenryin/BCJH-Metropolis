@@ -70,7 +70,7 @@ void Recipe::print() {
     this->cookAbility.print();
     this->flavor.print();
 }
-void loadRecipe(std::map<int, Recipe> &recipeList) {
+void loadRecipe(RList &recipeList) {
     Json::Value usrData;
     std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
     // std::cout << gameDataF.fail() << std::endl;
@@ -87,15 +87,15 @@ void loadRecipe(std::map<int, Recipe> &recipeList) {
     for (auto recipe : recipes) {
         int id = recipe["recipeId"].asInt();
         if (recipeGot[std::to_string(id)].asBool()) {
-            recipeList[id] = Recipe(recipe);
+            recipeList.push_back(Recipe(recipe));
         }
     }
 }
 
 // #define jsonStr2Int(v) atoi(v.asCString())
-dishBuff Recipe::rarityBuff[5];
+DishBuff Recipe::rarityBuff[5];
 void Recipe::initRarityBuff(Json::Value &usrBuff) {
-    dishBuff r[5];
+    DishBuff r[5];
     r[0].dishNum = 40;
     r[1].dishNum = 30;
     r[2].dishNum = 25;

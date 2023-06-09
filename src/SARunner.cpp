@@ -11,13 +11,12 @@
 #include "exception.hpp"
 // #include "activityRule.hpp"
 #include <limits.h>
-SARunner::SARunner(CList *chefList, RList *recipeList, CRPairs *chefRecipePairs,
-                   int stepMax, int tMax, int tMin, e::GetEnergy getEnergyFunc,
+SARunner::SARunner(CList *chefList, RList *recipeList, int stepMax, int tMax,
+                   int tMin, e::GetEnergy getEnergyFunc,
                    r::RandomMove randomMoveFunc,
                    f::CoolingSchedule coolingScheduleFunc) {
     this->chefList = chefList;
     this->recipeList = recipeList;
-    this->chefRecipePairs = chefRecipePairs;
     this->randomMoveFunc = randomMoveFunc;
     this->coolingScheduleFunc = coolingScheduleFunc;
     this->stepMax = stepMax;
@@ -26,18 +25,17 @@ SARunner::SARunner(CList *chefList, RList *recipeList, CRPairs *chefRecipePairs,
     this->history = new History[stepMax];
     this->getEnergyFunc = getEnergyFunc;
 #ifdef SEARCH_TARGET_SCORE
-    if (MODE != 2) {
-        std::cout << "config.hpp中改了不该改的东西，请改回来" << std::endl;
-        exit(1);
-    }
+    // if (MODE != 2) {
+    //     std::cout << "config.hpp中改了不该改的东西，请改回来" << std::endl;
+    //     exit(1);
+    // }
     this->targetScore = SEARCH_TARGET_SCORE;
 #else
     this->targetScore = INT_MAX;
 #endif
 }
 SARunner::~SARunner() { delete[] this->history; }
-States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
-                                Chef *chefs[NUM_CHEFS]) {
+States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
     States s;
 
     // std::cout << chefs << std::endl;
@@ -48,23 +46,21 @@ States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
             if (chefList->size() == 0) {
                 throw NoChefException();
             }
-            auto iter = chefList->begin();
-            std::advance(iter, rand() % chefList->size());
-            s.chef[j] = &iter->second;
+            s.chef[j] = &chefList->at(rand() % chefList->size());
         }
     } else {
         for (int i = 0; i < NUM_CHEFS; i++) {
-            Chef *chef = chefs[i];
-            s.chef[i] = chef;
+
+            s.chef[i] = chefs[i];
         }
     }
     int r = 0;
     for (int j = 0; j < NUM_CHEFS; j++) {
-        auto recipeList = &(*chefRecipePairs)[s.chef[j]];
+        auto recipeList = &s.chef[j]->recipeCapable;
         for (int i = 0; i < DISH_PER_CHEF; i++) {
             int count = 0;
             do {
-                s.recipe[r] = (*recipeList)[rand() % recipeList->size()];
+                s.recipe[r] = recipeList->at(rand() % recipeList->size());
                 count++;
             } while (inArray(s.recipe, r, s.recipe[r]) &&
                      count < RANDOM_SEARCH_TIMEOUT);
@@ -77,21 +73,23 @@ States SARunner::generateStates(CList *chefList, CRPairs *chefRecipePairs,
     return s;
 }
 
-States SARunner::run(Chef *chefs[NUM_CHEFS], bool progress, bool silent,
+States SARunner::run(States *s0, bool progress, bool silent,
                      const char *filename) {
-    // std::cout << "Here" << std::endl;
     States s;
-    try {
-        s = generateStates(this->chefList, this->chefRecipePairs, chefs);
-    } catch (NoChefException &e) {
-        std::cout << e.what() << std::endl;
-        exit(1);
-    } catch (NoRecipeException &e) {
-        std::cout << e.what() << std::endl;
-        exit(1);
+    if (s0 == NULL) {
+        try {
+            s = generateStates(this->chefList, NULL);
+        } catch (NoChefException &e) {
+            std::cout << e.what() << std::endl;
+            exit(1);
+        } catch (NoRecipeException &e) {
+            std::cout << e.what() << std::endl;
+            exit(1);
+        }
+    } else {
+        s = *s0;
     }
-    int energy = getEnergyFunc(s, this->chefList, this->recipeList,
-                               this->chefRecipePairs, false);
+    int energy = getEnergyFunc(s, this->chefList, this->recipeList, false);
     // std::cout << "Initial energy: " << energy << std::endl;
     this->bestState = s;
     this->bestEnergy = energy;
@@ -111,8 +109,7 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool progress, bool silent,
         }
         States newS;
         try {
-            newS = randomMoveFunc(s, this->chefList, this->recipeList,
-                                  this->chefRecipePairs);
+            newS = randomMoveFunc(s, this->chefList, this->recipeList);
 
         } catch (NoRecipeException &e) {
             std::cout << e.what() << std::endl;
@@ -123,8 +120,8 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool progress, bool silent,
         }
         // std::cin >> step;
         // print(newS);
-        int newEnergy = getEnergyFunc(newS, this->chefList, this->recipeList,
-                                      this->chefRecipePairs, false);
+        int newEnergy =
+            getEnergyFunc(newS, this->chefList, this->recipeList, false);
         double prob = 0;
         int delta = energy - newEnergy;
         if (delta / t < -30) {
@@ -163,8 +160,8 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool progress, bool silent,
                  << std::endl;
         }
         file.close();
-        // std::cout <<
-        system("python3 ../src/plot.py &");
+        std::cout << "Saved to ../out/history.csv!" <<std::endl;
+        system("python ../src/plot.py &");
     }
     if (filename) {
 
@@ -177,7 +174,7 @@ States SARunner::run(Chef *chefs[NUM_CHEFS], bool progress, bool silent,
                  << std::endl;
         }
         file.close();
-        std::string cmd = "python3 ../src/plot.py -f " + fn + " &";
+        std::string cmd = "python ../src/plot.py -f " + fn + " &";
         system(cmd.c_str());
     }
 
@@ -203,7 +200,6 @@ void SARunner::print(States s, bool verbose) {
         //         getPrice(*s.chef[i], *s.recipe[r++], true);
         //     }
         // }
-        this->getEnergyFunc(s, this->chefList, this->recipeList,
-                            this->chefRecipePairs, true);
+        this->getEnergyFunc(s, this->chefList, this->recipeList, true);
     }
 }

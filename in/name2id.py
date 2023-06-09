@@ -76,7 +76,7 @@ def getRecipe(ls):
                 recipe.group(2)), find_recipe_name(recipe.group(3)), end=" ")
 
 
-with open("in.txt") as f:
+with open("in.txt",encoding="utf-8") as f:
     ls = f.readlines()
     getChef(ls)
     print()

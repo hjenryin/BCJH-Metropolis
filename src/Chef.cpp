@@ -32,7 +32,7 @@ void loadUltimateSkills(std::map<int, int> &ultimateSkills,
     splitUltimateSkill(ultimateSkills, usrBuff["Partial"]["id"]);
     splitUltimateSkill(ultimateSkills, usrBuff["Self"]["id"]);
 }
-void loadChef(std::map<int, Chef> &chefList) {
+void loadChef(CList &chefList) {
     if (MODE == 2) {
         Chef::coinBuffOn = false;
     } else {
@@ -42,7 +42,9 @@ void loadChef(std::map<int, Chef> &chefList) {
     Json::Value gameData;
     std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
     std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
+
     usrDataF >> usrData;
+
     usrDataF.close();
     gameDataF >> gameData;
     gameDataF.close();
@@ -67,17 +69,14 @@ void loadChef(std::map<int, Chef> &chefList) {
             }
 
             if (ultimateSkills.find(id) != ultimateSkills.end()) {
-                chefList[id] = Chef(chef, ultimateSkills[id]);
+                chefList.push_back(Chef(chef, ultimateSkills[id]));
             } else {
-                chefList[id] = Chef(chef, -1);
+                chefList.push_back(Chef(chef, -1));
             }
         }
     }
-    auto chefP = chefList.begin();
-    while (chefP != chefList.end()) {
-        auto chef = &chefP->second;
-        toolEquipped(chef);
-        chefP++;
+    for (auto chef : chefList) {
+        toolEquipped(&chef);
     }
 }
 /**
@@ -115,7 +114,7 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
     if (ultimateSkillId != -1) {
         this->addSkill(ultimateSkillId);
     }
-    this->tool = -1;
+    this->tool = NOT_EQUIPPED;
 }
 
 void Chef::print() {
@@ -268,23 +267,22 @@ int CookAbility::operator*(const AbilityBuff &a) {
     return grade;
 }
 
-void loadChefTools(const std::map<int, Chef> &chefList,
-                   std::map<int, Chef> &newChefList) {
-    for (auto iter : chefList) {
-        int id = iter.first;
-        Chef chef = iter.second;
-        if (chef.tool != NO_TOOL) {
-            for (int i = 0; i < 6; i++) {
-                newChefList[id * 6 + i] = chef.addTool((AbilityEnum)i);
-            }
-        } else {
-            for (int i = 0; i < 6; i++) {
-                newChefList[id * 6 + i] = chef;
-            }
-        }
-    }
-}
-Chef Chef::addTool(AbilityEnum a) {
+// void loadChefTools(CList &chefList) {
+//     for (auto &chef : chefList) {
+//         int id = chef.id;
+
+//         if (chef.tool != NO_TOOL) {
+//             for (int i = 0; i < 6; i++) {
+//                 newChefList[id * 6 + i] = chef.addTool((AbilityEnum)i);
+//             }
+//         } else {
+//             for (int i = 0; i < 6; i++) {
+//                 newChefList[id * 6 + i] = chef;
+//             }
+//         }
+//     }
+// }
+Chef Chef::addTool_modify_name(AbilityEnum a) {
     Chef newChef(*this);
     newChef.tool = a;
     switch (a) {
@@ -323,12 +321,94 @@ bool Chef::isCapable(Recipe *recipe) {
     }
     return false;
 }
-void Chef::loadRecipeCapable(std::map<int, Recipe> &recipeList) {
-    for (auto recipe = recipeList.begin(); recipe != recipeList.end();
-         recipe++) {
-        if (this->isCapable(&recipe->second)) {
-            // std::cout << &(chef->second) << std::endl;
-            this->recipeCapable.push_back(&recipe->second);
+void Chef::loadRecipeCapable(std::vector<Recipe> &recipeList) {
+    for (auto &recipe : recipeList) {
+        if (this->isCapable(&recipe)) {
+            this->recipeCapable.push_back(&recipe);
         }
     }
+}
+void Chef::modifyTool(AbilityEnum a) {
+    if (this->tool == NO_TOOL)
+        return;
+    if (this->tool == a)
+        return;
+
+    switch (this->tool) {
+    case STIRFRY:
+        this->skill.ability.stirfry -= 100;
+        break;
+    case BAKE:
+        this->skill.ability.bake -= 100;
+        break;
+    case STEAM:
+        this->skill.ability.steam -= 100;
+        break;
+    case FRY:
+        this->skill.ability.fry -= 100;
+        break;
+    case BOIL:
+        this->skill.ability.boil -= 100;
+        break;
+    case KNIFE:
+        this->skill.ability.knife -= 100;
+        break;
+    default:
+        // NOT_EQUIPPED
+        break;
+    }
+    switch (a) {
+    case STIRFRY:
+        this->skill.ability.stirfry += 100;
+        break;
+    case BAKE:
+        this->skill.ability.bake += 100;
+        break;
+    case STEAM:
+        this->skill.ability.steam += 100;
+        break;
+    case FRY:
+        this->skill.ability.fry += 100;
+        break;
+    case BOIL:
+        this->skill.ability.boil += 100;
+        break;
+    case KNIFE:
+        this->skill.ability.knife += 100;
+        break;
+    default:
+        // NOT_EQUIPPED
+        break;
+    }
+    this->tool = a;
+}
+
+std::string getToolName(AbilityEnum tool) {
+    std::string toolName;
+    switch (tool) {
+    case STIRFRY:
+        toolName = "炒";
+        break;
+    case BOIL:
+        toolName = "煮";
+        break;
+    case FRY:
+        toolName = "炸";
+        break;
+    case STEAM:
+        toolName = "蒸";
+        break;
+    case BAKE:
+        toolName = "烤";
+        break;
+    case KNIFE:
+        toolName = "切";
+        break;
+    case NO_TOOL:
+        toolName = "设定厨具";
+        break;
+    default:
+        toolName = "无厨具";
+    }
+    return toolName;
 }
