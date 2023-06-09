@@ -87,7 +87,7 @@ void loadRecipe(RList &recipeList) {
     for (auto recipe : recipes) {
         int id = recipe["recipeId"].asInt();
         if (recipeGot[std::to_string(id)].asBool()) {
-            recipeList[id] = Recipe(recipe);
+            recipeList.push_back(Recipe(recipe));
         }
     }
 }

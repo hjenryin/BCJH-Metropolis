@@ -8,8 +8,8 @@
 #include <exception>
 #include "Recipe.hpp"
 #include "Values.hpp"
+#include <vector>
 class Recipe;
-typedef std::vector<Chef> CList;
 
 class Chef {
   private:
@@ -29,7 +29,7 @@ class Chef {
     std::vector<Recipe *> recipeCapable;
     std::vector<Recipe *> recipeLearned;
 
-    void loadRecipeCapable(std::map<int, Recipe> &recipeList);
+    void loadRecipeCapable(std::vector<Recipe> &recipeList);
     bool isCapable(Recipe *r);
 
     static void setGlobalBuff(CookAbility buff) { globalAbilityBuff = buff; }
@@ -47,11 +47,12 @@ class Chef {
     Chef(Json::Value &v, int ultimateSkillId);
     Chef() {}
     void print();
-    Chef addTool(AbilityEnum);
+    void modifyTool(AbilityEnum);
+    Chef addTool_modify_name(AbilityEnum);
 };
-
+typedef std::vector<Chef> CList;
 void loadChef(CList &chefList);
 
-void loadChefTools(const CList &chefList, CList &newChefList);
+// void loadChefTools(CList &chefList, CList &newChefList);
 
 #endif

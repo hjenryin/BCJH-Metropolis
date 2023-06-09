@@ -12,10 +12,9 @@
 #include <fstream>
 #include <time.h>
 bool Chef::coinBuffOn = true;
-void initChefRecipePairs(CRPairs &, std::map<int, Chef> &,
-                         std::map<int, Recipe> &);
-int run(CList &, RList &, CRPairs &, int, bool);
-void calculator(CList &, RList &, CRPairs &);
+void initChefRecipePairs( CList &, RList &);
+int run(CList &, RList &,  int, bool);
+void calculator(CList &, RList &);
 
 void parseArgs(int argc, char *argv[], bool &silent, int &log,
                 bool &calculate) {
@@ -46,12 +45,13 @@ int main(int argc, char *argv[]) {
     if (true)
         std::cout << "随机种子：" << seed << std::endl;
     srand(seed);
-    CList chefList0, chefList;
+    CList chefList;
     RList recipeList;
     try {
-        loadChef(chefList0);
+        std::cout << "正在读取文件..." << std::endl;
+        loadChef(chefList);
         loadRecipe(recipeList);
-        loadChefTools(chefList0, chefList);
+        std::cout << "读取文件成功。" << std::endl;
     } catch (Json::RuntimeError &e) {
         std::cout << "json文件格式不正确。请确认：1. "
                      "已经上传了文件。2."
@@ -62,60 +62,62 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    CRPairs chefRecipePairs;
-    initChefRecipePairs(chefRecipePairs, chefList, recipeList);
+    // CRPairs chefRecipePairs;
+    // initChefRecipePairs(chefRecipePairs, chefList, recipeList);
     for (auto chef = chefList.begin(); chef != chefList.end(); chef++) {
-        chef->second.loadRecipeCapable(recipeList);
+        chef->loadRecipeCapable(recipeList);
     }
+
     if (!calculate) {
         int s = 0;
         // do {
-        s = run(chefList, recipeList, chefRecipePairs, log, silent);
+        s = run(chefList, recipeList, log, silent);
         // } while (s < 1210000);
     } else {
-        calculator(chefList, recipeList, chefRecipePairs);
+        calculator(chefList, recipeList);
     }
 }
-int run(CList &chefList, RList &recipeList, CRPairs &chefRecipePairs, int log,
-        bool silent) {
-    SARunner saRunner(&chefList, &recipeList, &chefRecipePairs, ITER_CHEF,
-                      T_MAX_CHEF, 0, e::getTotalPrice, r::randomChef,
-                      f::t_dist_slow);
+int run(CList &chefList, RList &recipeList, int log, bool silent) {
+    SARunner saRunner(&chefList, &recipeList, ITER_CHEF, T_MAX_CHEF, 0,
+                      e::getTotalPrice, r::randomChef, f::t_dist_slow);
     // std::cout << log << std::endl;
     States s = saRunner.run(NULL, true, silent);
 
     std::cout << std::endl;
     log += 0x1;
-    int score =
-        e0::sumPrice(s, &chefList, &recipeList, &chefRecipePairs, log, true);
+    int score = e0::sumPrice(s, &chefList, &recipeList, log, true);
     std::cout << "**************\nScore: " << score << "\n***************"
               << std::endl;
     if (!silent) {
-        SARunner saRunnerPrint(&chefList, &recipeList, &chefRecipePairs,
-                               ITER_RECIPE, T_MAX_RECIPE, 0, e::getTotalPrice,
+        SARunner saRunnerPrint(&chefList, &recipeList, ITER_RECIPE,
+                               T_MAX_RECIPE, 0, e::getTotalPrice,
                                r::randomRecipe, f::t_dist_fast);
         saRunnerPrint.run(s.chef, false, silent, "../out/recipe");
     }
     return score;
 }
 
-void initChefRecipePairs(CRPairs &chefRecipePairs, CList &chefList,
-                         RList &recipeList) {
-    for (auto chef : chefList) {
-        for (auto recipe : recipeList) {
-            int price = getPrice(chef, recipe);
-            if (price > 0) {
-                // std::cout << &(chef->second) << std::endl;
-                chefRecipePairs[&chef].push_back(&recipe);
-            }
-        }
-        if (chefRecipePairs[&chef].size() == 0) {
-            chefRecipePairs.erase(&chef);
-        }
-    }
-    // std::cout << chefRecipePairs.size() << std::endl;
-}
-void calculator(CList &chefList, RList &recipeList, CRPairs &p) {
+// void initChefRecipePairs(CRPairs &chefRecipePairs, CList &chefList,
+//                          RList &recipeList) {
+//     for (auto chef : chefList) {
+//         for (auto recipe : recipeList) {
+//             int price = getPrice(chef, recipe);
+
+//             if (price > 0) {
+//                 // std::cout << &(chef->second) << std::endl;
+//                 std::cout << price << std::endl;
+//                 chefRecipePairs[&chef].push_back(&recipe);
+//             }
+//         }
+
+//         if (chefRecipePairs[&chef].size() == 0) {
+//             chefRecipePairs.erase(&chef);
+//         }
+//         // std::cout << chefRecipePairs[&chef].size() << std::endl;
+//     }
+//     std::cout << chefRecipePairs.size() << std::endl;
+// }
+void calculator(CList &chefList, RList &recipeList) {
     std::ifstream f;
     f.open("../in/out.txt");
     States s;
@@ -134,8 +136,8 @@ void calculator(CList &chefList, RList &recipeList, CRPairs &p) {
         s.recipe[i] = &recipeList[r];
     }
     f.close();
-    int score = e0::sumPrice(s, &chefList, &recipeList, &p, false, true);
-    SARunner saRunner(&chefList, &recipeList, &p, ITER_CHEF, T_MAX_CHEF, 0);
+    int score = e0::sumPrice(s, &chefList, &recipeList, false, true);
+    SARunner saRunner(&chefList, &recipeList, ITER_CHEF, T_MAX_CHEF, 0);
     saRunner.print(s, true);
     std::cout << "\n\nScore: " << score << std::endl;
 }
