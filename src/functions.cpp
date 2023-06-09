@@ -32,6 +32,7 @@ States r0::randomChef(States &s, CList *chefList, RList *recipeList) {
     auto learned = &(pChef->recipeLearned);
     learned->clear();
     int dishNum = chefNum * DISH_PER_CHEF;
+    int totalDishNum = NUM_CHEFS * DISH_PER_CHEF;
     for (int i = 0; i < DISH_PER_CHEF; i++) {
         learned->push_back(s.recipe[dishNum + i]);
     }
@@ -48,10 +49,19 @@ States r0::randomChef(States &s, CList *chefList, RList *recipeList) {
         for (int i = 0; i < DISH_PER_CHEF; i++) {
             s.recipe[dishNum + i] = pChef->recipeLearned[i];
         }
+        for (int i = 0; i < DISH_PER_CHEF; i++) {
+            auto target = s.recipe[dishNum + i];
+            for (int j = 0; j < totalDishNum; j++) {
+                if (dishNum + i != j && s.recipe[j] == target) {
+                    r00::unrepeatedRandomRecipe(&pChef->recipeCapable, s.recipe,
+                                                totalDishNum, dishNum + i);
+                }
+            }
+        }
     }
     SARunner saRunner(chefList, recipeList, ITER_RECIPE, T_MAX_RECIPE, 0,
                       e::getTotalPrice, r::randomRecipe, f::t_dist_slow);
-    return saRunner.run(s.chef);
+    return saRunner.run(&s);
 }
 States r0::swapRecipe(States &s, CList *chefList, RList *r) {
     for (int i = 1; i < 10; i++) {
@@ -160,18 +170,21 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
     if (exactChefTool) {
         // std::cout << "exactChefTool" << std::endl;
         for (int i = 0; i < NUM_CHEFS; i++) {
+            AbilityEnum tool = s.chef[i]->tool;
+            std::string toolName = getToolName(tool);
+            toolName = "-" + toolName;
             if (deductTool(s, chefList, recipeList, i, 40)) {
                 if (deductTool(s, chefList, recipeList, i, 70)) {
                     if (deductTool(s, chefList, recipeList, i, 100)) {
-                        s.chef[i]->name += "(0)";
+                        s.chef[i]->name += toolName + "(0)";
                     } else {
-                        s.chef[i]->name += "(30)";
+                        s.chef[i]->name += toolName + "(30)";
                     }
                 } else {
-                    s.chef[i]->name += "(60)";
+                    s.chef[i]->name += toolName + "(60)";
                 }
             } else {
-                s.chef[i]->name += "(100)";
+                s.chef[i]->name += toolName + "(100)";
             }
         }
     }

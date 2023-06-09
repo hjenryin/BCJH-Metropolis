@@ -324,7 +324,6 @@ bool Chef::isCapable(Recipe *recipe) {
 void Chef::loadRecipeCapable(std::vector<Recipe> &recipeList) {
     for (auto &recipe : recipeList) {
         if (this->isCapable(&recipe)) {
-            // std::cout << &(chef->second) << std::endl;
             this->recipeCapable.push_back(&recipe);
         }
     }
@@ -381,4 +380,35 @@ void Chef::modifyTool(AbilityEnum a) {
         // NOT_EQUIPPED
         break;
     }
+    this->tool = a;
+}
+
+std::string getToolName(AbilityEnum tool) {
+    char *toolName;
+    switch (tool) {
+    case STIRFRY:
+        toolName = "炒";
+        break;
+    case BOIL:
+        toolName = "煮";
+        break;
+    case FRY:
+        toolName = "炸";
+        break;
+    case STEAM:
+        toolName = "蒸";
+        break;
+    case BAKE:
+        toolName = "烤";
+        break;
+    case KNIFE:
+        toolName = "切";
+        break;
+    case NO_TOOL:
+        toolName = "设定厨具";
+        break;
+    default:
+        toolName = "无厨具";
+    }
+    return toolName;
 }

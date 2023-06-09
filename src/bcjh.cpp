@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     int seed = time(NULL);
     bool calculate = false;
     parseArgs(argc, argv, silent, log, calculate);
-    seed = 1685272226;
+    // seed = 1686325126;
     if (true)
         std::cout << "随机种子：" << seed << std::endl;
     srand(seed);
@@ -62,15 +62,16 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    // CRPairs chefRecipePairs;
-    // initChefRecipePairs(chefRecipePairs, chefList, recipeList);
     for (auto chef = chefList.begin(); chef != chefList.end(); chef++) {
         chef->loadRecipeCapable(recipeList);
     }
 
     if (!calculate) {
         int s = 0;
-        // do {
+        for (int i = 0; i < 9; i++) {
+            s = run(chefList, recipeList, log, silent);
+        }
+        // do{
         s = run(chefList, recipeList, log, silent);
         // } while (s < 1210000);
     } else {
@@ -92,31 +93,11 @@ int run(CList &chefList, RList &recipeList, int log, bool silent) {
         SARunner saRunnerPrint(&chefList, &recipeList, ITER_RECIPE,
                                T_MAX_RECIPE, 0, e::getTotalPrice,
                                r::randomRecipe, f::t_dist_fast);
-        saRunnerPrint.run(s.chef, false, silent, "../out/recipe");
+        saRunnerPrint.run(&s, false, silent, "../out/recipe");
     }
     return score;
 }
 
-// void initChefRecipePairs(CRPairs &chefRecipePairs, CList &chefList,
-//                          RList &recipeList) {
-//     for (auto chef : chefList) {
-//         for (auto recipe : recipeList) {
-//             int price = getPrice(chef, recipe);
-
-//             if (price > 0) {
-//                 // std::cout << &(chef->second) << std::endl;
-//                 std::cout << price << std::endl;
-//                 chefRecipePairs[&chef].push_back(&recipe);
-//             }
-//         }
-
-//         if (chefRecipePairs[&chef].size() == 0) {
-//             chefRecipePairs.erase(&chef);
-//         }
-//         // std::cout << chefRecipePairs[&chef].size() << std::endl;
-//     }
-//     std::cout << chefRecipePairs.size() << std::endl;
-// }
 void calculator(CList &chefList, RList &recipeList) {
     std::ifstream f;
     f.open("../in/out.txt");

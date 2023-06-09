@@ -50,8 +50,8 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
         }
     } else {
         for (int i = 0; i < NUM_CHEFS; i++) {
-            Chef *chef = chefs[i];
-            s.chef[i] = chef;
+
+            s.chef[i] = chefs[i];
         }
     }
     int r = 0;
@@ -73,18 +73,21 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
     return s;
 }
 
-States SARunner::run(Chef *chefs[NUM_CHEFS], bool progress, bool silent,
+States SARunner::run(States *s0, bool progress, bool silent,
                      const char *filename) {
-    // std::cout << "Here" << std::endl;
     States s;
-    try {
-        s = generateStates(this->chefList, chefs);
-    } catch (NoChefException &e) {
-        std::cout << e.what() << std::endl;
-        exit(1);
-    } catch (NoRecipeException &e) {
-        std::cout << e.what() << std::endl;
-        exit(1);
+    if (s0 == NULL) {
+        try {
+            s = generateStates(this->chefList, NULL);
+        } catch (NoChefException &e) {
+            std::cout << e.what() << std::endl;
+            exit(1);
+        } catch (NoRecipeException &e) {
+            std::cout << e.what() << std::endl;
+            exit(1);
+        }
+    } else {
+        s = *s0;
     }
     int energy = getEnergyFunc(s, this->chefList, this->recipeList, false);
     // std::cout << "Initial energy: " << energy << std::endl;
