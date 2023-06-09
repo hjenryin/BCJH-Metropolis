@@ -68,12 +68,12 @@ int main(int argc, char *argv[]) {
 
     if (!calculate) {
         int s = 0;
-        for (int i = 0; i < 9; i++) {
-            s = run(chefList, recipeList, log, silent);
-        }
-        // do{
+        // for (int i = 0; i < 9; i++) {
         s = run(chefList, recipeList, log, silent);
-        // } while (s < 1210000);
+            // }
+            // do{
+            s = run(chefList, recipeList, log, silent);
+            // } while (s < 1210000);
     } else {
         calculator(chefList, recipeList);
     }
