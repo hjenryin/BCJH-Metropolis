@@ -2,6 +2,7 @@
 #include "Chef.hpp"
 #include <cmath>
 
+int strangeBuff_handle(Chef chef, Recipe recipe, DishBuff rb);
 int getPrice(Chef &chef, Recipe &recipe, ActivityBuff *activityBuff,
              bool verbose) {
     // if (verbose)
@@ -51,7 +52,9 @@ int getPrice(Chef &chef, Recipe &recipe, ActivityBuff *activityBuff,
     int skillBuff = recipe.flavor * chef.skill.flavorBuff +
                     recipe.cookAbility * chef.skill.abilityBuff +
                     recipe.materialCategories * chef.skill.materialBuff +
-                    rb.dishBuff;
+                    rb.dishBuff + chef.skill.rarityBuff.rarityBuff[recipe.rarity - 1];
+    int strangeBuff = strangeBuff_handle(chef, recipe, rb);
+    skillBuff += strangeBuff;
     int buff = gradebuff + skillBuff +
                (chef.coinBuffOn ? chef.skill.coinBuff : 0) + activityBuffValue;
     // std::cout << buff << std::endl;
@@ -70,6 +73,7 @@ int getPrice(Chef &chef, Recipe &recipe, ActivityBuff *activityBuff,
                   << recipe.materialCategories * chef.skill.materialBuff
                   << " + " << rb.dishBuff << ")"
                   << " + 金币" << (chef.coinBuffOn ? chef.skill.coinBuff : 0)
+                  << " + 其它" << strangeBuff
                   << ")" << std::endl;
         if (activityBuff != NULL)
             std::cout << "规则: " << activityBuffValue << std::endl;
@@ -116,7 +120,10 @@ BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule r, bool verbose) {
     int skillBuff = recipe->flavor * chef->skill.flavorBuff +
                     recipe->cookAbility * chef->skill.abilityBuff +
                     recipe->materialCategories * chef->skill.materialBuff +
-                    rb.dishBuff + (chef->coinBuffOn ? chef->skill.coinBuff : 0);
+                    rb.dishBuff + chef->skill.rarityBuff.rarityBuff[recipe->rarity - 1] +
+                    (chef->coinBuffOn ? chef->skill.coinBuff : 0);
+    int strangeBuff = strangeBuff_handle(*chef, *recipe, rb);
+    skillBuff += strangeBuff;
     int buff = gradebuff + skillBuff + intentionAddBuff;
     int singlePrice =
         std::ceil((recipe->price + rule.baseRule.directAdd) *
@@ -132,7 +139,8 @@ BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule r, bool verbose) {
                   << recipe->cookAbility * chef->skill.abilityBuff << " + 食材"
                   << recipe->materialCategories * chef->skill.materialBuff
                   << " + 修炼" << rb.dishBuff << " + 金币"
-                  << (chef->coinBuffOn ? chef->skill.coinBuff : 0) << ")"
+                  << (chef->coinBuffOn ? chef->skill.coinBuff : 0)
+                  << " + 其它" << strangeBuff << ")"
                   << std::endl;
         std::cout << "Intention: (基础+" << rule.baseRule.directAdd << "，+"
                   << intentionBaseBuff << "%；售价+" << intentionAddBuff
@@ -148,4 +156,13 @@ BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule r, bool verbose) {
     }
     BanquetInfo b = {totalPrice, full};
     return b;
+}
+
+int strangeBuff_handle(Chef chef, Recipe recipe, DishBuff rb) {
+    int strangeBuff = 0;
+    if (~chef.skill.strangeBuff.ExcessCookbookNum.dishNum) {
+        if (rb.dishNum >= chef.skill.strangeBuff.ExcessCookbookNum.dishNum)
+            strangeBuff += chef.skill.strangeBuff.ExcessCookbookNum.dishBuff;
+    }
+    return strangeBuff;
 }

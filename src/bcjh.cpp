@@ -15,7 +15,7 @@ bool Chef::coinBuffOn = true;
 void initChefRecipePairs( CList &, RList &);
 int run(CList &, RList &,  int, bool);
 void calculator(CList &, RList &);
-
+void add_halo(States);
 void parseArgs(int argc, char *argv[], bool &silent, int &log,
                 bool &calculate) {
     for (int i = 1; i < argc; i++) {
@@ -83,7 +83,8 @@ int run(CList &chefList, RList &recipeList, int log, bool silent) {
                       e::getTotalPrice, r::randomChef, f::t_dist_slow);
     // std::cout << log << std::endl;
     States s = saRunner.run(NULL, true, silent);
-
+    //判断光环
+    add_halo(s);
     std::cout << std::endl;
     log += 0x1;
     int score = e0::sumPrice(s, &chefList, &recipeList, log, true);
@@ -121,4 +122,21 @@ void calculator(CList &chefList, RList &recipeList) {
     SARunner saRunner(&chefList, &recipeList, ITER_CHEF, T_MAX_CHEF, 0);
     saRunner.print(s, true);
     std::cout << "\n\nScore: " << score << std::endl;
+}
+
+void add_halo(States s) {
+    for (int g = 0; g < NUM_GUESTS; g++) {
+        for (int i = g * CHEFS_PER_GUEST; i < CHEFS_PER_GUEST * (g + 1); i++) {
+            if (s.chef[i]->skill.halo) {
+                if (MODE == 1) {//宴会模式，光环只对后面的角色生效
+                    for (int k = i; k < CHEFS_PER_GUEST * (g + 1); k++) {
+                        s.chef[k]->skill.ability.add(s.chef[i]->skill.skillHalo);
+                    }
+                }
+            }
+            if ((i + 1) % CHEFS_PER_GUEST && s.chef[i]->skill.halo_next) {
+                s.chef[i + 1]->skill.ability.add(s.chef[i]->skill.skillHaloNext);
+            }
+        }
+    }
 }

@@ -10,10 +10,7 @@
 #include "Values.hpp"
 #include <vector>
 
-struct DishBuff {
-    int dishNum;
-    int dishBuff = 0;
-};
+
 class Materials {
   public:
     bool vegetable;
