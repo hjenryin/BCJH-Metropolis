@@ -23,17 +23,42 @@ permissions:
   contents: write
 
 jobs:
+  
+  RemoveStaleRelease:
+    continue-on-error: true
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set date env
+      run: Set-TimeZone -Id 'China Standard Time' && echo "DATE=$([datetime]::now.tostring("yyyy-MM-dd"))" >> $env:GITHUB_ENV 
+        
+    - uses: dev-drprasad/delete-tag-and-release@v1.0 # PRERELEASE is v1.0 and can also be used to test and give us feedback
+      with:
+        tag_name: ${{ env.DATE }} #(required) tag name to delete 
+        github_token: ${{ secrets.GITHUB_TOKEN }} # (required) a GitHub token with write access to the repo that needs to be modified
+        delete_release: true #(optional) default: true 
+      
   build:
     runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v3
+    
+    - name: Set date env
+      run: Set-TimeZone -Id 'China Standard Time' && echo "DATE=$([datetime]::now.tostring("yyyy-MM-dd"))" >> $env:GITHUB_ENV 
+    
+    - run: echo ${{ env.DATE }}
+
+
+    - run: cd src && python ../assets/removeSystemCall.py
 
     - name: cmake
-      run: cmake --no-warn-unused-cli -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -B ${{github.workspace}}/build -G "Visual Studio 17 2022" -T host=x86 -A win32
+      run: cmake --no-warn-unused-cli -B ${{github.workspace}}/build -G "Visual Studio 17 2022" -T host=x86 -A win32
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v1.3.1
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -44,11 +69,33 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
-    - run: echo "echo 修改配置、了解更多请至https://github.com/hjenryin/BCJH-Metropolis/以便在线运行" > build/点此运行.bat
-    - run: echo "cmd /k bcjh.exe" >> build/点此运行.bat
-    
-    - run: zip bcjh.zip build/bcjh.exe build/点此运行.bat
+      
+    - run: mkdir release
+    - run: mv build/bcjh.exe release
+
+    - name: Generate .bat file
+      run: echo echo 修改配置、了解更多请至https://github.com/hjenryin/BCJH-Metropolis/以便在线运行 > release/点此运行.bat && tzutil /s "China Standard Time" && echo echo 更新时间：%date%, %time% >> release/点此运行.bat && echo cmd /k bcjh.exe >> release/点此运行.bat
+      shell: cmd
+ 
+    - name: Change encoding
+      run: mv data/data.min.json release && python assets/changeEncoding.py -p release/点此运行.bat && python assets/changeEncoding.py -p release/data.min.json
+    - name: Zip Release
+      # You may pin to the exact commit or the version.
+      # uses: TheDoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464
+      uses: TheDoctor0/zip-release@0.7.1
+      with:
+        # Base path for archive files
+        path: release
+        filename: bcjh.zip
+        
+    - uses: dev-drprasad/delete-tag-and-release@v1.0 # PRERELEASE is v1.0 and can also be used to test and give us feedback
+      with:
+        tag_name: ${{ env.DATE }} #(required) tag name to delete 
+        github_token: ${{ secrets.GITHUB_TOKEN }} # (required) a GitHub token with write access to the repo that needs to be modified
+        delete_release: true #(optional) default: true 
+
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "./bcjh.zip"
-        tag: "fast"
+        tag: ${{ env.DATE }}
+       
