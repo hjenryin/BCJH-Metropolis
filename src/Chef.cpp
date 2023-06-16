@@ -75,7 +75,7 @@ void loadChef(CList &chefList) {
             }
         }
     }
-    for (auto chef : chefList) {
+    for (auto &chef : chefList) {
         toolEquipped(&chef);
     }
 }

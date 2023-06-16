@@ -12,12 +12,12 @@
 #include <fstream>
 #include <time.h>
 bool Chef::coinBuffOn = true;
-void initChefRecipePairs( CList &, RList &);
-int run(CList &, RList &,  int, bool);
+void initChefRecipePairs(CList &, RList &);
+int run(CList &, RList &, int, bool);
 void calculator(CList &, RList &);
 
 void parseArgs(int argc, char *argv[], bool &silent, int &log,
-                bool &calculate) {
+               bool &calculate) {
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         if (arg == "-s") {
@@ -69,11 +69,11 @@ int main(int argc, char *argv[]) {
     if (!calculate) {
         int s = 0;
         // for (int i = 0; i < 9; i++) {
+        // s = run(chefList, recipeList, log, silent);
+        // }
+        // do{
         s = run(chefList, recipeList, log, silent);
-            // }
-            // do{
-            s = run(chefList, recipeList, log, silent);
-            // } while (s < 1210000);
+        // } while (s < 1210000);
     } else {
         calculator(chefList, recipeList);
     }
