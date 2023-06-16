@@ -196,7 +196,7 @@ int banquetRule10(BanquetStrictRule **strictRule, BanquetLenientRule **lenientRu
     }
     // 第3轮
     // 条件：神：本道料理售价-100%
-    for (int i = d + 3; i < d + 6; i++) {
+    for (int i = d + 6; i < d + 9; i++) {
         if (s.chef[i/3]->skill.ability / s.recipe[i]->cookAbility >= 4) {
             lenientRule[i]->addRule.buff += -100;
             break;
