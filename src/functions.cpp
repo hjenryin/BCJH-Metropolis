@@ -4,6 +4,7 @@
 #include "banquetRule.hpp"
 #include "exception.hpp"
 #include "activityRule.hpp"
+#include <cassert>
 
 namespace r0 {
 States randomRecipe(States &, CList *, RList *);
@@ -168,6 +169,10 @@ bool deductTool(States s, CList *chefList, RList *recipeList, int chefId,
 int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
                  bool exactChefTool) {
     if (exactChefTool) {
+        for (int i = 0; i < NUM_CHEFS; i++) {
+            s.chef[i]->modifyTool(s.toolCKPT[i]);
+        }
+        assert(chefList != NULL && recipeList != NULL);
         // std::cout << "exactChefTool" << std::endl;
         for (int i = 0; i < NUM_CHEFS; i++) {
             AbilityEnum tool = s.chef[i]->tool;

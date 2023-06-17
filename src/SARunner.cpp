@@ -104,7 +104,8 @@ States SARunner::run(States *s0, bool progress, bool silent,
                 //               << std::flush;
                 // }
             } else {
-                std::cout << "\r" << step << "/" << this->stepMax << std::flush;
+                std::cout << "\r" << step << "/" << this->stepMax << " - "
+                          << this->bestEnergy << std::flush;
             }
         }
         States newS;
@@ -138,7 +139,15 @@ States SARunner::run(States *s0, bool progress, bool silent,
         }
         if (energy > this->bestEnergy) {
             this->bestEnergy = energy;
+            for (int i = 0; i < NUM_CHEFS; i++) {
+                s.toolCKPT[i] = s.chef[i]->tool;
+            }
             this->bestState = s;
+            if (progress && !silent) {
+
+                int tmp = e0::sumPrice(this->bestState);
+                std::cout << " ";
+            }
         }
         t = coolingScheduleFunc(this->stepMax, step, this->tMax, this->tMin);
         if (t <= this->tMin) {

@@ -11,6 +11,7 @@
 class SARunner;
 struct States {
     Chef *chef[NUM_CHEFS];
+    AbilityEnum toolCKPT[NUM_CHEFS];
     Recipe *recipe[DISH_PER_CHEF * NUM_CHEFS];
 };
 namespace r00 {
@@ -37,7 +38,7 @@ States randomChef(States, CList *, RList *);
 
 } // namespace r
 namespace e0 {
-int sumPrice(States s, CList *c, RList *r, int log = false,
+int sumPrice(States s, CList *c = NULL, RList *r = NULL, int log = false,
              bool exactChefTool = false);
 }
 namespace e {

@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     int seed = time(NULL);
     bool calculate = false;
     parseArgs(argc, argv, silent, log, calculate);
-    // seed = 1686325126;
+    seed = 1686995027;
     if (true)
         std::cout << "随机种子：" << seed << std::endl;
     srand(seed);
