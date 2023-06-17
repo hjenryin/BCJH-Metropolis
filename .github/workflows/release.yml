@@ -100,7 +100,14 @@ jobs:
         delete_release: true #(optional) default: true 
 
     - uses: ncipollo/release-action@v1
+      id: create_release
       with:
         artifacts: "./bcjh.zip"
         tag: ${{ env.DATE }}
+
+    - uses: eregon/publish-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        release_id: ${{ steps.create_release.outputs.id }}
        
