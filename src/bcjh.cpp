@@ -35,13 +35,13 @@ void parseArgs(int argc, char *argv[], bool &silent, int &log,
 }
 
 int main(int argc, char *argv[]) {
-    int opt;
+
     bool silent = false;
     int log = 0; // 0x0: 无输出 0x1: 正常输出 0x10: 详细输出
-    int seed = time(NULL);
+    int seed = (int)time(NULL);
     bool calculate = false;
     parseArgs(argc, argv, silent, log, calculate);
-    // seed = 1686995027;
+    seed = 1687004120;
     if (true)
         std::cout << "随机种子：" << seed << std::endl;
     srand(seed);
@@ -83,7 +83,7 @@ int run(CList &chefList, RList &recipeList, int log, bool silent) {
                       e::getTotalPrice, r::randomChef, f::t_dist_slow);
     // std::cout << log << std::endl;
     States s = saRunner.run(NULL, true, silent);
-
+    s = perfectTool(s);
     std::cout << std::endl;
     log += 0x1;
     int score = e0::sumPrice(s, &chefList, &recipeList, log, true);

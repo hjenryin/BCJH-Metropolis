@@ -17,13 +17,15 @@ class Chef {
     static int globalAbilityMale;
     static int globalAbilityFemale;
     void addSkill(int id);
+    AbilityEnum tool = NOT_EQUIPPED;
 
   public:
     static bool coinBuffOn;
     bool male;
     bool female;
     int id;
-    AbilityEnum tool = NOT_EQUIPPED;
+    AbilityEnum getTool() { return this->tool; }
+    void NoTool() { this->tool = NO_TOOL; }
     std::string name;
     Skill skill;
     std::vector<Recipe *> recipeCapable;

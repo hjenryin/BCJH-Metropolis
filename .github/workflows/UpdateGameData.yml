@@ -11,7 +11,7 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - name: Update Game Data
-              run: python data/checkupdate.py
+              run: python data/checkUpdate.py
             - name: Commit files
               run: |
                   git add data -f
