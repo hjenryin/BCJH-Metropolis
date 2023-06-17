@@ -58,4 +58,5 @@ double linear_mul(int stepMax, int step, double tMax, double tMin);
 double zipf(int stepMax, int step, double tMax, double tMin);
 double one_over_n(int stepMax, int step, double tMax, double tMin);
 } // namespace f
+States perfectTool(States &s);
 #endif

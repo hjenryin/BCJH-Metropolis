@@ -26,23 +26,23 @@ permissions:
 
 jobs:
   
-  RemoveStaleRelease:
-    continue-on-error: true
-    runs-on: windows-latest
+  # RemoveStaleRelease:
+  #   continue-on-error: true
+  #   runs-on: windows-latest
 
-    steps:
-    - uses: actions/checkout@v3
+  #   steps:
+  #   - uses: actions/checkout@v3
     
-    - name: Set date env
-      run: Set-TimeZone -Id 'China Standard Time' && echo "DATE=$([datetime]::now.tostring("yyyy-MM-dd"))" >> $env:GITHUB_ENV 
+  #   - name: Set date env
+  #     run: Set-TimeZone -Id 'China Standard Time' && echo "DATE=$([datetime]::now.tostring("yyyy-MM-dd"))" >> $env:GITHUB_ENV 
         
-    - uses: dev-drprasad/delete-tag-and-release@v1.0 # PRERELEASE is v1.0 and can also be used to test and give us feedback
-      with:
-        tag_name: ${{ env.DATE }} #(required) tag name to delete 
-        github_token: ${{ secrets.GITHUB_TOKEN }} # (required) a GitHub token with write access to the repo that needs to be modified
-        delete_release: true #(optional) default: true 
+  #   - uses: dev-drprasad/delete-tag-and-release@v1.0 # PRERELEASE is v1.0 and can also be used to test and give us feedback
+  #     with:
+  #       tag_name: ${{ env.DATE }} #(required) tag name to delete 
+  #       github_token: ${{ secrets.GITHUB_TOKEN }} # (required) a GitHub token with write access to the repo that needs to be modified
+  #       delete_release: true #(optional) default: true 
       
-  build:
+  buildRelease:
     runs-on: windows-latest
 
     steps:

@@ -57,7 +57,7 @@ int getPrice(Chef &chef, Recipe &recipe, ActivityBuff *activityBuff,
     // std::cout << buff << std::endl;
     double bonus = 1.0 + buff / 100.0;
     // std::cout << bonus << std::endl;
-    int singlePrice = std::ceil(recipe.price * bonus);
+    int singlePrice = (int)std::ceil(recipe.price * bonus);
     // std::cout << singlePrice << std::endl;
     int totalPrice = singlePrice * rb.dishNum;
     if (verbose) {
@@ -118,9 +118,9 @@ BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule r, bool verbose) {
                     recipe->materialCategories * chef->skill.materialBuff +
                     rb.dishBuff + (chef->coinBuffOn ? chef->skill.coinBuff : 0);
     int buff = gradebuff + skillBuff + intentionAddBuff;
-    int singlePrice =
-        std::ceil((recipe->price + rule.baseRule.directAdd) *
-                  (1.0 + intentionBaseBuff / 100.0) * (1.0 + buff / 100.0));
+    int singlePrice = (int)std::ceil((recipe->price + rule.baseRule.directAdd) *
+                                     (1.0 + intentionBaseBuff / 100.0) *
+                                     (1.0 + buff / 100.0));
     // std::cout << singlePrice << std::endl;
     int totalPrice = singlePrice * rb.dishNum;
     if (verbose) {

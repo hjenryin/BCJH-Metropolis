@@ -99,7 +99,7 @@ States r0::randomRecipe(States &s, CList *chefList, RList *r) {
 States r0::swapChefTool(States &s, CList *chefList, RList *recipeList) {
     int chefNum = rand() % NUM_CHEFS;
     auto chef = s.chef[chefNum];
-    int orig_tool = chef->tool;
+    int orig_tool = chef->getTool();
 
     int tool;
     do {
@@ -126,7 +126,7 @@ States r0::swapChefTool(States &s, CList *chefList, RList *recipeList) {
 bool deductTool(States s, CList *chefList, RList *recipeList, int chefId,
                 int deduction) {
     Chef chef(*s.chef[chefId]);
-    int tool = chef.tool;
+    int tool = chef.getTool();
     int *cookAbility;
     switch (tool) {
     case STIRFRY:
@@ -175,7 +175,7 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
         assert(chefList != NULL && recipeList != NULL);
         // std::cout << "exactChefTool" << std::endl;
         for (int i = 0; i < NUM_CHEFS; i++) {
-            AbilityEnum tool = s.chef[i]->tool;
+            AbilityEnum tool = s.chef[i]->getTool();
             std::string toolName = getToolName(tool);
             toolName = "-" + toolName;
             if (deductTool(s, chefList, recipeList, i, 40)) {
@@ -367,4 +367,25 @@ void r00::unrepeatedRandomRecipe(std::vector<Recipe *> *rl, Recipe **rs,
         throw NoRecipeException();
     }
     rs[index] = r;
+}
+States perfectTool(States &s) {
+    for (int i = 0; i < NUM_CHEFS; i++) {
+        auto chef = s.chef[i];
+        if (chef->getTool() == NO_TOOL)
+            continue;
+        chef->modifyTool(NOT_EQUIPPED);
+        int max = e0::sumPrice(s);
+        AbilityEnum bestTool = NOT_EQUIPPED;
+        for (int j = 0; j < 6; j++) {
+            chef->modifyTool(AbilityEnum(j));
+            int temp = e0::sumPrice(s);
+            if (temp > max) {
+                max = temp;
+                bestTool = AbilityEnum(j);
+            }
+        }
+        chef->modifyTool(bestTool);
+        s.toolCKPT[i] = bestTool;
+    }
+    return s;
 }

@@ -140,7 +140,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
         if (energy > this->bestEnergy) {
             this->bestEnergy = energy;
             for (int i = 0; i < NUM_CHEFS; i++) {
-                s.toolCKPT[i] = s.chef[i]->tool;
+                s.toolCKPT[i] = s.chef[i]->getTool();
             }
             this->bestState = s;
             if (progress && !silent) {
@@ -169,14 +169,14 @@ States SARunner::run(States *s0, bool progress, bool silent,
                  << std::endl;
         }
         file.close();
-        std::cout << "Saved to ../out/history.csv!" <<std::endl;
+        // std::cout << "Saved to ../out/history.csv!" <<std::endl;
         system("python ../src/plot.py &");
     }
     if (filename) {
 
         std::fstream file;
         std::string fn(filename);
-        std::cout << "Saving to file: " << fn + ".csv" << std::endl;
+        // std::cout << "Saving to file: " << fn + ".csv" << std::endl;
         file.open(fn + ".csv", std::ios::out);
         for (int i = 0; i < step; i++) {
             file << this->history[i].energy << "," << this->history[i].t
