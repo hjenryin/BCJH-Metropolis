@@ -10,7 +10,7 @@
 #define TARGET_SCORE_APPROXIMATE 2360000
 // 这里输分数线，达标之后将停止搜索
 
-#define ITER_CHEF 6git000 // 选择厨师时的迭代次数
+#define ITER_CHEF 6000   // 选择厨师时的迭代次数
 #define ITER_RECIPE 2000 // 对于每一组厨师，选择菜谱时的迭代次数
 
 #define AVOID_CHEF_1 true
