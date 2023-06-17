@@ -22,7 +22,7 @@ _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**
     # linux
     cmake ..
     make
-
+    
     # windows
     cmake .. -G "MinGW Makefiles"
     mingw32-make
