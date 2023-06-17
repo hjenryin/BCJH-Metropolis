@@ -7,6 +7,8 @@ name: MSBuild
 
 on:
   push:
+    branches: 
+      - main
   workflow_dispatch:
 
 
@@ -74,7 +76,7 @@ jobs:
     - run: mv build/bcjh.exe release
 
     - name: Generate .bat file
-      run: echo echo 修改配置、了解更多请至https://github.com/hjenryin/BCJH-Metropolis/以便在线运行 > release/点此运行.bat && tzutil /s "China Standard Time" && echo echo 更新时间：%date%, %time% >> release/点此运行.bat && echo cmd /k bcjh.exe >> release/点此运行.bat
+      run: set "filename=release/点此运行.bat" && echo @echo off > %filename% && tzutil /s "China Standard Time" && echo echo 更新时间：%date%, %time% > %filename% && type assets/retrieveData.bat >> %filename%
       shell: cmd
  
     - name: Change encoding
