@@ -53,6 +53,12 @@ jobs:
     
     - run: echo ${{ env.DATE }}
 
+    - name: Generate .bat file
+      run: mkdir release && echo @echo off > release\点此运行.bat && tzutil /s "China Standard Time" && echo echo 更新时间：%date%, %time% > release\点此运行.bat && type assets\retrieveData.bat >> release\点此运行.bat
+      shell: cmd
+
+    - name: Change encoding
+      run: mv data/data.min.json release && python assets/changeEncoding.py -p release/data.min.json
 
     - run: cd src && python ../assets/removeSystemCall.py
 
@@ -72,15 +78,12 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
       
-    - run: mkdir release
+
     - run: mv build/bcjh.exe release
 
-    - name: Generate .bat file
-      run: set "filename=release/点此运行.bat" && echo @echo off > %filename% && tzutil /s "China Standard Time" && echo echo 更新时间：%date%, %time% > %filename% && type assets/retrieveData.bat >> %filename%
-      shell: cmd
+
  
-    - name: Change encoding
-      run: mv data/data.min.json release && python assets/changeEncoding.py -p release/点此运行.bat && python assets/changeEncoding.py -p release/data.min.json
+
     - name: Zip Release
       # You may pin to the exact commit or the version.
       # uses: TheDoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464
