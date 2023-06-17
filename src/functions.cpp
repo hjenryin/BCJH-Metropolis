@@ -209,25 +209,26 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
             fullCache = 0;
             for (int i = 0; i < 9; i++) {
                 if ((log & 0x10) && i % 3 == 0) {
-                std::cout << "VERBOSE************" << std::endl;
-                s.chef[d2 + i / 3]->print();
-                std::cout << "************" << std::endl;
+                    std::cout << "VERBOSE************" << std::endl;
+                    s.chef[d2 + i / 3]->print();
+                    std::cout << "************" << std::endl;
                 }
-                bi[d + i] = getPrice(s.chef[d2 + i / 3], s.recipe[d + i], rule[d + i], (log & 0x10));
+                bi[d + i] = getPrice(s.chef[d2 + i / 3], s.recipe[d + i],
+                                     rule[d + i], (log & 0x10));
                 totalFull += bi[d + i].full;
                 totalScore += bi[d + i].price;
                 scoreCache += bi[d + i].price;
                 fullCache += bi[d + i].full;
                 if ((log & 0x1) && i % 3 == 2) {
                     std::cout << "厨师：" << s.chef[d2 + i / 3]->name << " -> "
-                            << fullCache << " / " << scoreCache << std::endl;
+                              << fullCache << " / " << scoreCache << std::endl;
                     scoreCache = 0;
                     fullCache = 0;
                     std::cout << "菜谱：" << s.recipe[d + i - 2]->name << "；"
-                            << s.recipe[d + i - 1]->name << "；" << s.recipe[d + i]->name
-                            << std::endl;
+                              << s.recipe[d + i - 1]->name << "；"
+                              << s.recipe[d + i]->name << std::endl;
                 }
-            } 
+            }
             switch (totalFull - bestFull[g]) {
             case 0:
                 ans += (int)std::ceil(totalScore * 1.3);
@@ -235,7 +236,7 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
             default:
                 int delta = std::abs(totalFull - bestFull[g]);
                 ans += (int)std::ceil(totalScore * (1 - 0.05 * delta));
-            }           
+            }
         }
         return ans;
     } else if (MODE == 2 || MODE == 0) {
