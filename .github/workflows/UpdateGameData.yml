@@ -1,0 +1,23 @@
+name: Update Game Data
+
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: '0 0 * * *'
+
+jobs:
+    update:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Update Game Data
+              run: python data/checkupdate.py
+            - name: Commit files
+              run: |
+                  git add data -f
+                  git commit -m "Update Game Data"
+            - name: Push changes
+              uses: ad-m/github-push-action@master
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  branch: ${{ github.ref }}
