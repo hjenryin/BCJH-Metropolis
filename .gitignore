@@ -2,6 +2,7 @@
 build/
 data/backup/
 data/userData.json
+data/data.min.json
 toolEquipped.hpp
 vcpkg/
 out/
