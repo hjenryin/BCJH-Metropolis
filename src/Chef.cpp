@@ -8,6 +8,7 @@
 #include "Calculator.hpp"
 #include "utils/json.hpp"
 #include "../toolEquipped.hpp"
+#include "exception.hpp"
 // #define jsonStr2Int(v) atoi(v.asCString())
 CookAbility Chef::globalAbilityBuff;
 int Chef::globalAbilityMale = 0;
@@ -40,14 +41,30 @@ void loadChef(CList &chefList) {
     }
     Json::Value usrData;
     Json::Value gameData;
-    std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
-    std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
+
+    // std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
+    // std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
+
+    std::ifstream gameDataF("data.min.json", std::ifstream::binary);
+    if (!gameDataF.good()) {
+        gameDataF.open("../data/data.min.json", std::ifstream::binary);
+        if (!gameDataF.good()) {
+            throw FileNotExistException();
+        }
+    }
+    std::ifstream usrDataF("userData.json", std::ifstream::binary);
+    if (!usrDataF.good()) {
+        usrDataF.open("../data/userData.json", std::ifstream::binary);
+        if (!usrDataF.good()) {
+            throw FileNotExistException();
+        }
+    }
 
     usrDataF >> usrData;
-
     usrDataF.close();
     gameDataF >> gameData;
     gameDataF.close();
+
     initBuff(usrData["userUltimate"]);
     const Json::Value chefs = gameData["chefs"];
     Skill::loadJson(gameData["skills"]);

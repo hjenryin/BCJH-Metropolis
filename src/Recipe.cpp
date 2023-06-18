@@ -8,6 +8,7 @@
 #include <vector>
 #include "utils/json.hpp"
 #include "../config.hpp"
+#include "exception.hpp"
 Recipe::Recipe(Json::Value &recipe) {
     this->name = recipe["name"].asString();
     this->id = recipe["recipeId"].asInt();
@@ -72,13 +73,29 @@ void Recipe::print() {
 }
 void loadRecipe(RList &recipeList) {
     Json::Value usrData;
-    std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
-    // std::cout << gameDataF.fail() << std::endl;
     Json::Value gameData;
+    // std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
+    // std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
+
+    std::ifstream gameDataF("data.min.json", std::ifstream::binary);
+    if (!gameDataF.good()) {
+        gameDataF.open("../data/data.min.json", std::ifstream::binary);
+        if (!gameDataF.good()) {
+            throw FileNotExistException();
+        }
+    }
+    std::ifstream usrDataF("userData.json", std::ifstream::binary);
+    if (!usrDataF.good()) {
+        usrDataF.open("../data/userData.json", std::ifstream::binary);
+        if (!usrDataF.good()) {
+            throw FileNotExistException();
+        }
+    }
+
+    // std::cout << gameDataF.fail() << std::endl;
     gameDataF >> gameData;
     gameDataF.close();
     // std::cout << "Game data loaded" << std::endl;
-    std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
     usrDataF >> usrData;
     usrDataF.close();
     Recipe::initRarityBuff(usrData["userUltimate"]);
