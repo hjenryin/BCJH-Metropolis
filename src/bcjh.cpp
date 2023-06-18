@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <time.h>
+#include "exception.hpp"
 bool Chef::coinBuffOn = true;
 void initChefRecipePairs(CList &, RList &);
 int run(CList &, RList &, int, bool);
@@ -52,10 +53,13 @@ int main(int argc, char *argv[]) {
         loadChef(chefList);
         loadRecipe(recipeList);
         std::cout << "读取文件成功。" << std::endl;
+    } catch (FileNotExistException &e) {
+        std::cout << "json文件确实。如果在网页端，请确认已经上传了文件；如果在"
+                     "本地，请确认已经下载了文件。\n";
+        exit(1);
     } catch (Json::RuntimeError &e) {
-        std::cout << "json文件格式不正确。请确认：1. "
-                     "已经上传了文件。2."
-                     "如果文件内容是手动复制的，确认文件已经复制完整。\n";
+        std::cout << "json文件格式不正确。如果文件内容是手动复制的，确认文件已"
+                     "经复制完整。\n";
         exit(1);
     } catch (Json::LogicError &e) {
         std::cout << "json文件格式不正确。请确认文件来自白菜菊花而非图鉴网。\n";
@@ -65,6 +69,9 @@ int main(int argc, char *argv[]) {
     for (auto chef = chefList.begin(); chef != chefList.end(); chef++) {
         chef->loadRecipeCapable(recipeList);
     }
+    // Count time used
+    clock_t start, end;
+    start = clock();
 
     if (!calculate) {
         int s = 0;
@@ -77,6 +84,9 @@ int main(int argc, char *argv[]) {
     } else {
         calculator(chefList, recipeList);
     }
+    end = clock();
+    std::cout << "用时：" << (double)(end - start) / CLOCKS_PER_SEC << "秒"
+              << std::endl;
 }
 int run(CList &chefList, RList &recipeList, int log, bool silent) {
     SARunner saRunner(&chefList, &recipeList, ITER_CHEF, T_MAX_CHEF, 0,

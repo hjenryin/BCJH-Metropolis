@@ -21,5 +21,10 @@ class NoRecipeException : public std::exception {
     }
     NoRecipeException() throw() {}
 };
+class FileNotExistException : public std::exception {
+  public:
+    virtual const char *what() const throw() { return "文件不存在。"; }
+    FileNotExistException() throw() {}
+};
 #define RANDOM_SEARCH_TIMEOUT 100
 #endif

@@ -12,7 +12,9 @@ if "%bcjhid%"=="" (
 if not "%bcjhid%"=="" (
     echo 正在下载用户配置
     powershell -command $json=$(iwr -uri "https://bcjh.xyz/api/download_data?id=%bcjhid%" ^| ConvertFrom-Json^) ^; if ($json.result -eq 'True'^) { Write-Host 用户名（中文可能乱码）：$($json.user^) -ForegroundColor:Green^; echo $json.data ^> userData.json } else { Write-Host 下载失败，请检查id是否正确 -BackgroundColor:Red -ForegroundColor:White ^}
-
+    type userData.json > tmp
+    del userData.json
+    ren tmp userData.json
 )
 
 .\bcjh.exe

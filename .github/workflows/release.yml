@@ -53,12 +53,16 @@ jobs:
     
     - run: echo ${{ env.DATE }}
 
-    - name: Generate .bat file
-      run: mkdir release && echo @echo off > release\点此运行.bat && tzutil /s "China Standard Time" && echo echo 更新时间：%date%, %time% > release\点此运行.bat && type assets\retrieveData.bat >> release\点此运行.bat
+    - name: Generate .bat prefix
+      run: mkdir release && echo @echo off > release\点此运行.bat && tzutil /s "China Standard Time" && echo echo 计算器更新时间：%date%, %time% > release\点此运行.bat
       shell: cmd
 
     - name: Change encoding
-      run: mv data/data.min.json release && python assets/changeEncoding.py -p release/data.min.json
+      run: mv data/data.min.json release && python assets/changeEncoding.py -p release/data.min.json && python assets/changeEncoding.py -p release\点此运行.bat
+
+    - name: Generate .bat file
+      run:  type assets\retrieveData.bat >> release\点此运行.bat
+      shell: cmd
 
     - run: cd src && python ../assets/removeSystemCall.py
 
@@ -68,9 +72,9 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.3.1
 
-    - name: Restore NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+    # - name: Restore NuGet packages
+    #   working-directory: ${{env.GITHUB_WORKSPACE}}
+    #   run: nuget restore ${{env.SOLUTION_FILE_PATH}}
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
