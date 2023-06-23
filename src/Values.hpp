@@ -148,5 +148,9 @@ enum AbilityEnum {
     KNIFE
 };
 enum FlavorEnum { UNIDENTIFIED = -1, SWEET, SALTY, SOUR, BITTER, SPICY, TASTY };
-
+enum ToolFileType {
+    NO_FILE__NO_TOOL,
+    EMPTY_FILE__NOT_EQUIPPED,
+    CUSTOMIZE_TOOL
+};
 #endif
