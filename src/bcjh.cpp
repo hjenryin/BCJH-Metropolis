@@ -12,13 +12,23 @@
 #include <fstream>
 #include <time.h>
 #include "exception.hpp"
+#include <future>
+#include <vector>
 bool Chef::coinBuffOn = true;
 void initChefRecipePairs(CList &, RList &);
-int run(CList &, RList &, int, bool);
+struct Result {
+    int score;
+    int seed;
+    CList *chefList;
+    RList recipeList;
+    States *state;
+};
+Result run(const CList &, RList &, int, bool, int);
 void calculator(CList &, RList &);
 
-void parseArgs(int argc, char *argv[], bool &silent, int &log,
-               bool &calculate) {
+void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &calculate,
+               bool &mp, int &seed) {
+    int seed_orig = seed;
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         if (arg == "-s") {
@@ -31,7 +41,30 @@ void parseArgs(int argc, char *argv[], bool &silent, int &log,
             std::cout << "-s: 无进度条" << std::endl;
             std::cout << "-v: 输出详细信息" << std::endl;
             std::cout << "-c: 从文件中读取配置，计算分数" << std::endl;
+        } else if (arg == "--no-mp") {
+            mp = false;
+        } else if (arg == "--seed") {
+            seed = atoi(argv[++i]);
+        } else {
+            std::cout << "未知参数：" << arg << std::endl;
+            exit(1);
         }
+        // set seed
+    }
+    if (seed_orig != seed) {
+        if (mp) {
+            mp = false;
+            std::cout << "Seed set to " << seed << ", mp disabled" << std::endl;
+        } else {
+            std::cout << "Seed set to " << seed << std::endl;
+        }
+    }
+    if (mp) {
+        silent = true;
+        std::cout << "多线程模式启用，不显示进度条，请等待约"
+                  << std::round(ITER_CHEF * ITER_RECIPE / 5000000.) * 10
+                  << "秒。建议期间不要离开窗口，否则可能影响速度。"
+                  << std::endl;
     }
 }
 
@@ -41,11 +74,9 @@ int main(int argc, char *argv[]) {
     int log = 0; // 0x0: 无输出 0x1: 正常输出 0x10: 详细输出
     int seed = (int)time(NULL);
     bool calculate = false;
-    parseArgs(argc, argv, silent, log, calculate);
-    // seed = 1687004120;
-    if (true)
-        std::cout << "随机种子：" << seed << std::endl;
-    srand(seed);
+    bool mp = true;
+    parseArgs(argc, argv, silent, log, calculate, mp, seed);
+
     CList chefList;
     RList recipeList;
     try {
@@ -74,13 +105,50 @@ int main(int argc, char *argv[]) {
     start = clock();
 
     if (!calculate) {
-        int s = 0;
-        // for (int i = 0; i < 9; i++) {
-        // s = run(chefList, recipeList, log, silent);
-        // }
-        // do{
-        s = run(chefList, recipeList, log, silent);
-        // } while (s < 1210000);
+        Result result;
+        if (!mp) {
+            result = run(chefList, recipeList, log, silent, seed);
+        } else {
+            int num_threads = std::thread::hardware_concurrency();
+            std::cout << "线程数：" << num_threads << "\t"
+                      << "分数：";
+            std::vector<std::future<Result>> futures;
+            for (int i = 0; i < num_threads; i++) {
+                seed++;
+                futures.push_back(std::async(std::launch::async, run, chefList,
+                                             recipeList, log, silent, seed));
+            }
+
+            int max_score = 0;
+            for (auto &future : futures) {
+                Result tmp = future.get();
+                if (tmp.score > max_score) {
+                    result = tmp;
+                    max_score = result.score;
+
+                } else {
+                    delete tmp.chefList;
+                    delete tmp.state;
+                }
+                std::cout << tmp.score << " ";
+            }
+            std::cout << "最佳结果：" << std::endl;
+        }
+        std::cout << std::endl;
+        log += 0x1;
+        std::cout << "随机种子：" << result.seed << std::endl;
+        int score = e0::sumPrice(*result.state, result.chefList,
+                                 &result.recipeList, log, true);
+        std::cout << "**************\n总分: " << result.score
+                  << "\n***************" << std::endl;
+        if (!silent) {
+            SARunner saRunnerPrint(
+                result.chefList, &result.recipeList, ITER_RECIPE, T_MAX_RECIPE,
+                0, e::getTotalPrice, r::randomRecipe, f::t_dist_fast);
+            saRunnerPrint.run(result.state, false, silent, "../out/recipe");
+        }
+        delete result.chefList;
+        delete result.state;
     } else {
         calculator(chefList, recipeList);
     }
@@ -88,24 +156,20 @@ int main(int argc, char *argv[]) {
     std::cout << "用时：" << (double)(end - start) / CLOCKS_PER_SEC << "秒"
               << std::endl;
 }
-int run(CList &chefList, RList &recipeList, int log, bool silent) {
-    SARunner saRunner(&chefList, &recipeList, ITER_CHEF, T_MAX_CHEF, 0,
-                      e::getTotalPrice, r::randomChef, f::t_dist_slow);
+Result run(const CList &chefList, RList &recipeList, int log, bool silent,
+           int seed) {
+    CList *chefListPtr = new CList(chefList);
+    *chefListPtr = chefList;
+    srand(seed);
+    SARunner saRunner(chefListPtr, &recipeList, ITER_CHEF, T_MAX_CHEF,
+                      T_MAX_CHEF / 10, e::getTotalPrice, r::randomChef,
+                      f::t_dist_slow);
     // std::cout << log << std::endl;
-    States s = saRunner.run(NULL, true, silent);
-    s = perfectTool(s);
-    std::cout << std::endl;
-    log += 0x1;
-    int score = e0::sumPrice(s, &chefList, &recipeList, log, true);
-    std::cout << "**************\nScore: " << score << "\n***************"
-              << std::endl;
-    if (!silent) {
-        SARunner saRunnerPrint(&chefList, &recipeList, ITER_RECIPE,
-                               T_MAX_RECIPE, 0, e::getTotalPrice,
-                               r::randomRecipe, f::t_dist_fast);
-        saRunnerPrint.run(&s, false, silent, "../out/recipe");
-    }
-    return score;
+    States *s = new States;
+    *s = saRunner.run(NULL, true, silent);
+    *s = perfectTool(*s);
+    int score = e0::sumPrice(*s, chefListPtr, &recipeList, log, false);
+    return Result{score, seed, chefListPtr, recipeList, s};
 }
 
 void calculator(CList &chefList, RList &recipeList) {

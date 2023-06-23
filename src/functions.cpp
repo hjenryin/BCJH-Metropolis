@@ -150,7 +150,7 @@ bool deductTool(States s, CList *chefList, RList *recipeList, int chefId,
     case NO_TOOL:
         return true;
     default:
-        std::cout << "Not using a tool" << std::endl;
+        // std::cout << "Not using a tool" << std::endl;
         return true;
     }
     *cookAbility -= deduction;
@@ -338,16 +338,16 @@ double f::linear(int stepMax, int step, double tMax, double tMin) {
     return (tMax - tMin) * (1 - step / (double)stepMax) + tMin;
 }
 double f::t_dist_fast(int stepMax, int step, double tMax, double tMin) {
-    return tMax / (1 + step * step / 300000.0);
+    return tMin + (tMax - tMin) / (1 + step * step / 300000.0);
 }
 double f::t_dist_slow(int stepMax, int step, double tMax, double tMin) {
-    return tMax / (1 + step * step / 2000000.0);
+    return tMin + (tMax - tMin) / (1 + step * step / 3000000.0);
 }
 double f::linear_mul(int stepMax, int step, double tMax, double tMin) {
-    return tMax / (1 + step / 100000.0);
+    return tMin + (tMax - tMin) / (1 + step / 100000.0);
 }
 double f::zipf(int stepMax, int step, double tMax, double tMin) {
-    double t = tMax / std::pow(step + 1, 0.2);
+    double t = tMin + (tMax - tMin) / std::pow(step + 1, 0.2);
     // std::cout << t << std::endl;
     return t;
 }

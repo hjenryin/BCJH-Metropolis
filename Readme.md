@@ -1,13 +1,14 @@
 # 基于模拟退火的爆炒江湖宴会计算器
 
+![](https://img.shields.io/github/downloads/hjenryin/BCJH-Metropolis/total) ![](https://img.shields.io/github/forks/hjenryin/BCJH-Metropolis) ![](https://img.shields.io/github/stars/hjenryin/BCJH-Metropolis)
+
 ## 更新公告
 
-* 速度、效果大提升。在我个人的数据中，本次风云宴平均耗时6秒（搜到分数线就停止）。现有版本搜索时间约为30秒（参数：ITER分别为2000，5000），且对ITER数需求较高。
-* 参数选择：`ITER_CHEF`可以设大一点，反正搜到就停止。`ITER_RECIPE`可以小一点（一两千），会自动学习比较好的菜谱。`TARGET_SCORE_APPROXIMATE`需要准确输入希望达到的分数线（毕竟搜到就停）。
-* 改掉了一些💩山。
-* 最近比较忙，可能使用中出现错误或不稳定的情况，我可能不能及时修复，敬请见谅。
+* 速度、效果大提升。在我个人的数据中，风云宴平均耗时10秒（搜到分数线就停止）。
+* 默认多线程。相同时间，运行一次，搜索8次（取决于电脑配置）。
+* 参数选择：`ITER_CHEF`可以设大一点，反正搜到就停止。`ITER_RECIPE`可以小一点（一两千），会自动学习比较好的菜谱。`TARGET_SCORE_APPROXIMATE` 需要准确输入希望达到的分数线（毕竟搜到就停）。
 
-## 使用方法（本地）
+## 使用方法（本地编译）
 
 如果在windows平台，需要使用MinGW编译，并将 `data/data.min.json` 改为ANSI编码。如有条件，强烈建议这种本地运行（运行可加速、可多次重复）。
 _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**_
@@ -22,7 +23,7 @@ _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**
     # linux
     cmake ..
     make
-    
+
     # windows
     cmake .. -G "MinGW Makefiles"
     mingw32-make
@@ -60,6 +61,10 @@ _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**
   - 合成套餐和原套餐的矛盾无法避免。
   - 一些规则奇奇怪怪的厨师（应该就汤圆年糕）的技能没有实现。
 - 可能有一定门槛。（这可能有助于防止这类辅助工具的滥用导致分数膨胀？）（你问我为什么不用其他语言写？python一个晚上就写好了，结果因为有涉及json读写很多类型没法推断，jit用不了，算这个太慢了，所以就用c++写了）
+
+## 使用方法（本地安装包）
+
+前往[Releases · hjenryin/BCJH-Metropolis](https://github.com/hjenryin/BCJH-Metropolis/releases)下载最新 `bcjh.zip`，解压后输入白菜菊花id即可使用。
 
 ## 工作原理
 
