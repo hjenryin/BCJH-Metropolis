@@ -61,11 +61,7 @@ void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &calculate,
     }
     if (mp) {
         silent = true;
-        std::cout << "多线程模式启用，不显示进度条，请等待约"
-                  << std::round(ITER_CHEF * ITER_RECIPE / 5000000.) * 10
-                  << "秒。建议期间不要离开窗口，否则可能影响速度。"
-                  << std::endl;
-    }
+        }
 }
 
 int main(int argc, char *argv[]) {
@@ -110,6 +106,13 @@ int main(int argc, char *argv[]) {
             result = run(chefList, recipeList, log, silent, seed);
         } else {
             int num_threads = std::thread::hardware_concurrency();
+            std::cout << "多线程模式启用，不显示进度条，请等待约"
+                      << std::ceil(ITER_CHEF * ITER_RECIPE * 2 / 5000000. * 8 /
+                                   num_threads) *
+                             5
+                      << "秒。建议期间不要离开窗口，否则可能影响速度。"
+                      << std::endl;
+
             std::cout << "线程数：" << num_threads << "\t"
                       << "分数：";
             std::vector<std::future<Result>> futures;

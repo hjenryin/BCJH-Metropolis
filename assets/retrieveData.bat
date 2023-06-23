@@ -1,4 +1,4 @@
-@echo off
+
 echo 修改配置、了解更多请至https://github.com/hjenryin/BCJH-Metropolis/ 以便在线运行
 echo 有疑问请至https://github.com/hjenryin/BCJH-Metropolis/discussions/categories/q-a 提问
 echo 有任何想法可至https://github.com/hjenryin/BCJH-Metropolis/discussions/categories/general 讨论
@@ -16,7 +16,8 @@ if not "%bcjhid%"=="" (
     del userData.json
     ren tmp userData.json
 )
-
+echo=
+echo=查看厨具修改教程，请参考 https://github.com/hjenryin/BCJH-Metropolis#配置厨具
 .\bcjh.exe
 echo 按任意键关闭
-pause
+pause >NUL

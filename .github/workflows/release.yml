@@ -54,7 +54,7 @@ jobs:
     - run: echo ${{ env.DATE }}
 
     - name: Generate .bat prefix
-      run: mkdir release && echo @echo off > release\点此运行.bat && tzutil /s "China Standard Time" && echo echo 计算器更新时间：%date%, %time% > release\点此运行.bat
+      run: mkdir release && echo @echo off > release\点此运行.bat && echo chcp 936 ^>NUL >> release\点此运行.bat && tzutil /s "China Standard Time" && echo echo 计算器更新时间：%date%, %time% >> release\点此运行.bat
       shell: cmd
 
     - name: Change encoding
@@ -63,8 +63,9 @@ jobs:
     - name: Generate .bat file
       run:  type assets\retrieveData.bat >> release\点此运行.bat
       shell: cmd
-
-    - run: cd src && python ../assets/removeSystemCall.py
+    
+    - name: Prepare zipping
+      run: cd src && python ../assets/removeSystemCall.py && cd .. &&  mv assets/厨具样例.csv release/厨具样例.csv
 
     - name: cmake
       run: cmake --no-warn-unused-cli -B ${{github.workspace}}/build -G "Visual Studio 17 2022" -T host=x86 -A win32
