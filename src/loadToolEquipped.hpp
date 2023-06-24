@@ -1,7 +1,7 @@
 #ifndef LOADTOOLEQUIPPED_HPP
 #define LOADTOOLEQUIPPED_HPP
-#include "src/Chef.hpp"
-#include "src/Values.hpp"
+#include "Chef.hpp"
+#include "Values.hpp"
 #include <fstream>
 #include <vector>
 #include <exception>
@@ -78,16 +78,14 @@ ToolFileType loadToolFile() {
     if (tif.size() == 0) {
         tibptr = NULL;
         return EMPTY_FILE__NOT_EQUIPPED;
-    }
-    if (tif.size() == 1) {
+    } else if (tif.size() == 1) {
         tibptr = new ToolInfoBlock(tif[0]);
         return CUSTOMIZE_TOOL;
-    }
-    if (tif.size() > 1) {
+    } else {
         cout << "发现多个配置，请输入希望使用的配置编号。" << endl;
-        for (int i = 0; i < tif.size(); i++) {
+        for (unsigned int i = 0; i < tif.size(); i++) {
             cout << i << ": ";
-            for (int j = 0; j < tif[i].info.size(); j++) {
+            for (unsigned int j = 0; j < tif[i].info.size(); j++) {
                 cout << tif[i].info[j][0] << " ";
             }
             cout << endl;
@@ -96,7 +94,7 @@ ToolFileType loadToolFile() {
         int i = -1;
         cin >> i;
 
-        if (!(i >= 0 && i < tif.size())) {
+        if (!(i >= 0 && i < int(tif.size()))) {
             cout << "输入的不是0到" << tif.size() - 1 << "之间的整数。" << endl;
             exit(1);
         }
@@ -106,13 +104,13 @@ ToolFileType loadToolFile() {
     }
 }
 
-bool isFloatOrInt(string s) {
+bool isFloat(string s) {
     bool hasDot = false;
     if (s.size() == 0)
         return true;
     if (s[0] != '-' && !(s[0] >= '0' && s[0] <= '9'))
         return false;
-    for (int i = 1; i < s.size(); i++) {
+    for (unsigned int i = 1; i < s.size(); i++) {
         if (s[i] == '.') {
             if (hasDot)
                 return false;
@@ -123,13 +121,34 @@ bool isFloatOrInt(string s) {
         if (s[i] < '0' || s[i] > '9')
             return false;
     }
-    return true;
+    if (hasDot)
+        return true;
+    else {
+        throw runtime_error("Float");
+    }
 }
 double str2f(string s) {
-    if (isFloatOrInt(s))
+    if (isFloat(s))
         return atof(s.c_str());
     else
-        throw runtime_error("无法将字符串转换为浮点数。");
+        throw runtime_error("Float");
+}
+bool isInt(string s) {
+    if (s.size() == 0)
+        return true;
+    if (s[0] != '-' && !(s[0] >= '0' && s[0] <= '9'))
+        return false;
+    for (unsigned int i = 1; i < s.size(); i++) {
+        if (s[i] < '0' || s[i] > '9')
+            return false;
+    }
+    return true;
+}
+int str2i(string s) {
+    if (isInt(s))
+        return atoi(s.c_str());
+    else
+        throw runtime_error("Int");
 }
 
 void loadToolFromFile(Chef *chef, ToolFileType t) {
@@ -143,7 +162,7 @@ void loadToolFromFile(Chef *chef, ToolFileType t) {
 
     auto lineN = tibptr->row - 1;
     auto tools = (*tibptr).info;
-    for (int i = 0; i < tools.size(); i++) {
+    for (unsigned int i = 0; i < tools.size(); i++) {
         lineN = lineN + 1;
         auto tool = tools[i];
         if (!(tool[0] == chef->name)) {
@@ -157,54 +176,73 @@ void loadToolFromFile(Chef *chef, ToolFileType t) {
         auto flavorBuff = &skill->flavorBuff;
         auto materialBuff = &skill->materialBuff;
         try {
-            ability->add(str2f(tool[j++]));
             if (tool[j][0] == '*') {
-                ability->bake *= str2f(tool[j++].substr(1));
+                ability->multiply(str2f(tool[j++].substr(1)));
             } else {
-                ability->bake += str2f(tool[j++]);
+                ability->add(str2i(tool[j++]));
             }
             if (tool[j][0] == '*') {
-                ability->knife *= str2f(tool[j++].substr(1));
+                ability->bake = int(ability->bake * str2f(tool[j++].substr(1)));
             } else {
-                ability->knife += str2f(tool[j++]);
+                ability->bake += str2i(tool[j++]);
             }
             if (tool[j][0] == '*') {
-                ability->stirfry *= str2f(tool[j++].substr(1));
+                ability->knife =
+                    int(ability->knife * str2f(tool[j++].substr(1)));
             } else {
-                ability->stirfry += str2f(tool[j++]);
+                ability->knife += str2i(tool[j++]);
             }
             if (tool[j][0] == '*') {
-                ability->fry *= str2f(tool[j++].substr(1));
+                ability->stirfry =
+                    int(ability->stirfry * str2f(tool[j++].substr(1)));
             } else {
-                ability->fry += str2f(tool[j++]);
+                ability->stirfry += str2i(tool[j++]);
             }
             if (tool[j][0] == '*') {
-                ability->steam *= str2f(tool[j++].substr(1));
+                ability->fry = int(ability->fry * str2f(tool[j++].substr(1)));
             } else {
-                ability->steam += str2f(tool[j++]);
+                ability->fry += str2i(tool[j++]);
             }
             if (tool[j][0] == '*') {
-                ability->boil *= str2f(tool[j++].substr(1));
+                ability->steam =
+                    int(ability->steam * str2f(tool[j++].substr(1)));
             } else {
-                ability->boil += str2f(tool[j++]);
+                ability->steam += str2i(tool[j++]);
             }
-            skill->coinBuff += str2f(tool[j++]);
-            abilityBuff->bake += str2f(tool[j++]);
-            abilityBuff->knife += str2f(tool[j++]);
-            abilityBuff->stirfry += str2f(tool[j++]);
-            abilityBuff->fry += str2f(tool[j++]);
-            abilityBuff->steam += str2f(tool[j++]);
-            abilityBuff->boil += str2f(tool[j++]);
-            flavorBuff->sweet += str2f(tool[j++]);
-            flavorBuff->spicy += str2f(tool[j++]);
-            flavorBuff->salty += str2f(tool[j++]);
-            flavorBuff->tasty += str2f(tool[j++]);
-            flavorBuff->sour += str2f(tool[j++]);
-            flavorBuff->bitter += str2f(tool[j++]);
-        } catch (...) {
+            if (tool[j][0] == '*') {
+                ability->boil = int(ability->boil * str2f(tool[j++].substr(1)));
+            } else {
+                ability->boil += str2i(tool[j++]);
+            }
+            skill->coinBuff += str2i(tool[j++]);
+            abilityBuff->bake += str2i(tool[j++]);
+            abilityBuff->knife += str2i(tool[j++]);
+            abilityBuff->stirfry += str2i(tool[j++]);
+            abilityBuff->fry += str2i(tool[j++]);
+            abilityBuff->steam += str2i(tool[j++]);
+            abilityBuff->boil += str2i(tool[j++]);
+            flavorBuff->sweet += str2i(tool[j++]);
+            flavorBuff->spicy += str2i(tool[j++]);
+            flavorBuff->salty += str2i(tool[j++]);
+            flavorBuff->tasty += str2i(tool[j++]);
+            flavorBuff->sour += str2i(tool[j++]);
+            flavorBuff->bitter += str2i(tool[j++]);
+        } catch (runtime_error e) {
             j -= 1;
-            cout << "厨具配置文件第" << lineN << "行第" << j + 1
-                 << "列出现无法识别的内容" << tool[j] << "。" << endl;
+            if (e.what() == string("Float")) {
+
+                cout << "厨具配置文件第" << lineN << "行第" << j + 1
+                     << "列应当是一个小数，实际上却是" << tool[j] << "。"
+                     << endl;
+            } else if (e.what() == string("Int")) {
+                cout << "厨具配置文件第" << lineN << "行第" << j + 1
+                     << "列应当是一个整数，实际上却是" << tool[j] << "。"
+                     << endl;
+            } else {
+                j -= 1;
+                cout << "厨具配置文件第" << lineN << "行第" << j + 1
+                     << "列出现无法识别的内容" << tool[j] << "。" << endl;
+            }
             exit(0);
         }
     }

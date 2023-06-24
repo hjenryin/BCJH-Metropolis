@@ -57,7 +57,14 @@ class Ability {
     Ability(int stirfry, int bake, int boil, int steam, int fry, int knife)
         : stirfry(stirfry), bake(bake), boil(boil), steam(steam), fry(fry),
           knife(knife) {}
-
+    void multiply(double a) {
+        this->stirfry = int(this->stirfry * a);
+        this->bake = int(this->bake * a);
+        this->boil = int(this->boil * a);
+        this->steam = int(this->steam * a);
+        this->fry = int(this->fry * a);
+        this->knife = int(this->knife * a);
+    }
     void add(const Ability &a) {
         this->stirfry += a.stirfry;
         this->bake += a.bake;
