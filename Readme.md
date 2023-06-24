@@ -10,26 +10,27 @@
 
 ## 使用方法（本地编译）
 
-如果在windows平台，需要使用MinGW编译，并将 `data/data.min.json` 改为ANSI编码。如有条件，强烈建议这种本地运行（运行可加速、可多次重复）。
+如果在windows平台，需要使用MSBuild编译，并将 `data/data.min.json` 改为ANSI编码。如有条件，强烈建议这种本地运行（运行可加速、可多次重复）。
 _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**_
 
 - 在 `./config.hpp` 中设置参数，方法参见[此文](https://github.com/hjenryin/BCJH-Metropolis/blob/main/assets/config.md)。
-- 在 `./data` 下保存 `data.min.json` （[由此下载](https://foodgame.github.io/data/data.min.json)）和 `userData.json`（我采用的是白菜菊花里面的，不知道其他图鉴网的结构是不是一样的？）
-- 如果需要，在 `toolEquipped.hpp` 配置已经戴上不愿碎掉的厨具。（配置方法参见[此处](https://github.com/hjenryin/BCJH-Metropolis/blob/main/toolEquipped.hpp)）
+- 在 `./data` 下保存 `data.min.json` （[由此下载](https://foodgame.github.io/data/data.min.json)）和白菜菊花个人数据 `userData.json`。
 - 编译、运行：
-
   - 在根目录新建 `build` 文件夹并 `cd` 至build
   - ```
     # linux
-    cmake ..
+    cmake .. --config Release 
     make
 
-    # windows
-    cmake .. -G "MinGW Makefiles"
-    mingw32-make
+    # windows (Visual Studio取决于安装的版本)
+    cmake .. -G "Visual Studio 17 2022" --config Release
+    msbuild /m
     ```
   - 使用 `./bcjh` (linux) 或 `./bcjh.exe` (windows) 运行。
-- （可选）可视化：运行结束之后就可以在 `./out/history.png` 和 `./out/recipe.png` 看到自己厨师和最后一道菜的历史路径。如果结果不理想，可以调整 `./config.hpp` 中的参数，以及 `./src/functions.hpp .cpp` 中 `namespace f` 里的退火函数。
+
+- 如果需要，在 `build/toolEquipped.csv` 配置已经戴上不愿碎掉的厨具。（配置方法参见[此处](https://github.com/hjenryin/BCJH-Metropolis#配置厨具)）（理论上应该放在 `data/toolEquipped.csv`，但不知为何识别不了。）
+
+-   （可选）可视化：运行结束之后就可以在 `./out/history.png` 和 `./out/recipe.png` 看到自己厨师和最后一道菜的历史路径。如果结果不理想，可以调整 `./config.hpp` 中的参数，以及 `./src/functions.hpp .cpp` 中 `namespace f` 里的退火函数。
 
   ![样例](./out/history.png)
 - 最后在命令行就可以得到输出结果了！（注意顺序）（得到厨师-技法，表示对应新手池厨具，后面的括号如果是0表示不用装厨具）

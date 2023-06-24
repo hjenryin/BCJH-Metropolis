@@ -7,10 +7,10 @@
 #include "../config.hpp"
 #include "Calculator.hpp"
 #include "utils/json.hpp"
-// #include "../toolEquipped.hpp"
+#include "../toolEquipped.hpp"
 #include "exception.hpp"
-#include "../loadToolEquipped.hpp"
-// #define jsonStr2Int(v) atoi(v.asCString())
+#include "loadToolEquipped.hpp"
+
 CookAbility Chef::globalAbilityBuff;
 int Chef::globalAbilityMale = 0;
 int Chef::globalAbilityFemale = 0;
