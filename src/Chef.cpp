@@ -93,6 +93,8 @@ void loadChef(CList &chefList) {
             }
         }
     }
+
+#ifdef _WIN32
     auto t = loadToolFile();
     if (t == EMPTY_FILE__NOT_EQUIPPED) {
         std::cout << "toolEquipped.csv没有设定规则。允许所有厨师装备厨具。"
@@ -105,8 +107,13 @@ void loadChef(CList &chefList) {
     }
     for (auto &chef : chefList) {
         loadToolFromFile(&chef, t);
-        // toolEquipped(&chef);
     }
+#endif
+#ifdef __linux__
+    for (auto &chef : chefList) {
+        toolEquipped(&chef);
+    }
+#endif
 }
 /**
  * Chef
