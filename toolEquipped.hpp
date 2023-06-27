@@ -4,6 +4,22 @@
 #include "src/Chef.hpp"
 #include "src/Values.hpp"
 
+#ifdef _WIN32
+/**
+ * 此函数已被弃用，请使用csv参照
+ * https://github.com/hjenryin/BCJH-Metropolis#配置厨具 录入厨具
+ *
+ * 如果仍须使用，请注释src/Chef.cpp中loadToolFromFile(&chef, t);和auto t =
+ * loadToolFile(); 并取消toolEquipped(&chef);的注释
+ */
+__declspec(deprecated("此函数已被弃用，请使用csv录入厨具")) void toolEquipped(
+    Chef *chef);
+#endif
+
+#ifdef __linux__
+void toolEquipped(Chef *chef);
+#endif
+
 // 关于技法：
 // 例：ability->add(30);     // 全技法+30
 // 例：ability->bake += 150; // 烤技法+150,
@@ -23,15 +39,7 @@
 // 关于金币获得：
 // 例：skill->coinBuff += 30; // 金币获得+30%
 
-/**
- * 此函数已被弃用，请使用csv参照
- * https://github.com/hjenryin/BCJH-Metropolis#配置厨具 录入厨具
- *
- * 如果仍须使用，请注释src/Chef.cpp中loadToolFromFile(&chef, t);和auto t =
- * loadToolFile(); 并取消toolEquipped(&chef);的注释
- */
-__declspec(deprecated("此函数已被弃用，请使用csv录入厨具")) void toolEquipped(
-    Chef *chef) {
+void toolEquipped(Chef *chef) {
 
     // return; // 以下为示例代码，可自行修改。完成后注释此行。
 

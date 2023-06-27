@@ -3,7 +3,7 @@ project(bcjh)
 
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Wall -O3")
 # set(CMAKE_BUILD_TYPE "Debug")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -pthread")
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_compile_options("-fexec-charset=gbk")
