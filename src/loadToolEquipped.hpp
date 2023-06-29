@@ -7,6 +7,14 @@
 #include <exception>
 // #include <Windows.h>
 using namespace std;
+class CSVWarning {
+  public:
+    bool missingRarity3;
+    void operator+=(CSVWarning w) {
+        this->missingRarity3 = this->missingRarity3 || w.missingRarity3;
+    }
+    CSVWarning() : missingRarity3(false) {}
+};
 struct ToolInfo {
     string name;
     CookAbility ability;
@@ -62,6 +70,8 @@ ToolFileType loadToolFile() {
         while (getline(sin, word, ',')) {
             tir.push_back(word);
         }
+        if (line[line.size() - 1] == ',')
+            tir.push_back("");
         tib.info.push_back(tir);
         tir.clear();
     }
@@ -146,13 +156,14 @@ int str2i(string s) {
         throw runtime_error("Int");
 }
 
-void loadToolFromFile(Chef *chef, ToolFileType t) {
+CSVWarning loadToolFromFile(Chef *chef, ToolFileType t) {
+    CSVWarning w;
     if (t == EMPTY_FILE__NOT_EQUIPPED) {
-        return;
+        return w;
     }
     if (t == NO_FILE__NO_TOOL) {
         chef->NoTool();
-        return;
+        return w;
     }
 
     auto lineN = tibptr->row - 1;
@@ -222,6 +233,17 @@ void loadToolFromFile(Chef *chef, ToolFileType t) {
             flavorBuff->tasty += str2i(tool[j++]);
             flavorBuff->sour += str2i(tool[j++]);
             flavorBuff->bitter += str2i(tool[j++]);
+            materialBuff->vegetable += str2i(tool[j++]);
+            materialBuff->meat += str2i(tool[j++]);
+            materialBuff->fish += str2i(tool[j++]);
+            materialBuff->creation += str2i(tool[j++]);
+            if (tool.size() == j) {
+                w.missingRarity3 = true;
+            } else if (tool.size() == j + 1) {
+                skill->rarityBuff[3] += str2i(tool[j++]);
+            } else {
+                throw runtime_error("Too many columns");
+            }
         } catch (runtime_error e) {
             j -= 1;
             if (e.what() == string("Float")) {
@@ -233,6 +255,9 @@ void loadToolFromFile(Chef *chef, ToolFileType t) {
                 cout << "厨具配置文件第" << lineN << "行第" << j + 1
                      << "列应当是一个整数，实际上却是" << tool[j] << "。"
                      << endl;
+            } else if (e.what() == string("Too many columns")) {
+                cout << "厨具配置文件的列数过多，请对照样例检查哪里多了一列。"
+                     << endl;
             } else {
                 j -= 1;
                 cout << "厨具配置文件第" << lineN << "行第" << j + 1
@@ -241,6 +266,7 @@ void loadToolFromFile(Chef *chef, ToolFileType t) {
             exit(0);
         }
     }
+    return w;
 }
 
 #endif

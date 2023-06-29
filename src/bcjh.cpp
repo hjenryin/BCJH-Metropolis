@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
     if (!calculate) {
         Result result;
         if (!mp) {
-            result = run(chefList, recipeList, log, silent, seed);
+            result = run(chefList, recipeList, 0, silent, seed);
         } else {
             int num_threads = std::thread::hardware_concurrency();
             std::cout << "启用" << num_threads
@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
 
                 futures.push_back(
                     std::async(std::launch::async, run, std::ref(chefList),
-                               std::ref(recipeList), log, silent, seed++));
+                               std::ref(recipeList), 0, silent, seed++));
                 silent = true;
             }
             std::cout << "分数：";

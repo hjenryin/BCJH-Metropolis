@@ -105,8 +105,16 @@ void loadChef(CList &chefList) {
     } else {
         std::cout << "toolEquipped.csv文件已加载。" << std::endl;
     }
+    CSVWarning(w);
     for (auto &chef : chefList) {
-        loadToolFromFile(&chef, t);
+        w += loadToolFromFile(&chef, t);
+    }
+    if (w.missingRarity3) {
+        std::cout
+            << "提示：当前版本toolEquipped."
+               "csv已支持“制作三火料理售价加成”，详见样例，但读取到的toolEquipp"
+               "ed.csv中没有这一项。默认“制作三火料理售价加成”均为0。"
+            << std::endl;
     }
 #endif
 #ifdef __linux__
@@ -240,6 +248,9 @@ void Skill::loadJson(Json::Value &v) {
                     skill->materialBuff.fish = value;
                 } else if (type == "UseCreation") {
                     skill->materialBuff.creation = value;
+                } else if (type == "CookbookPrice") {
+                    int rarity = effect["conditionValue"].asInt();
+                    skill->rarityBuff[rarity] = value;
                 }
             }
         }

@@ -21,6 +21,7 @@ class MaterialCategoryBuff {
                   << "; Creation: " << this->creation << std::endl;
     }
 };
+
 class FlavorBuff {
   public:
     int sweet;
@@ -107,6 +108,13 @@ class CookAbility : public Ability {
     void print() { this->Ability::print("CookAbility: "); }
     int operator*(const AbilityBuff &a);
 };
+class RarityBuff {
+    int rarityBuff[5] = {0, 0, 0, 0, 0};
+
+  public:
+    /*几火就是几，不用减一*/
+    int &operator[](int i) { return rarityBuff[i - 1]; }
+};
 class Skill {
   private:
   public:
@@ -115,11 +123,14 @@ class Skill {
     AbilityBuff abilityBuff;
     FlavorBuff flavorBuff;
     MaterialCategoryBuff materialBuff;
+    RarityBuff rarityBuff;
     int coinBuff;
     Skill(CookAbility ability, AbilityBuff abilityBuff, FlavorBuff flavorBuff,
-          MaterialCategoryBuff materialBuff, int coinBuff)
+          MaterialCategoryBuff materialBuff, RarityBuff rarityBuff,
+          int coinBuff)
         : ability(ability), abilityBuff(abilityBuff), flavorBuff(flavorBuff),
-          materialBuff(materialBuff), coinBuff(coinBuff) {}
+          materialBuff(materialBuff), coinBuff(coinBuff),
+          rarityBuff(rarityBuff) {}
     Skill() {
         this->ability = CookAbility();
         this->abilityBuff = AbilityBuff();
