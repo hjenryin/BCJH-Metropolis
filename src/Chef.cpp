@@ -309,7 +309,7 @@ int CookAbility::operator*(const AbilityBuff &a) {
 
 //         if (chef.tool != NO_TOOL) {
 //             for (int i = 0; i < 6; i++) {
-//                 newChefList[id * 6 + i] = chef.addTool((AbilityEnum)i);
+//                 newChefList[id * 6 + i] = chef.addTool((ToolEnum)i);
 //             }
 //         } else {
 //             for (int i = 0; i < 6; i++) {
@@ -318,7 +318,7 @@ int CookAbility::operator*(const AbilityBuff &a) {
 //         }
 //     }
 // }
-Chef Chef::addTool_modify_name(AbilityEnum a) {
+Chef Chef::addTool_modify_name(ToolEnum a) {
     Chef newChef(*this);
     newChef.tool = a;
     switch (a) {
@@ -358,13 +358,33 @@ bool Chef::isCapable(Recipe *recipe) {
     return false;
 }
 void Chef::loadRecipeCapable(std::vector<Recipe> &recipeList) {
-    for (auto &recipe : recipeList) {
-        if (this->isCapable(&recipe)) {
-            this->recipeCapable.push_back(&recipe);
+    if (this->tool == NO_TOOL) {
+        for (auto &recipe : recipeList) {
+            if (this->isCapable(&recipe)) {
+                this->recipeCapable.push_back(&recipe);
+            }
         }
+    } else if (this->tool == NOT_EQUIPPED) {
+        std::vector<Recipe *> recipeListCopy;
+        for (auto &recipe : recipeList) {
+            recipeListCopy.push_back(&recipe);
+        }
+        for (int i = 0; i < 6; i++) {
+            this->modifyTool((ToolEnum)i);
+            auto iter = recipeListCopy.begin();
+            while (iter != recipeListCopy.end()) {
+                if (this->isCapable(*iter)) {
+                    this->recipeCapable.push_back(*iter);
+                    iter = recipeListCopy.erase(iter);
+                } else {
+                    iter++;
+                }
+            }
+        }
+        this->modifyTool(NOT_EQUIPPED);
     }
 }
-void Chef::modifyTool(AbilityEnum a) {
+void Chef::modifyTool(ToolEnum a) {
     if (this->tool == NO_TOOL)
         return;
     if (this->tool == a)
@@ -419,7 +439,7 @@ void Chef::modifyTool(AbilityEnum a) {
     this->tool = a;
 }
 
-std::string getToolName(AbilityEnum tool) {
+std::string getToolName(ToolEnum tool) {
     std::string toolName;
     switch (tool) {
     case STIRFRY:

@@ -29,13 +29,6 @@ ToolFileType loadToolFile() {
     ifstream toolFile(fname, ios::in);
 
     if (!toolFile.good()) {
-        // print current path
-        // char buf[256];
-
-        // ...
-        // char buf[MAX_PATH];
-        // GetCurrentDirectory(MAX_PATH, buf);
-        // cout << "当前路径：" << buf << endl;
 
         auto fname = "..\\data\\toolEquipped.csv";
         ifstream toolFile(fname, ios::in);
@@ -97,6 +90,8 @@ ToolFileType loadToolFile() {
         if (!(i >= 0 && i < int(tif.size()))) {
             cout << "输入的不是0到" << tif.size() - 1 << "之间的整数。" << endl;
             exit(1);
+        } else {
+            cout << "使用配置" << i << "。" << endl;
         }
         tibptr = new ToolInfoBlock(tif[i]);
 

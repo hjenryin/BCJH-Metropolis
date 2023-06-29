@@ -11,7 +11,7 @@
 class SARunner;
 struct States {
     Chef *chef[NUM_CHEFS];
-    AbilityEnum toolCKPT[NUM_CHEFS];
+    ToolEnum toolCKPT[NUM_CHEFS];
     Recipe *recipe[DISH_PER_CHEF * NUM_CHEFS];
 };
 namespace r00 {
@@ -58,5 +58,5 @@ double linear_mul(int stepMax, int step, double tMax, double tMin);
 double zipf(int stepMax, int step, double tMax, double tMin);
 double one_over_n(int stepMax, int step, double tMax, double tMin);
 } // namespace f
-States perfectTool(States &s);
+States perfectChef(States &s, CList *c);
 #endif

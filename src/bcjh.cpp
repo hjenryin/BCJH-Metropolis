@@ -60,9 +60,9 @@ void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &calculate,
         }
     }
 
-    // if (mp) {
-    //     silent = true;
-    //     }
+    if (mp) {
+        silent = true;
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -114,10 +114,10 @@ int main(int argc, char *argv[]) {
             std::vector<std::future<Result>> futures;
 
             for (int i = 0; i < num_threads; i++) {
-                seed++;
+
                 futures.push_back(
                     std::async(std::launch::async, run, std::ref(chefList),
-                               std::ref(recipeList), log, silent, seed));
+                               std::ref(recipeList), log, silent, seed++));
                 silent = true;
             }
             std::cout << "分数：";
@@ -168,7 +168,7 @@ Result run(const CList &chefList, RList &recipeList, int log, bool silent,
     // std::cout << log << std::endl;
     States *s = new States;
     *s = saRunner.run(NULL, true, silent);
-    *s = perfectTool(*s);
+    *s = perfectChef(*s, chefListPtr);
     int score = e0::sumPrice(*s, chefListPtr, &recipeList, log, false);
     return Result{score, seed, chefListPtr, recipeList, s};
 }
