@@ -103,39 +103,41 @@ int main(int argc, char *argv[]) {
 
     if (!calculate) {
         Result result;
+
+        int num_threads = std::thread::hardware_concurrency();
         if (!mp) {
-            result = run(chefList, recipeList, 0, silent, seed);
-        } else {
-            int num_threads = std::thread::hardware_concurrency();
-            std::cout << "启用" << num_threads
-                      << "线程，建议期间不要离开窗口，否则可能影响速度。"
-                      << std::endl;
-
-            std::vector<std::future<Result>> futures;
-
-            for (int i = 0; i < num_threads; i++) {
-
-                futures.push_back(
-                    std::async(std::launch::async, run, std::ref(chefList),
-                               std::ref(recipeList), 0, silent, seed++));
-                silent = true;
-            }
-            std::cout << "分数：";
-            int max_score = 0;
-            for (auto &future : futures) {
-                Result tmp = future.get();
-                if (tmp.score > max_score) {
-                    result = tmp;
-                    max_score = result.score;
-
-                } else {
-                    delete tmp.chefList;
-                    delete tmp.state;
-                }
-                std::cout << tmp.score << " ";
-            }
-            std::cout << "\n最佳结果：" << std::endl;
+            num_threads = 1;
         }
+        seed *= num_threads;
+        std::cout << "启用" << num_threads
+                  << "线程，建议期间不要离开窗口，否则可能影响速度。"
+                  << std::endl;
+
+        std::vector<std::future<Result>> futures;
+
+        for (int i = 0; i < num_threads; i++) {
+
+            futures.push_back(
+                std::async(std::launch::async, run, std::ref(chefList),
+                           std::ref(recipeList), 0, silent, seed++));
+            silent = true;
+        }
+        std::cout << "分数：";
+        int max_score = 0;
+        for (auto &future : futures) {
+            Result tmp = future.get();
+            if (tmp.score > max_score) {
+                result = tmp;
+                max_score = result.score;
+
+            } else {
+                delete tmp.chefList;
+                delete tmp.state;
+            }
+            std::cout << tmp.score << " ";
+        }
+        std::cout << "\n最佳结果：" << std::endl;
+
         log += 0x1;
         std::cout << "随机种子：" << result.seed << std::endl;
         int score = e0::sumPrice(*result.state, result.chefList,
