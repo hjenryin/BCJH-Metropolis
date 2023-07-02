@@ -50,6 +50,7 @@ void loadChef(CList &chefList) {
     if (!gameDataF.good()) {
         gameDataF.open("../data/data.min.json", std::ifstream::binary);
         if (!gameDataF.good()) {
+            std::cout << "data not exist" << std::endl;
             throw FileNotExistException();
         }
     }
@@ -57,6 +58,7 @@ void loadChef(CList &chefList) {
     if (!usrDataF.good()) {
         usrDataF.open("../data/userData.json", std::ifstream::binary);
         if (!usrDataF.good()) {
+            std::cout << "user data not exist" << std::endl;
             throw FileNotExistException();
         }
     }

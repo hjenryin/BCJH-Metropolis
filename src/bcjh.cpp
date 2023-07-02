@@ -14,6 +14,20 @@
 #include "exception.hpp"
 #include <future>
 #include <vector>
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+EM_ASYNC_JS(char *, fetch_userData, (int id), {
+    out("waiting for a fetch");
+    const response = await fetch("https://bcjh.xyz/api/download_data?id=" + id);
+    out("fetch done");
+    const data = await response.json();
+    out(data.user);
+    var lengthBytes = lengthBytesUTF8(data.data) + 1;
+    var stringOnWasmHeap = _malloc(lengthBytes);
+    stringToUTF8(data.data, stringOnWasmHeap, lengthBytes);
+    return stringOnWasmHeap;
+});
+#endif
 bool Chef::coinBuffOn = true;
 void initChefRecipePairs(CList &, RList &);
 struct Result {
@@ -27,7 +41,7 @@ Result run(const CList &, RList &, int, bool, int);
 void calculator(CList &, RList &);
 
 void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &calculate,
-               bool &mp, int &seed) {
+               bool &mp, int &seed, int &bcjhId) {
     int seed_orig = seed;
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
@@ -45,6 +59,10 @@ void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &calculate,
             mp = false;
         } else if (arg == "--seed") {
             seed = atoi(argv[++i]);
+#ifdef EMSCRIPTEN
+        } else if (arg == "--bcjh-id") {
+            bcjhId = atoi(argv[++i]);
+#endif
         } else {
             std::cout << "未知参数：" << arg << std::endl;
             exit(1);
@@ -72,7 +90,36 @@ int main(int argc, char *argv[]) {
     int seed = (int)time(NULL);
     bool calculate = false;
     bool mp = true;
-    parseArgs(argc, argv, silent, log, calculate, mp, seed);
+    int bcjhId = 0;
+    std::cout << "BCJH-Metropolis " << std::endl;
+    parseArgs(argc, argv, silent, log, calculate, mp, seed, bcjhId);
+    std::cout << "Seed: " << seed << std::endl;
+#ifdef EMSCRIPTEN
+    // auto url =
+    //     "https://bcjh.xyz/api/download_data?id=" + std::to_string(bcjhId);
+    // void *pbuffer = malloc(sizeof(void *));
+    // int pnum = 0;
+    // int perror = 0;
+    // emscripten_wget_data(url.c_str(), &pbuffer, &pnum, &perror);
+    // if (perror) {
+    //     std::cout << perror << "白菜菊花配置获取失败。" << std::endl;
+    //     exit(1);
+    // }
+    // std::stringstream dataStream((char *)pbuffer);
+
+    try {
+        char *data = fetch_userData(bcjhId);
+        std::cout << "白菜菊花配置获取成功。" << std::endl;
+        std::ofstream dataF("userData.json", std::ofstream::binary);
+        dataF << data;
+        free(data);
+        dataF.close();
+
+    } catch (...) {
+        std::cout << "白菜菊花配置获取失败。" << std::endl;
+        exit(1);
+    }
+#endif
 
     CList chefList;
     RList recipeList;
@@ -103,7 +150,10 @@ int main(int argc, char *argv[]) {
 
     if (!calculate) {
         Result result;
-
+        // #ifdef EMSCRIPTEN
+        //         // std::cout << "EMSCRIPTEN" << std::endl;
+        //         result = run(chefList, recipeList, 0, true, seed);
+        // #else
         int num_threads = std::thread::hardware_concurrency();
         if (!mp) {
             num_threads = 1;
@@ -137,7 +187,7 @@ int main(int argc, char *argv[]) {
             std::cout << tmp.score << " ";
         }
         std::cout << "\n最佳结果：" << std::endl;
-
+        // #endif
         log += 0x1;
         std::cout << "随机种子：" << result.seed << std::endl;
         int score = e0::sumPrice(*result.state, result.chefList,
@@ -156,7 +206,7 @@ int main(int argc, char *argv[]) {
         calculator(chefList, recipeList);
     }
     end = clock();
-    std::cout << "用时：" << (double)(end - start) / CLOCKS_PER_SEC << "秒"
+    std::cout << "用时：" << (double)((end - start) / CLOCKS_PER_SEC) << "秒"
               << std::endl;
 }
 Result run(const CList &chefList, RList &recipeList, int log, bool silent,
