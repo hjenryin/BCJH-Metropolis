@@ -82,11 +82,28 @@ class Ability {
         this->fry += a;
         this->knife += a;
     }
-    void print(std::string title) {
-        std::cout << title << "Stirfry: " << this->stirfry
-                  << "; Boil: " << this->boil << "; Knife: " << this->knife
-                  << "; Fry: " << this->fry << "; Bake: " << this->bake
-                  << "; Steam: " << this->steam << std::endl;
+    void print(std::string title, std::string end = "\n",
+               bool percent = false) {
+        auto perstr = percent ? "%" : "";
+        std::cout
+            << title
+            << (this->stirfry
+                    ? "炒" + std::to_string(this->stirfry) + perstr + " "
+                    : "")
+            << (this->bake ? "烤" + std::to_string(this->bake) + perstr + " "
+                           : "")
+            << (this->boil ? "煮" + std::to_string(this->boil) + perstr + " "
+                           : "")
+            << (this->steam ? "蒸" + std::to_string(this->steam) + perstr + " "
+                            : "")
+            << (this->fry ? "炸" + std::to_string(this->fry) + perstr + " "
+                          : "")
+            << (this->knife ? "切" + std::to_string(this->knife) + perstr + " "
+                            : "");
+        if (!(this->stirfry || this->bake || this->boil || this->steam ||
+              this->fry || this->knife))
+            std::cout << "无";
+        std::cout << end;
     }
 };
 
@@ -95,7 +112,7 @@ class AbilityBuff : public Ability {
     AbilityBuff() {}
     AbilityBuff(int stirfry, int bake, int boil, int steam, int fry, int knife)
         : Ability(stirfry, bake, boil, steam, fry, knife) {}
-    void print() { this->Ability::print("AbilityBuff: "); }
+    void print() { this->Ability::print("AbilityBuff: ", "\n", true); }
 };
 class CookAbility : public Ability {
 
@@ -114,6 +131,13 @@ class RarityBuff {
   public:
     /*几火就是几，不用减一*/
     int &operator[](int i) { return rarityBuff[i - 1]; }
+    void print() {
+        std::cout << "RarityBuff: ";
+        for (int i = 0; i < 5; i++) {
+            std::cout << rarityBuff[i] << "% ";
+        }
+        std::cout << std::endl;
+    }
 };
 class Skill {
   private:
@@ -152,7 +176,8 @@ class Skill {
         this->abilityBuff.print();
         this->flavorBuff.print();
         this->materialBuff.print();
-        std::cout << "CoinBuff: " << this->coinBuff << std::endl;
+        std::cout << "CoinBuff: " << this->coinBuff << "; ";
+        this->rarityBuff.print();
     }
 };
 enum ToolEnum {

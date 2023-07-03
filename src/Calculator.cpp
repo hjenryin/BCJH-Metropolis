@@ -62,7 +62,7 @@ int getPrice(Chef &chef, Recipe &recipe, ActivityBuff *activityBuff,
     // std::cout << singlePrice << std::endl;
     int totalPrice = singlePrice * rb.dishNum;
     if (verbose) {
-        chef.print();
+        // chef.print();
         recipe.print();
         std::cout << "等级: " << grade << "，加成" << gradebuff << "%"
                   << std::endl;
@@ -141,8 +141,8 @@ BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule r, bool verbose) {
         std::cout << "Intention: (基础+" << rule.baseRule.directAdd << "，+"
                   << intentionBaseBuff << "%；售价+" << intentionAddBuff
                   << "%) " << std::endl;
-        std::cout << "售价总计Buff: " << buff << std::endl;
-        std::cout << "Price: " << totalPrice << std::endl;
+        std::cout << "售价总计Buff: " << buff << "%" << std::endl;
+        std::cout << "╰--> 总价: " << totalPrice << std::endl;
     }
     int full;
     if (rule.addRule.fullAdd) {

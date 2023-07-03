@@ -162,9 +162,9 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
 }
 
 void Chef::print() {
-    std::cout << "ID: " << this->id << std::endl;
-    std::cout << "Name: " << this->name << std::endl;
-    std::cout << "Male: " << this->male << "; Female: " << this->female << "\n";
+    std::cout << this->id << ": " << this->name << "\t"
+              << (this->male ? "M" : "") << (this->female ? "F" : "")
+              << std::endl;
     this->skill.print();
 }
 CookAbility::CookAbility(Json::Value &v) {

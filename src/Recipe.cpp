@@ -60,16 +60,15 @@ const struct MaterialList {
 } materialList;
 
 void Recipe::print() {
-    std::cout << "Name: " << this->name << std::endl;
-    std::cout << "ID: " << this->id << std::endl;
+    std::cout << this->id << ": " << this->name << "（原价" << this->price
+              << "）" << std::endl;
     std::cout << "Rarity: " << this->rarity;
     auto rb = rarityBuff[this->rarity - 1];
     std::cout << " (Num: " << rb.dishNum << ", +" << rb.dishBuff << "%)"
               << std::endl;
-    std::cout << "Price: " << this->price << std::endl;
-    this->materialCategories.print();
+    this->flavor.print("\t");
+    this->materialCategories.print("\t");
     this->cookAbility.print();
-    this->flavor.print();
 }
 void loadRecipe(RList &recipeList) {
     Json::Value usrData;
