@@ -14,11 +14,11 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Emscripten")
     # Doesn't work on Windows: I don't know how to specify the charset.
     # If I use utf8, running on windows would be cause error C2001 etc;
     # If I use utf8 with BOM, there would be extra # before some file and invoke error.
-    add_compile_options("-fexceptions")
-    add_link_options("-fexceptions")
+    # add_compile_options("-fexceptions")
+    add_compile_options("-pthread")
+    # add_compile_options("-sNO_DISABLE_EXCEPTION_CATCHING")
     message(STATUS "Now is Emscripten")
     # add_compile_options("--preload-file ../data")
-    add_link_options("--preload-file ../data/")
     add_definitions(-DEMSCRIPTEN)
 endif()
 
@@ -37,9 +37,10 @@ file(GLOB src_list_cpp ${CMAKE_SOURCE_DIR}/src/*.cpp
 
 add_executable(bcjh ${src_list_cpp})
 if (CMAKE_SYSTEM_NAME MATCHES "Emscripten")
-    set_target_properties(bcjh PROPERTIES LINK_FLAGS "--O3 --preload-file ${CMAKE_SOURCE_DIR}/data/data.min.json@./data.min.json -sASYNCIFY ")
+    set_target_properties(bcjh PROPERTIES LINK_FLAGS "--O3 --preload-file ${CMAKE_SOURCE_DIR}/data/data.min.json@./data.min.json -sASYNCIFY -pthread -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency -sPROXY_TO_PTHREAD ")
 endif()
 
 # target_link_libraries(bcjh jsoncpp)
 # target_link_libraries(bcjh jsonhelper)
+# -sNO_DISABLE_EXCEPTION_CATCHING
 

@@ -17,11 +17,11 @@
 #ifdef EMSCRIPTEN
 #include <emscripten.h>
 EM_ASYNC_JS(char *, fetch_userData, (int id), {
-    out("waiting for a fetch");
-    const response = await fetch("https://bcjh.xyz/api/download_data?id=" + id);
-    out("fetch done");
+    console.log("waiting for a fetch");
+    const response = await fetch("https://bcjh.xyz/api/download_data?id=89458");
+    console.log("fetch done");
     const data = await response.json();
-    out(data.user);
+    console.log(data.user);
     var lengthBytes = lengthBytesUTF8(data.data) + 1;
     var stringOnWasmHeap = _malloc(lengthBytes);
     stringToUTF8(data.data, stringOnWasmHeap, lengthBytes);
@@ -155,6 +155,13 @@ int main(int argc, char *argv[]) {
         //         result = run(chefList, recipeList, 0, true, seed);
         // #else
         int num_threads = std::thread::hardware_concurrency();
+        // #ifdef EMSCRIPTEN
+        //         num_threads -= 2;
+        //         num_threads = 9;
+        //         if (num_threads < 1) {
+        //             num_threads = 1;
+        //         }
+        // #endif
         if (!mp) {
             num_threads = 1;
         }
@@ -186,6 +193,7 @@ int main(int argc, char *argv[]) {
             }
             std::cout << tmp.score << " ";
         }
+
         std::cout << "\n最佳结果：" << std::endl;
         // #endif
         log += 0x1;

@@ -998,20 +998,6 @@ function createExportWrapper(name, fixedasm) {
 }
 
 // include: runtime_exceptions.js
-// Base Emscripten EH error class
-class EmscriptenEH extends Error {}
-
-class EmscriptenSjLj extends EmscriptenEH {}
-
-class CppException extends EmscriptenEH {
-  constructor(excPtr) {
-    super(excPtr);
-    this.excPtr = excPtr;
-    const excInfo = getExceptionMessage(excPtr);
-    this.name = excInfo[0];
-    this.message = excInfo[1];
-  }
-}
 // end include: runtime_exceptions.js
 var wasmBinaryFile;
   wasmBinaryFile = 'bcjh.wasm';
@@ -1292,7 +1278,7 @@ function dbg(text) {
 // end include: runtime_debug.js
 // === Body ===
 
-function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () => { out("waiting for a fetch"); const response = await fetch("https://bcjh.xyz/api/download_data?id=" + id); out("fetch done"); const data = await response.json(); out(data.user); var lengthBytes = lengthBytesUTF8(data.data) + 1; var stringOnWasmHeap = _malloc(lengthBytes); stringToUTF8(data.data, stringOnWasmHeap, lengthBytes); return stringOnWasmHeap; }); }
+function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () => { console.log("waiting for a fetch"); const response = await fetch("https://bcjh.xyz/api/download_data?id=89458"); console.log("fetch done"); const data = await response.json(); console.log(data.user); var lengthBytes = lengthBytesUTF8(data.data) + 1; var stringOnWasmHeap = _malloc(lengthBytes); stringToUTF8(data.data, stringOnWasmHeap, lengthBytes); return stringOnWasmHeap; }); }
 
 
 // end include: preamble.js
@@ -3899,6 +3885,11 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
           PThread.initMainThread();
         }
       },initMainThread:function() {
+        var pthreadPoolSize = navigator.hardwareConcurrency;
+        // Start loading up the Worker pool, if requested.
+        while (pthreadPoolSize--) {
+          PThread.allocateUnusedWorker();
+        }
         // MINIMAL_RUNTIME takes care of calling loadWasmModuleToAllWorkers
         // in postamble_minimal.js
         addOnPreRun(() => {
@@ -3952,6 +3943,14 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
         // worker pool as an unused worker.
         worker.pthread_ptr = 0;
   
+        if (ENVIRONMENT_IS_NODE) {
+          // Once the proxied main thread has finished, mark it as weakly
+          // referenced so that its existence does not prevent Node.js from
+          // exiting.  This has no effect if the worker is already weakly
+          // referenced.
+          worker.unref();
+        }
+  
         // Finally, free the underlying (and now-unused) pthread structure in
         // linear memory.
         __emscripten_thread_free_data(pthread_ptr);
@@ -3994,6 +3993,13 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
             cancelThread(d['thread']);
           } else if (cmd === 'loaded') {
             worker.loaded = true;
+            // Check that this worker doesn't have an associated pthread.
+            if (ENVIRONMENT_IS_NODE && !worker.pthread_ptr) {
+              // Once worker is loaded & idle, mark it as weakly referenced,
+              // so that mere existence of a Worker in the pool does not prevent
+              // Node.js from exiting the app.
+              worker.unref();
+            }
             onFinishedLoading(worker);
           } else if (cmd === 'alert') {
             alert('Thread ' + d['threadId'] + ': ' + d['text']);
@@ -4067,7 +4073,15 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
           'workerID': worker.workerID,
         });
       }),loadWasmModuleToAllWorkers:function(onMaybeReady) {
-        onMaybeReady();
+        // Instantiation is synchronous in pthreads.
+        if (
+          ENVIRONMENT_IS_PTHREAD
+        ) {
+          return onMaybeReady();
+        }
+  
+        let pthreadPoolReady = Promise.all(PThread.unusedWorkers.map(PThread.loadWasmModuleToWorker));
+        pthreadPoolReady.then(onMaybeReady);
       },allocateUnusedWorker:function() {
         var worker;
         // Allow HTML module to configure the location where the 'worker.js' file will be loaded from,
@@ -4079,15 +4093,6 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
       },getNewWorker:function() {
         if (PThread.unusedWorkers.length == 0) {
   // PTHREAD_POOL_SIZE_STRICT should show a warning and, if set to level `2`, return from the function.
-  // However, if we're in Node.js, then we can create new workers on the fly and PTHREAD_POOL_SIZE_STRICT
-  // should be ignored altogether.
-          if (!ENVIRONMENT_IS_NODE) {
-              err('Tried to spawn a new thread, but the thread pool is exhausted.\n' +
-              'This might result in a deadlock unless some threads eventually exit or the code explicitly breaks out to the event loop.\n' +
-              'If you want to increase the pool size, use setting `-sPTHREAD_POOL_SIZE=...`.'
-                + '\nIf you want to throw an explicit error instead of the risk of deadlocking in those cases, use setting `-sPTHREAD_POOL_SIZE_STRICT=2`.'
-              );
-          }
           PThread.allocateUnusedWorker();
           PThread.loadWasmModuleToWorker(PThread.unusedWorkers[0]);
         }
@@ -4101,10 +4106,6 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
         callbacks.shift()(Module);
       }
     };
-
-  function decrementExceptionRefcount(ptr) {
-      ___cxa_decrement_exception_refcount(ptr);
-    }
 
   function establishStackSpace() {
       var pthread_ptr = _pthread_self();
@@ -4130,43 +4131,20 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
   
   
   
+  var runtimeKeepalivePop = () => {
+      assert(runtimeKeepaliveCounter > 0);
+      runtimeKeepaliveCounter -= 1;
+    };
+  
   function exitOnMainThread(returnCode) {
   if (ENVIRONMENT_IS_PTHREAD)
     return proxyToMainThread(2, 0, returnCode);
   
+      runtimeKeepalivePop();;
       _exit(returnCode);
     
   }
   
-
-  
-  
-  var withStackSave = (f) => {
-      var stack = stackSave();
-      var ret = f();
-      stackRestore(stack);
-      return ret;
-    };
-  
-  var getExceptionMessageCommon = (ptr) => withStackSave(() => {
-      var type_addr_addr = stackAlloc(4);
-      var message_addr_addr = stackAlloc(4);
-      ___get_exception_message(ptr, type_addr_addr, message_addr_addr);
-      var type_addr = HEAPU32[((type_addr_addr)>>2)];
-      var message_addr = HEAPU32[((message_addr_addr)>>2)];
-      var type = UTF8ToString(type_addr);
-      _free(type_addr);
-      var message;
-      if (message_addr) {
-        message = UTF8ToString(message_addr);
-        _free(message_addr);
-      }
-      return [type, message];
-    });
-  function getExceptionMessage(ptr) {
-      return getExceptionMessageCommon(ptr);
-    }
-  Module["getExceptionMessage"] = getExceptionMessage;
 
   
     /**
@@ -4187,10 +4165,6 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
       default: abort(`invalid type for getValue: ${type}`);
     }
   }
-
-  function incrementExceptionRefcount(ptr) {
-      ___cxa_increment_exception_refcount(ptr);
-    }
 
   
   var invokeEntryPoint = function(ptr, arg) {
@@ -4218,6 +4192,10 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
   function registerTLSInit(tlsInitFunc) {
       PThread.tlsInitFunctions.push(tlsInitFunc);
     }
+
+  var runtimeKeepalivePush = () => {
+      runtimeKeepaliveCounter += 1;
+    };
 
   
     /**
@@ -4254,48 +4232,6 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
     };
 
 
-  var exceptionCaught =  [];
-  
-  
-  var uncaughtExceptionCount = 0;
-  function ___cxa_begin_catch(ptr) {
-      var info = new ExceptionInfo(ptr);
-      if (!info.get_caught()) {
-        info.set_caught(true);
-        uncaughtExceptionCount--;
-      }
-      info.set_rethrown(false);
-      exceptionCaught.push(info);
-      ___cxa_increment_exception_refcount(info.excPtr);
-      return info.get_exception_ptr();
-    }
-
-  
-  function ___cxa_current_primary_exception() {
-      if (!exceptionCaught.length) {
-        return 0;
-      }
-      var info = exceptionCaught[exceptionCaught.length - 1];
-      ___cxa_increment_exception_refcount(info.excPtr);
-      return info.excPtr;
-    }
-
-  
-  var exceptionLast = 0;
-  
-  
-  function ___cxa_end_catch() {
-      // Clear state flag.
-      _setThrew(0);
-      assert(exceptionCaught.length > 0);
-      // Call destructor if one is registered then clear it.
-      var info = exceptionCaught.pop();
-  
-      ___cxa_decrement_exception_refcount(info.excPtr);
-      exceptionLast = 0; // XXX in decRef?
-    }
-
-  
   /** @constructor */
   function ExceptionInfo(excPtr) {
       this.excPtr = excPtr;
@@ -4367,108 +4303,16 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
       };
     }
   
-  function ___resumeException(ptr) {
-      if (!exceptionLast) { 
-        exceptionLast = new CppException(ptr);
-      }
-      throw exceptionLast;
-    }
+  var exceptionLast = 0;
   
-  
-  /** @suppress {duplicate } */
-  function ___cxa_find_matching_catch() {
-      // Here we use explicit calls to `from64`/`to64` rather then using the
-      // `__sig` attribute to perform these automatically.  This is because the
-      // `__sig` wrapper uses arrow function notation, which is not compatible
-      // with the use of `arguments` in this function.
-      var thrown =
-        exceptionLast && exceptionLast.excPtr;
-      if (!thrown) {
-        // just pass through the null ptr
-        setTempRet0(0);
-        return 0;
-      }
-      var info = new ExceptionInfo(thrown);
-      info.set_adjusted_ptr(thrown);
-      var thrownType = info.get_type();
-      if (!thrownType) {
-        // just pass through the thrown ptr
-        setTempRet0(0);
-        return thrown;
-      }
-  
-      // can_catch receives a **, add indirection
-      // The different catch blocks are denoted by different types.
-      // Due to inheritance, those types may not precisely match the
-      // type of the thrown object. Find one which matches, and
-      // return the type of the catch block which should be called.
-      for (var i = 0; i < arguments.length; i++) {
-        var caughtType = arguments[i];
-        ;
-  
-        if (caughtType === 0 || caughtType === thrownType) {
-          // Catch all clause matched or exactly the same type is caught
-          break;
-        }
-        var adjusted_ptr_addr = info.ptr + 16;
-        if (___cxa_can_catch(caughtType, thrownType, adjusted_ptr_addr)) {
-          setTempRet0(caughtType);
-          return thrown;
-        }
-      }
-      setTempRet0(thrownType);
-      return thrown;
-    }
-  var ___cxa_find_matching_catch_2 = ___cxa_find_matching_catch;
-
-  var ___cxa_find_matching_catch_3 = ___cxa_find_matching_catch;
-
-  var ___cxa_find_matching_catch_4 = ___cxa_find_matching_catch;
-
-  var ___cxa_find_matching_catch_5 = ___cxa_find_matching_catch;
-
-  
-  
-  function ___cxa_rethrow() {
-      var info = exceptionCaught.pop();
-      if (!info) {
-        abort('no exception to throw');
-      }
-      var ptr = info.excPtr;
-      if (!info.get_rethrown()) {
-        // Only pop if the corresponding push was through rethrow_primary_exception
-        exceptionCaught.push(info);
-        info.set_rethrown(true);
-        info.set_caught(false);
-        uncaughtExceptionCount++;
-      }
-      exceptionLast = new CppException(ptr);
-      throw exceptionLast;
-    }
-
-  
-  
-  function ___cxa_rethrow_primary_exception(ptr) {
-      if (!ptr) return;
-      var info = new ExceptionInfo(ptr);
-      exceptionCaught.push(info);
-      info.set_rethrown(true);
-      ___cxa_rethrow();
-    }
-
-  
-  
+  var uncaughtExceptionCount = 0;
   function ___cxa_throw(ptr, type, destructor) {
       var info = new ExceptionInfo(ptr);
       // Initialize ExceptionInfo content after it was allocated in __cxa_allocate_exception.
       info.init(type, destructor);
-      exceptionLast = new CppException(ptr);
+      exceptionLast = ptr;
       uncaughtExceptionCount++;
-      throw exceptionLast;
-    }
-
-  function ___cxa_uncaught_exceptions() {
-      return uncaughtExceptionCount;
+      assert(false, 'Exception thrown, but exception catching is not enabled. Compile with -sNO_DISABLE_EXCEPTION_CATCHING or -sEXCEPTION_CATCHING_ALLOWED=[..] to catch.');
     }
 
   function ___emscripten_init_main_thread_js(tb) {
@@ -4551,7 +4395,6 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
       // thread and can fire off JS thread creation directly ourselves.
       return spawnThread(threadParams);
     }
-
 
   var setErrNo = (value) => {
       HEAP32[((___errno_location())>>2)] = value;
@@ -4851,9 +4694,6 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
       return Date.now();
     }
 
-  var runtimeKeepalivePush = () => {
-      runtimeKeepaliveCounter += 1;
-    };
   var _emscripten_exit_with_live_runtime = () => {
       runtimeKeepalivePush();
       throw 'unwind';
@@ -4877,6 +4717,12 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
       return navigator['hardwareConcurrency'];
     }
 
+  var withStackSave = (f) => {
+      var stack = stackSave();
+      var ret = f();
+      stackRestore(stack);
+      return ret;
+    };
   
   
   /** @type{function(number, (number|boolean), ...(number|boolean))} */
@@ -4935,6 +4781,8 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
       requestedSize = requestedSize >>> 0;
       abortOnCannotGrowMemory(requestedSize);
     };
+
+  var _emscripten_runtime_keepalive_check = () => keepRuntimeAlive();
 
   var ENV = {};
   
@@ -5138,10 +4986,6 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
   
   }
   
-
-  function _llvm_eh_typeid_for(type) {
-      return type;
-    }
 
   var isLeapYear = (year) => {
         return year%4 === 0 && (year%100 !== 0 || year%400 === 0);
@@ -5503,17 +5347,6 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
       return ret;
     };
 
-  var wasmTableMirror = [];
-  var getWasmTableEntry = (funcPtr) => {
-      var func = wasmTableMirror[funcPtr];
-      if (!func) {
-        if (funcPtr >= wasmTableMirror.length) wasmTableMirror.length = funcPtr + 1;
-        wasmTableMirror[funcPtr] = func = wasmTable.get(funcPtr);
-      }
-      assert(wasmTable.get(funcPtr) == func, "JavaScript-side Wasm function table mirror is out of date!");
-      return func;
-    };
-
 
   function runAndAbortIfError(func) {
       try {
@@ -5545,10 +5378,6 @@ function __asyncjs__fetch_userData(id) { return Asyncify.handleAsync(async () =>
     }
   
   
-  var runtimeKeepalivePop = () => {
-      assert(runtimeKeepaliveCounter > 0);
-      runtimeKeepaliveCounter -= 1;
-    };
   
   
   
@@ -5957,21 +5786,10 @@ function checkIncomingModuleAPI() {
 var wasmImports = {
   "__assert_fail": ___assert_fail,
   "__asyncjs__fetch_userData": __asyncjs__fetch_userData,
-  "__cxa_begin_catch": ___cxa_begin_catch,
-  "__cxa_current_primary_exception": ___cxa_current_primary_exception,
-  "__cxa_end_catch": ___cxa_end_catch,
-  "__cxa_find_matching_catch_2": ___cxa_find_matching_catch_2,
-  "__cxa_find_matching_catch_3": ___cxa_find_matching_catch_3,
-  "__cxa_find_matching_catch_4": ___cxa_find_matching_catch_4,
-  "__cxa_find_matching_catch_5": ___cxa_find_matching_catch_5,
-  "__cxa_rethrow": ___cxa_rethrow,
-  "__cxa_rethrow_primary_exception": ___cxa_rethrow_primary_exception,
   "__cxa_throw": ___cxa_throw,
-  "__cxa_uncaught_exceptions": ___cxa_uncaught_exceptions,
   "__emscripten_init_main_thread_js": ___emscripten_init_main_thread_js,
   "__emscripten_thread_cleanup": ___emscripten_thread_cleanup,
   "__pthread_create_js": ___pthread_create_js,
-  "__resumeException": ___resumeException,
   "__syscall_fcntl64": ___syscall_fcntl64,
   "__syscall_ioctl": ___syscall_ioctl,
   "__syscall_openat": ___syscall_openat,
@@ -5989,6 +5807,7 @@ var wasmImports = {
   "emscripten_num_logical_cores": _emscripten_num_logical_cores,
   "emscripten_receive_on_main_thread_js": _emscripten_receive_on_main_thread_js,
   "emscripten_resize_heap": _emscripten_resize_heap,
+  "emscripten_runtime_keepalive_check": _emscripten_runtime_keepalive_check,
   "environ_get": _environ_get,
   "environ_sizes_get": _environ_sizes_get,
   "exit": _exit,
@@ -5996,35 +5815,6 @@ var wasmImports = {
   "fd_read": _fd_read,
   "fd_seek": _fd_seek,
   "fd_write": _fd_write,
-  "invoke_diii": invoke_diii,
-  "invoke_fiii": invoke_fiii,
-  "invoke_i": invoke_i,
-  "invoke_ii": invoke_ii,
-  "invoke_iid": invoke_iid,
-  "invoke_iii": invoke_iii,
-  "invoke_iiii": invoke_iiii,
-  "invoke_iiiii": invoke_iiiii,
-  "invoke_iiiiid": invoke_iiiiid,
-  "invoke_iiiiii": invoke_iiiiii,
-  "invoke_iiiiiii": invoke_iiiiiii,
-  "invoke_iiiiiiii": invoke_iiiiiiii,
-  "invoke_iiiiiiiiii": invoke_iiiiiiiiii,
-  "invoke_iiiiiiiiiii": invoke_iiiiiiiiiii,
-  "invoke_iiiiiiiiiiii": invoke_iiiiiiiiiiii,
-  "invoke_iiiiiiiiiiiii": invoke_iiiiiiiiiiiii,
-  "invoke_jiiii": invoke_jiiii,
-  "invoke_v": invoke_v,
-  "invoke_vi": invoke_vi,
-  "invoke_vii": invoke_vii,
-  "invoke_viii": invoke_viii,
-  "invoke_viiii": invoke_viiii,
-  "invoke_viiiii": invoke_viiiii,
-  "invoke_viiiiii": invoke_viiiiii,
-  "invoke_viiiiiii": invoke_viiiiiii,
-  "invoke_viiiiiiii": invoke_viiiiiiii,
-  "invoke_viiiiiiiiii": invoke_viiiiiiiiii,
-  "invoke_viiiiiiiiiiiiiii": invoke_viiiiiiiiiiiiiii,
-  "llvm_eh_typeid_for": _llvm_eh_typeid_for,
   "memory": wasmMemory,
   "strftime_l": _strftime_l,
   "system": _system
@@ -6034,11 +5824,9 @@ var asm = createWasm();
 /** @type {function(...*):?} */
 var ___wasm_call_ctors = createExportWrapper("__wasm_call_ctors");
 /** @type {function(...*):?} */
-var ___cxa_free_exception = createExportWrapper("__cxa_free_exception");
-/** @type {function(...*):?} */
 var _main = Module["_main"] = createExportWrapper("__main_argc_argv");
 /** @type {function(...*):?} */
-var _free = Module["_free"] = createExportWrapper("free");
+var _free = createExportWrapper("free");
 /** @type {function(...*):?} */
 var _malloc = createExportWrapper("malloc");
 /** @type {function(...*):?} */
@@ -6049,25 +5837,7 @@ var _pthread_self = Module["_pthread_self"] = function() {
 };
 
 /** @type {function(...*):?} */
-var ___errno_location = createExportWrapper("__errno_location");
-/** @type {function(...*):?} */
-var __emscripten_thread_init = Module["__emscripten_thread_init"] = createExportWrapper("_emscripten_thread_init");
-/** @type {function(...*):?} */
-var __emscripten_thread_crashed = Module["__emscripten_thread_crashed"] = createExportWrapper("_emscripten_thread_crashed");
-/** @type {function(...*):?} */
-var _fflush = Module["_fflush"] = createExportWrapper("fflush");
-/** @type {function(...*):?} */
-var _emscripten_main_runtime_thread_id = createExportWrapper("emscripten_main_runtime_thread_id");
-/** @type {function(...*):?} */
-var _emscripten_main_thread_process_queued_calls = createExportWrapper("emscripten_main_thread_process_queued_calls");
-/** @type {function(...*):?} */
-var __emscripten_run_in_main_runtime_thread_js = createExportWrapper("_emscripten_run_in_main_runtime_thread_js");
-/** @type {function(...*):?} */
-var _emscripten_dispatch_to_thread_ = createExportWrapper("emscripten_dispatch_to_thread_");
-/** @type {function(...*):?} */
-var __emscripten_thread_free_data = createExportWrapper("_emscripten_thread_free_data");
-/** @type {function(...*):?} */
-var __emscripten_thread_exit = Module["__emscripten_thread_exit"] = createExportWrapper("_emscripten_thread_exit");
+var __emscripten_proxy_main = Module["__emscripten_proxy_main"] = createExportWrapper("_emscripten_proxy_main");
 /** @type {function(...*):?} */
 var _emscripten_stack_get_base = function() {
   return (_emscripten_stack_get_base = Module["asm"]["emscripten_stack_get_base"]).apply(null, arguments);
@@ -6079,11 +5849,27 @@ var _emscripten_stack_get_end = function() {
 };
 
 /** @type {function(...*):?} */
+var ___errno_location = createExportWrapper("__errno_location");
+/** @type {function(...*):?} */
+var __emscripten_thread_init = Module["__emscripten_thread_init"] = createExportWrapper("_emscripten_thread_init");
+/** @type {function(...*):?} */
+var __emscripten_thread_crashed = Module["__emscripten_thread_crashed"] = createExportWrapper("_emscripten_thread_crashed");
+/** @type {function(...*):?} */
+var _fflush = Module["_fflush"] = createExportWrapper("fflush");
+/** @type {function(...*):?} */
+var _emscripten_main_thread_process_queued_calls = createExportWrapper("emscripten_main_thread_process_queued_calls");
+/** @type {function(...*):?} */
+var _emscripten_main_runtime_thread_id = createExportWrapper("emscripten_main_runtime_thread_id");
+/** @type {function(...*):?} */
+var __emscripten_run_in_main_runtime_thread_js = createExportWrapper("_emscripten_run_in_main_runtime_thread_js");
+/** @type {function(...*):?} */
+var _emscripten_dispatch_to_thread_ = createExportWrapper("emscripten_dispatch_to_thread_");
+/** @type {function(...*):?} */
+var __emscripten_thread_free_data = createExportWrapper("_emscripten_thread_free_data");
+/** @type {function(...*):?} */
+var __emscripten_thread_exit = Module["__emscripten_thread_exit"] = createExportWrapper("_emscripten_thread_exit");
+/** @type {function(...*):?} */
 var __emscripten_check_mailbox = Module["__emscripten_check_mailbox"] = createExportWrapper("_emscripten_check_mailbox");
-/** @type {function(...*):?} */
-var _setThrew = createExportWrapper("setThrew");
-/** @type {function(...*):?} */
-var setTempRet0 = createExportWrapper("setTempRet0");
 /** @type {function(...*):?} */
 var _emscripten_stack_init = function() {
   return (_emscripten_stack_init = Module["asm"]["emscripten_stack_init"]).apply(null, arguments);
@@ -6111,89 +5897,59 @@ var _emscripten_stack_get_current = function() {
 };
 
 /** @type {function(...*):?} */
-var ___cxa_decrement_exception_refcount = createExportWrapper("__cxa_decrement_exception_refcount");
-/** @type {function(...*):?} */
-var ___cxa_increment_exception_refcount = createExportWrapper("__cxa_increment_exception_refcount");
-/** @type {function(...*):?} */
-var ___get_exception_message = Module["___get_exception_message"] = createExportWrapper("__get_exception_message");
-/** @type {function(...*):?} */
-var ___cxa_can_catch = createExportWrapper("__cxa_can_catch");
-/** @type {function(...*):?} */
 var ___cxa_is_pointer_type = createExportWrapper("__cxa_is_pointer_type");
-/** @type {function(...*):?} */
-var dynCall_iii = Module["dynCall_iii"] = createExportWrapper("dynCall_iii");
 /** @type {function(...*):?} */
 var dynCall_ii = Module["dynCall_ii"] = createExportWrapper("dynCall_ii");
 /** @type {function(...*):?} */
-var dynCall_iiiiiii = Module["dynCall_iiiiiii"] = createExportWrapper("dynCall_iiiiiii");
-/** @type {function(...*):?} */
-var dynCall_vii = Module["dynCall_vii"] = createExportWrapper("dynCall_vii");
-/** @type {function(...*):?} */
 var dynCall_vi = Module["dynCall_vi"] = createExportWrapper("dynCall_vi");
 /** @type {function(...*):?} */
-var dynCall_v = Module["dynCall_v"] = createExportWrapper("dynCall_v");
+var dynCall_iii = Module["dynCall_iii"] = createExportWrapper("dynCall_iii");
 /** @type {function(...*):?} */
 var dynCall_iiii = Module["dynCall_iiii"] = createExportWrapper("dynCall_iiii");
 /** @type {function(...*):?} */
-var dynCall_iiiiii = Module["dynCall_iiiiii"] = createExportWrapper("dynCall_iiiiii");
-/** @type {function(...*):?} */
-var dynCall_viii = Module["dynCall_viii"] = createExportWrapper("dynCall_viii");
-/** @type {function(...*):?} */
-var dynCall_viiii = Module["dynCall_viiii"] = createExportWrapper("dynCall_viiii");
+var dynCall_viiiiii = Module["dynCall_viiiiii"] = createExportWrapper("dynCall_viiiiii");
 /** @type {function(...*):?} */
 var dynCall_iiiii = Module["dynCall_iiiii"] = createExportWrapper("dynCall_iiiii");
 /** @type {function(...*):?} */
-var dynCall_viiiii = Module["dynCall_viiiii"] = createExportWrapper("dynCall_viiiii");
-/** @type {function(...*):?} */
-var dynCall_iid = Module["dynCall_iid"] = createExportWrapper("dynCall_iid");
-/** @type {function(...*):?} */
-var dynCall_i = Module["dynCall_i"] = createExportWrapper("dynCall_i");
-/** @type {function(...*):?} */
-var dynCall_viiiiii = Module["dynCall_viiiiii"] = createExportWrapper("dynCall_viiiiii");
-/** @type {function(...*):?} */
-var dynCall_viiiiiiii = Module["dynCall_viiiiiiii"] = createExportWrapper("dynCall_viiiiiiii");
+var dynCall_viiii = Module["dynCall_viiii"] = createExportWrapper("dynCall_viiii");
 /** @type {function(...*):?} */
 var dynCall_diidd = Module["dynCall_diidd"] = createExportWrapper("dynCall_diidd");
 /** @type {function(...*):?} */
-var dynCall_iiiiiiiiii = Module["dynCall_iiiiiiiiii"] = createExportWrapper("dynCall_iiiiiiiiii");
+var dynCall_iid = Module["dynCall_iid"] = createExportWrapper("dynCall_iid");
 /** @type {function(...*):?} */
 var dynCall_iij = Module["dynCall_iij"] = createExportWrapper("dynCall_iij");
 /** @type {function(...*):?} */
 var dynCall_iiiiiiiiiii = Module["dynCall_iiiiiiiiiii"] = createExportWrapper("dynCall_iiiiiiiiiii");
 /** @type {function(...*):?} */
+var dynCall_v = Module["dynCall_v"] = createExportWrapper("dynCall_v");
+/** @type {function(...*):?} */
+var dynCall_iiiiii = Module["dynCall_iiiiii"] = createExportWrapper("dynCall_iiiiii");
+/** @type {function(...*):?} */
 var dynCall_iidiiii = Module["dynCall_iidiiii"] = createExportWrapper("dynCall_iidiiii");
+/** @type {function(...*):?} */
+var dynCall_vii = Module["dynCall_vii"] = createExportWrapper("dynCall_vii");
 /** @type {function(...*):?} */
 var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
 /** @type {function(...*):?} */
-var dynCall_iiiiid = Module["dynCall_iiiiid"] = createExportWrapper("dynCall_iiiiid");
+var dynCall_viii = Module["dynCall_viii"] = createExportWrapper("dynCall_viii");
 /** @type {function(...*):?} */
 var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_viijii");
 /** @type {function(...*):?} */
-var dynCall_iiiiiiii = Module["dynCall_iiiiiiii"] = createExportWrapper("dynCall_iiiiiiii");
-/** @type {function(...*):?} */
-var dynCall_jiiii = Module["dynCall_jiiii"] = createExportWrapper("dynCall_jiiii");
-/** @type {function(...*):?} */
-var dynCall_iiiiiiiiiiiii = Module["dynCall_iiiiiiiiiiiii"] = createExportWrapper("dynCall_iiiiiiiiiiiii");
-/** @type {function(...*):?} */
-var dynCall_fiii = Module["dynCall_fiii"] = createExportWrapper("dynCall_fiii");
-/** @type {function(...*):?} */
-var dynCall_diii = Module["dynCall_diii"] = createExportWrapper("dynCall_diii");
-/** @type {function(...*):?} */
-var dynCall_viiiiiii = Module["dynCall_viiiiiii"] = createExportWrapper("dynCall_viiiiiii");
-/** @type {function(...*):?} */
-var dynCall_iiiiiiiiiiii = Module["dynCall_iiiiiiiiiiii"] = createExportWrapper("dynCall_iiiiiiiiiiii");
-/** @type {function(...*):?} */
-var dynCall_viiiiiiiiii = Module["dynCall_viiiiiiiiii"] = createExportWrapper("dynCall_viiiiiiiiii");
-/** @type {function(...*):?} */
-var dynCall_viiiiiiiiiiiiiii = Module["dynCall_viiiiiiiiiiiiiii"] = createExportWrapper("dynCall_viiiiiiiiiiiiiii");
-/** @type {function(...*):?} */
 var dynCall_iiiiiiiii = Module["dynCall_iiiiiiiii"] = createExportWrapper("dynCall_iiiiiiiii");
+/** @type {function(...*):?} */
+var dynCall_iiiiiii = Module["dynCall_iiiiiii"] = createExportWrapper("dynCall_iiiiiii");
 /** @type {function(...*):?} */
 var dynCall_iiiiij = Module["dynCall_iiiiij"] = createExportWrapper("dynCall_iiiiij");
 /** @type {function(...*):?} */
+var dynCall_iiiiid = Module["dynCall_iiiiid"] = createExportWrapper("dynCall_iiiiid");
+/** @type {function(...*):?} */
 var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_iiiiijj");
 /** @type {function(...*):?} */
+var dynCall_iiiiiiii = Module["dynCall_iiiiiiii"] = createExportWrapper("dynCall_iiiiiiii");
+/** @type {function(...*):?} */
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
+/** @type {function(...*):?} */
+var dynCall_viiiii = Module["dynCall_viiiii"] = createExportWrapper("dynCall_viiiii");
 /** @type {function(...*):?} */
 var _asyncify_start_unwind = createExportWrapper("asyncify_start_unwind");
 /** @type {function(...*):?} */
@@ -6202,316 +5958,8 @@ var _asyncify_stop_unwind = createExportWrapper("asyncify_stop_unwind");
 var _asyncify_start_rewind = createExportWrapper("asyncify_start_rewind");
 /** @type {function(...*):?} */
 var _asyncify_stop_rewind = createExportWrapper("asyncify_stop_rewind");
-var ___start_em_js = Module['___start_em_js'] = 109664;
-var ___stop_em_js = Module['___stop_em_js'] = 110078;
-function invoke_iii(index,a1,a2) {
-  var sp = stackSave();
-  try {
-    return dynCall_iii(index,a1,a2);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_ii(index,a1) {
-  var sp = stackSave();
-  try {
-    return dynCall_ii(index,a1);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_iiiiiii(index,a1,a2,a3,a4,a5,a6) {
-  var sp = stackSave();
-  try {
-    return dynCall_iiiiiii(index,a1,a2,a3,a4,a5,a6);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_vii(index,a1,a2) {
-  var sp = stackSave();
-  try {
-    dynCall_vii(index,a1,a2);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_vi(index,a1) {
-  var sp = stackSave();
-  try {
-    dynCall_vi(index,a1);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_v(index) {
-  var sp = stackSave();
-  try {
-    dynCall_v(index);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_iiii(index,a1,a2,a3) {
-  var sp = stackSave();
-  try {
-    return dynCall_iiii(index,a1,a2,a3);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_iiiiii(index,a1,a2,a3,a4,a5) {
-  var sp = stackSave();
-  try {
-    return dynCall_iiiiii(index,a1,a2,a3,a4,a5);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_viiii(index,a1,a2,a3,a4) {
-  var sp = stackSave();
-  try {
-    dynCall_viiii(index,a1,a2,a3,a4);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_viii(index,a1,a2,a3) {
-  var sp = stackSave();
-  try {
-    dynCall_viii(index,a1,a2,a3);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_iiiii(index,a1,a2,a3,a4) {
-  var sp = stackSave();
-  try {
-    return dynCall_iiiii(index,a1,a2,a3,a4);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_viiiii(index,a1,a2,a3,a4,a5) {
-  var sp = stackSave();
-  try {
-    dynCall_viiiii(index,a1,a2,a3,a4,a5);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_iid(index,a1,a2) {
-  var sp = stackSave();
-  try {
-    return dynCall_iid(index,a1,a2);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_i(index) {
-  var sp = stackSave();
-  try {
-    return dynCall_i(index);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_viiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8) {
-  var sp = stackSave();
-  try {
-    dynCall_viiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_iiiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9) {
-  var sp = stackSave();
-  try {
-    return dynCall_iiiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_viiiiii(index,a1,a2,a3,a4,a5,a6) {
-  var sp = stackSave();
-  try {
-    dynCall_viiiiii(index,a1,a2,a3,a4,a5,a6);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_iiiiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) {
-  var sp = stackSave();
-  try {
-    return dynCall_iiiiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_iiiiid(index,a1,a2,a3,a4,a5) {
-  var sp = stackSave();
-  try {
-    return dynCall_iiiiid(index,a1,a2,a3,a4,a5);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_iiiiiiii(index,a1,a2,a3,a4,a5,a6,a7) {
-  var sp = stackSave();
-  try {
-    return dynCall_iiiiiiii(index,a1,a2,a3,a4,a5,a6,a7);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_iiiiiiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12) {
-  var sp = stackSave();
-  try {
-    return dynCall_iiiiiiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_fiii(index,a1,a2,a3) {
-  var sp = stackSave();
-  try {
-    return dynCall_fiii(index,a1,a2,a3);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_diii(index,a1,a2,a3) {
-  var sp = stackSave();
-  try {
-    return dynCall_diii(index,a1,a2,a3);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_viiiiiii(index,a1,a2,a3,a4,a5,a6,a7) {
-  var sp = stackSave();
-  try {
-    dynCall_viiiiiii(index,a1,a2,a3,a4,a5,a6,a7);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_iiiiiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) {
-  var sp = stackSave();
-  try {
-    return dynCall_iiiiiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_viiiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) {
-  var sp = stackSave();
-  try {
-    dynCall_viiiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_viiiiiiiiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15) {
-  var sp = stackSave();
-  try {
-    dynCall_viiiiiiiiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_jiiii(index,a1,a2,a3,a4) {
-  var sp = stackSave();
-  try {
-    return dynCall_jiiii(index,a1,a2,a3,a4);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
+var ___start_em_js = Module['___start_em_js'] = 94216;
+var ___stop_em_js = Module['___stop_em_js'] = 94654;
 
 // include: postamble.js
 // === Auto-generated postamble setup entry stuff ===
@@ -6804,10 +6252,6 @@ var unexportedSymbols = [
   'exceptionLast',
   'exceptionCaught',
   'ExceptionInfo',
-  'getExceptionMessageCommon',
-  'incrementExceptionRefcount',
-  'decrementExceptionRefcount',
-  'getExceptionMessage',
   'Browser',
   'wget',
   'SYSCALLS',
@@ -6866,7 +6310,11 @@ function callMain(args = []) {
   assert(runDependencies == 0, 'cannot call main when async dependencies remain! (listen on Module["onRuntimeInitialized"])');
   assert(__ATPRERUN__.length == 0, 'cannot call main when preRun functions remain to be called');
 
-  var entryFunction = _main;
+  var entryFunction = __emscripten_proxy_main;
+
+  // With PROXY_TO_PTHREAD make sure we keep the runtime alive until the
+  // proxied main calls exit (see exitOnMainThread() for where Pop is called).
+  runtimeKeepalivePush();
 
   args.unshift(thisProgram);
 
