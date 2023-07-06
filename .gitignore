@@ -13,3 +13,4 @@ toolEquipped.hpp
 !build/bcjh.js
 !build/bcjh.wasm
 !build/bcjh.worker.js
+!build/index.html

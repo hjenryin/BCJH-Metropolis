@@ -150,10 +150,10 @@ int main(int argc, char *argv[]) {
 
     if (!calculate) {
         Result result;
-        // #ifdef EMSCRIPTEN
-        //         // std::cout << "EMSCRIPTEN" << std::endl;
-        //         result = run(chefList, recipeList, 0, true, seed);
-        // #else
+#ifdef EMSCRIPTEN
+        // std::cout << "EMSCRIPTEN" << std::endl;
+        result = run(chefList, recipeList, 0, true, seed);
+#else
         int num_threads = std::thread::hardware_concurrency();
         // #ifdef EMSCRIPTEN
         //         num_threads -= 2;
@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
         }
 
         std::cout << "\n最佳结果：" << std::endl;
-        // #endif
+#endif
         log += 0x1;
         std::cout << "随机种子：" << result.seed << std::endl;
         int score = e0::sumPrice(*result.state, result.chefList,

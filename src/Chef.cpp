@@ -34,15 +34,14 @@ void loadUltimateSkills(std::map<int, int> &ultimateSkills,
     splitUltimateSkill(ultimateSkills, usrBuff["Partial"]["id"]);
     splitUltimateSkill(ultimateSkills, usrBuff["Self"]["id"]);
 }
-void loadChef(CList &chefList) {
+void loadChef(CList &chefList, std::stringstream *ss) {
     if (MODE == 2) {
         Chef::coinBuffOn = false;
     } else {
         Chef::coinBuffOn = true;
     }
-    Json::Value usrData;
-    Json::Value gameData;
 
+    Json::Value gameData;
     // std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
     // std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
 
@@ -54,19 +53,25 @@ void loadChef(CList &chefList) {
             throw FileNotExistException();
         }
     }
-    std::ifstream usrDataF("userData.json", std::ifstream::binary);
-    if (!usrDataF.good()) {
-        usrDataF.open("../data/userData.json", std::ifstream::binary);
-        if (!usrDataF.good()) {
-            std::cout << "user data not exist" << std::endl;
-            throw FileNotExistException();
-        }
-    }
-
-    usrDataF >> usrData;
-    usrDataF.close();
     gameDataF >> gameData;
     gameDataF.close();
+    std::cout << "gameData loaded" << std::endl;
+    Json::Value usrData;
+    if (ss != NULL) {
+        *ss >> usrData;
+    } else {
+        std::ifstream usrDataF("userData.json", std::ifstream::binary);
+        if (!usrDataF.good()) {
+            usrDataF.open("../data/userData.json", std::ifstream::binary);
+            if (!usrDataF.good()) {
+                std::cout << "user data not exist" << std::endl;
+                throw FileNotExistException();
+            }
+        }
+        usrDataF >> usrData;
+
+        usrDataF.close();
+    }
 
     initBuff(usrData["userUltimate"]);
     const Json::Value chefs = gameData["chefs"];
@@ -118,8 +123,7 @@ void loadChef(CList &chefList) {
                "ed.csv中没有这一项。默认“制作三火料理售价加成”均为0。"
             << std::endl;
     }
-#endif
-#ifdef __linux__
+#else
     for (auto &chef : chefList) {
         toolEquipped(&chef);
     }
@@ -170,7 +174,7 @@ void Chef::print() {
     this->skill.print();
 }
 CookAbility::CookAbility(Json::Value &v) {
-    // std::cout << "Here" << std::endl;
+
     if (v.isMember("stirfry") && v.isMember("bake") && v.isMember("boil") &&
         v.isMember("fry") && v.isMember("knife")) {
         // std::cout << "yes1" << std::endl;

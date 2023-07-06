@@ -126,5 +126,5 @@ class Recipe {
     static void initRarityBuff(Json::Value &usrBuff);
 };
 typedef std::vector<Recipe> RList;
-void loadRecipe(RList &recipeList);
+void loadRecipe(RList &recipeList, std::stringstream *ss = NULL);
 #endif

@@ -71,8 +71,8 @@ void Recipe::print() {
     this->cookAbility.print();
     this->flavor.print();
 }
-void loadRecipe(RList &recipeList) {
-    Json::Value usrData;
+void loadRecipe(RList &recipeList, std::stringstream *ss) {
+
     Json::Value gameData;
     // std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
     // std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
@@ -84,20 +84,25 @@ void loadRecipe(RList &recipeList) {
             throw FileNotExistException();
         }
     }
-    std::ifstream usrDataF("userData.json", std::ifstream::binary);
-    if (!usrDataF.good()) {
-        usrDataF.open("../data/userData.json", std::ifstream::binary);
-        if (!usrDataF.good()) {
-            throw FileNotExistException();
-        }
-    }
-
     // std::cout << gameDataF.fail() << std::endl;
     gameDataF >> gameData;
     gameDataF.close();
-    // std::cout << "Game data loaded" << std::endl;
-    usrDataF >> usrData;
-    usrDataF.close();
+
+    Json::Value usrData;
+    if (ss != NULL) {
+        *ss >> usrData;
+    } else {
+        std::ifstream usrDataF("userData.json", std::ifstream::binary);
+        if (!usrDataF.good()) {
+            usrDataF.open("../data/userData.json", std::ifstream::binary);
+            if (!usrDataF.good()) {
+                throw FileNotExistException();
+            }
+        }
+        // std::cout << "Game data loaded" << std::endl;
+        usrDataF >> usrData;
+        usrDataF.close();
+    }
     Recipe::initRarityBuff(usrData["userUltimate"]);
     auto recipes = gameData["recipes"];
     auto recipeGot = usrData["repGot"];
