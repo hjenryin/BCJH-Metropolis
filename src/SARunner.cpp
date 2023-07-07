@@ -42,15 +42,22 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
     // std::cout << chefList->size() << " " << chefRecipePairs->size()
     // << std::endl;
     if (chefs == NULL) {
+        if (chefList->size() == 0) {
+            throw NoChefException();
+        }
         for (int j = 0; j < NUM_CHEFS; j++) {
-            if (chefList->size() == 0) {
+            int count = 0;
+            do {
+                s.chef[j] = &chefList->at(rand() % chefList->size());
+                count++;
+            } while (inArray(s.chef, j, s.chef[j]) &&
+                     count < RANDOM_SEARCH_TIMEOUT);
+            if (count >= RANDOM_SEARCH_TIMEOUT) {
                 throw NoChefException();
             }
-            s.chef[j] = &chefList->at(rand() % chefList->size());
         }
     } else {
         for (int i = 0; i < NUM_CHEFS; i++) {
-
             s.chef[i] = chefs[i];
         }
     }
