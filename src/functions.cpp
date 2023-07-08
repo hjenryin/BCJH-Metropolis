@@ -450,9 +450,9 @@ States perfectChef(const RuleInfo &rl, States &s, CList *c) {
             }
 
             newS.chef[i] = &chef;
-            States pS = perfectTool(newS);
-            int pSs = e0::sumPrice(pS);
-            int bestSs = e0::sumPrice(bestS);
+            States pS = perfectTool(rl, newS);
+            int pSs = e0::sumPrice(rl, pS);
+            int bestSs = e0::sumPrice(rl, bestS);
 
             if (pSs > bestSs) {
                 bestS = pS;

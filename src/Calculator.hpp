@@ -61,7 +61,7 @@ struct BanquetStrictRule : public BanquetRule {
     }
 };
 
-class BanquetLenientRule {
+class BanquetLenientRule : public BanquetRule {
     friend BanquetInfo getPrice(Chef *, Skill &, Recipe *, BanquetRuleTogether, bool);
 
 
@@ -101,8 +101,7 @@ struct ActivityBuff {
 int getPrice(Chef &chef, Skill &, Recipe &recipe, ActivityBuff *p = NULL,
              bool verbose = false);
 
-BanquetInfo getPrice(Chef *chef, Recipe *recipe, Skill &, BanquetRuleTogether rule,
-
-                     bool verbose = false);
+BanquetInfo getPrice(Chef *chef, Skill &, Recipe *recipe,
+                     BanquetRuleTogether rule, bool verbose = false);
 
 #endif
