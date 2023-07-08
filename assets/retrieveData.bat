@@ -1,23 +1,22 @@
-
-echo ï¿½Þ¸ï¿½ï¿½ï¿½ï¿½Ã¡ï¿½ï¿½Ë½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½https://github.com/hjenryin/BCJH-Metropolis/ ï¿½Ô±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-echo ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½https://github.com/hjenryin/BCJH-Metropolis/discussions/categories/q-a ï¿½ï¿½ï¿½ï¿½
-echo ï¿½ï¿½ï¿½Îºï¿½ï¿½ë·¨ï¿½ï¿½ï¿½ï¿½https://github.com/hjenryin/BCJH-Metropolis/discussions/categories/general ï¿½ï¿½ï¿½ï¿½
+echo ÐÞ¸ÄÅäÖÃ¡¢ÁË½â¸ü¶àÇëÖÁhttps://github.com/hjenryin/BCJH-Metropolis/ ÒÔ±ãÔÚÏßÔËÐÐ
+echo ÓÐÒÉÎÊÇëÖÁhttps://github.com/hjenryin/BCJH-Metropolis/discussions/categories/q-a ÌáÎÊ
+echo ÓÐÈÎºÎÏë·¨¿ÉÖÁhttps://github.com/hjenryin/BCJH-Metropolis/discussions/categories/general ÌÖÂÛ
 set "bcjhid="
-set /p bcjhid=ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×²Ë¾Õ»ï¿½idï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½Ó»Ø³ï¿½ï¿½ï¿½
+set /p bcjhid=Èç¹ûÐèÒªÖØÐÂÏÂÔØÓÃ»§ÅäÖÃ£¬ÇëÊäÈë°×²Ë¾Õ»¨id£»·ñÔòÖ±½Ó»Ø³µ£º
 
 if "%bcjhid%"=="" (
-    echo Î´ï¿½ï¿½ï¿½ï¿½idï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½
+    echo Î´ÊäÈëid£¬Ìø¹ýÏÂÔØÓÃ»§ÅäÖÃ
 ) 
-@REM iwr -uri "https://bcjh.xyz/api/download_data?id=86952" | ConvertFrom-Json | select -expand data | Out-File -Encoding utf8 userData.json
+
 if not "%bcjhid%"=="" (
-    echo ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½
-    powershell -command $json=$(iwr -uri "https://bcjh.xyz/api/download_data?id=%bcjhid%" ^| ConvertFrom-Json^) ^; if ($json.result -eq 'True'^) { Write-Host ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë£©ï¿½ï¿½$($json.user^) -ForegroundColor:Green^; echo $json.data ^> userData.json } else { Write-Host ï¿½ï¿½ï¿½ï¿½Ê§ï¿½Ü£ï¿½ï¿½ï¿½ï¿½ï¿½idï¿½Ç·ï¿½ï¿½ï¿½È· -BackgroundColor:Red -ForegroundColor:White ^}
+    echo ÕýÔÚÏÂÔØÓÃ»§ÅäÖÃ
+    powershell -command $json=$(iwr -uri "https://bcjh.xyz/api/download_data?id=%bcjhid%" ^| ConvertFrom-Json^) ^; if ($json.result -eq 'True'^) { Write-Host ÓÃ»§Ãû£¨ÖÐÎÄ¿ÉÄÜÂÒÂë£©£º$($json.user^) -ForegroundColor:Green^; echo $json.data ^> userData.json } else { Write-Host ÏÂÔØÊ§°Ü£¬Çë¼ì²éidÊÇ·ñÕýÈ· -BackgroundColor:Red -ForegroundColor:White ^}
     type userData.json > tmp
     del userData.json
     ren tmp userData.json
 )
 echo=
-echo=ï¿½é¿´ï¿½ï¿½ï¿½ï¿½ï¿½Þ¸Ä½Ì³Ì£ï¿½ï¿½ï¿½Î¿ï¿½ https://github.com/hjenryin/BCJH-Metropolis#ï¿½ï¿½ï¿½Ã³ï¿½ï¿½ï¿½
+echo=²é¿´³ø¾ßÐÞ¸Ä½Ì³Ì£¬Çë²Î¿¼ https://github.com/hjenryin/BCJH-Metropolis#ÅäÖÃ³ø¾ß
 .\bcjh.exe
-echo ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø±ï¿½
+echo °´ÈÎÒâ¼ü¹Ø±Õ
 pause >NUL
