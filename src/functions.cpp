@@ -286,7 +286,10 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
                 break;
             default:
                 int delta = std::abs(totalFull - bestFull[g]);
-                guestScore = (int)std::ceil(totalScore * (1 - 0.05 * delta));
+                if (delta < 20)
+                    guestScore = (int)std::ceil(totalScore * (1 - 0.05 * delta));
+                else
+                    guestScore = 0;
             }
             ans += guestScore;
             if (log & 0x1)
@@ -448,10 +451,10 @@ States perfectChef(States &s, CList *c) {
     States bestS = s;
     for (int i = 0; i < NUM_CHEFS; i++) {
         for (auto &chef : *c) {
-            newS.chef[i] = &chef;
             if (repeatChef(&chef, newS.chef, i)) {
                 continue;
             }
+            newS.chef[i] = &chef;
             States pS = perfectTool(newS);
             int pSs = e0::sumPrice(pS);
             int bestSs = e0::sumPrice(bestS);

@@ -94,7 +94,7 @@ BanquetInfo getPrice(Chef *chef, Skill &companyBuff, Recipe *recipe,
         if (verbose)
             std::cout << "Grade 0" << std::endl;
         {
-            BanquetInfo b = {0, 0};
+            BanquetInfo b = {0, 500};
             return b;
         }
     }
