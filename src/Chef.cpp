@@ -124,9 +124,6 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
                 }
             }
         }
-        if (this->id == 1452) {
-            std::cout << "lbr" << std::endl;
-        }
     } else {
         std::cout << chef << std::endl;
         throw std::logic_error("Chef Json Error");

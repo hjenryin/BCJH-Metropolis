@@ -284,7 +284,8 @@ int e0::sumPrice(const RuleInfo &rl, States s, CList *chefList,
             ans += guestScore;
             if (log & 0x1)
                 std::cout << "第" << g + 1 << "位客人：" << totalFull << " / "
-                          << bestFull[g] << " -> " << guestScore << std::endl;
+                          << bestFull[g] << " -> " << guestScore << "😋"
+                          << std::endl;
         }
         return ans;
     } else if (MODE == 2 || MODE == 0) {

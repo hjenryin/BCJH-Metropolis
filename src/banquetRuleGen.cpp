@@ -56,7 +56,7 @@ bool loadBanquetRule(RuleInfo &ruleInfo, Json::Value &gameData, int ruleID) {
     return true;
 }
 
-Rule *getRuleFromJson(Json::Value &intent, int d, Json::Value &allIntents,
+Rule *getRuleFromJson(Json::Value &intent, int dish, Json::Value &allIntents,
                       Json::Value &allBuffs, int remainingDishes) {
     Condition *c;
     auto effectType = intent["effectType"].asString();
@@ -68,19 +68,19 @@ Rule *getRuleFromJson(Json::Value &intent, int d, Json::Value &allIntents,
         conditionType = intent["conditionType"].asString();
         conditionValue = intent["conditionValue"].asString();
         if (conditionType == "CookSkill") {
-            c = new SkillCondition(d, conditionValue, remainingDishes);
+            c = new SkillCondition(dish, conditionValue, remainingDishes);
         } else if (conditionType == "CondimentSkill") {
-            c = new FlavorCondition(d, conditionValue, remainingDishes);
+            c = new FlavorCondition(dish, conditionValue, remainingDishes);
         } else if (conditionType == "Order") {
-            c = new OrderCondition(d, getInt(intent["conditionValue"]));
+            c = new OrderCondition(dish, getInt(intent["conditionValue"]));
         } else if (conditionType == "Rarity") {
-            c = new RarityCondition(d, getInt(intent["conditionValue"]),
+            c = new RarityCondition(dish, getInt(intent["conditionValue"]),
                                     remainingDishes);
         } else if (conditionType == "Group") {
             assert(effectType == "CreateBuff");
-            c = new GroupCondition(d, conditionType, remainingDishes);
+            c = new GroupCondition(dish, conditionValue, remainingDishes);
         } else if (conditionType == "Rank") {
-            c = new RankCondition(d, getInt(intent["conditionValue"]),
+            c = new RankCondition(dish, getInt(intent["conditionValue"]),
                                   remainingDishes);
         } else {
             std::cout << "Unknown condition type: " << conditionType
@@ -88,7 +88,7 @@ Rule *getRuleFromJson(Json::Value &intent, int d, Json::Value &allIntents,
         }
     } else {
         assert(getInt(intent["intentId"]) == 1);
-        c = new AlwaysTrueCondition(d);
+        c = new AlwaysTrueCondition(dish);
     }
 
     Effect *e;
@@ -106,16 +106,19 @@ Rule *getRuleFromJson(Json::Value &intent, int d, Json::Value &allIntents,
         e = new IntentAddEffect();
     } else if (effectType == "CreateIntent") {
         auto newIntent = getIntentById(allIntents, effectValue);
-        auto newRule = getRuleFromJson(newIntent, d + 1, allIntents, allBuffs,
-                                       remainingDishes - 1);
+
+        auto newRule =
+            getRuleFromJson(newIntent, dish + 1, allIntents, allBuffs, 1);
         e = new CreateRuleEffect(newRule);
+
     } else if (effectType == "CreateBuff") {
         assert(conditionType == "Group");
         auto newIntent = getBuffById(allBuffs, effectValue);
         int lastRounds = getInt(newIntent["lastRounds"]);
-        auto newRule = getRuleFromJson(newIntent, d + DISH_PER_CHEF, allIntents,
-                                       allBuffs, lastRounds * DISH_PER_CHEF);
-        e = new CreateRuleEffect(newRule, true);
+        auto newRule = getRuleFromJson(newIntent, dish + DISH_PER_CHEF,
+                                       allIntents, allBuffs, 1);
+
+        e = new CreateRulesEffect(newRule, DISH_PER_CHEF * lastRounds, true);
     }
     return new SingleConditionRule(c, e);
 }

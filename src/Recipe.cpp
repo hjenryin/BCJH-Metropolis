@@ -62,7 +62,7 @@ const struct MaterialList {
 void Recipe::print() {
     std::cout << this->id << ": " << this->name << "（原价" << this->price
               << "）" << std::endl;
-    std::cout << "Rarity: " << this->rarity;
+    std::cout << this->rarity << "🔥";
     auto rb = rarityBuff[this->rarity - 1];
     std::cout << " (Num: " << rb.dishNum << ", +" << rb.dishBuff << "%)"
               << std::endl;

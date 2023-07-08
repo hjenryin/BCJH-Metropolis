@@ -106,26 +106,26 @@ class Ability {
         std::cout << end;
     }
     /* Knife, Stirfry, Bake, Boil, Steam, Fry */
-    int *operator[](std::string name) {
+    const int operator[](std::string name) {
         if (name == "Knife") {
-            return &this->knife;
+            return this->knife;
         }
         if (name == "Stirfry") {
-            return &this->stirfry;
+            return this->stirfry;
         }
         if (name == "Bake") {
-            return &this->bake;
+            return this->bake;
         }
         if (name == "Boil") {
-            return &this->boil;
+            return this->boil;
         }
         if (name == "Steam") {
-            return &this->steam;
+            return this->steam;
         }
         if (name == "Fry") {
-            return &this->fry;
+            return this->fry;
         }
-        return NULL;
+        return -1;
     }
 };
 
