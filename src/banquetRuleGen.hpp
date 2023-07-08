@@ -109,12 +109,16 @@ class RankCondition : public Condition {
     RankCondition(int start, int rank, int lasts = DISH_PER_CHEF)
         : Condition(start, lasts), rank(rank) {}
     int operator()(States &s) const override {
+        Skill companyBuff[NUM_GUESTS];
+        for (int i = 0; i < NUM_CHEFS; i++) {
+            companyBuff[i / CHEFS_PER_GUEST].add(s.chef[i]->companyBuff);
+        }
         auto recipes = s.recipe;
         auto chefs = s.chef;
         for (int i = start; i < start + lasts; i++) {
-            if (chefs[i / DISH_PER_CHEF]->skill.ability /
-                    recipes[i]->cookAbility >=
-                rank) {
+            auto skill = chefs[i / DISH_PER_CHEF]->skill +
+                         companyBuff[i / DISH_PER_CHEF / CHEFS_PER_GUEST];
+            if (skill.ability / recipes[i]->cookAbility >= rank) {
                 return i;
             }
         }
