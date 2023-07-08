@@ -55,7 +55,7 @@ class Chef {
     Chef addTool_modify_name(ToolEnum);
 };
 typedef std::vector<Chef> CList;
-void loadChef(CList &chefList);
+void loadChef(CList &chefList, Json::Value& gameData, Json::Value& usrData);
 
 // void loadChefTools(CList &chefList, CList &newChefList);
 std::string getToolName(ToolEnum tool);

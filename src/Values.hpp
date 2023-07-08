@@ -105,6 +105,28 @@ class Ability {
             std::cout << "无";
         std::cout << end;
     }
+    /* Knife, Stirfry, Bake, Boil, Steam, Fry */
+    int *operator[](std::string name) {
+        if (name == "Knife") {
+            return &this->knife;
+        }
+        if (name == "Stirfry") {
+            return &this->stirfry;
+        }
+        if (name == "Bake") {
+            return &this->bake;
+        }
+        if (name == "Boil") {
+            return &this->boil;
+        }
+        if (name == "Steam") {
+            return &this->steam;
+        }
+        if (name == "Fry") {
+            return &this->fry;
+        }
+        return NULL;
+    }
 };
 
 class AbilityBuff : public Ability {
@@ -140,10 +162,12 @@ class RarityBuff {
     }
 };
 class Skill {
+
   public:
     enum Type { SELF, NEXT, PARTIAL };
     Type type = SELF;
     bool next = false;
+
     static std::map<int, Skill> skillList;
     CookAbility ability;
     AbilityBuff abilityBuff;

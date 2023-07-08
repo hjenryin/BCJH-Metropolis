@@ -17,7 +17,7 @@ struct History {
 };
 class SARunner {
 
-    r::RandomMove randomMoveFunc;
+    Randomizer *randomMoveFunc;
     f::CoolingSchedule coolingScheduleFunc;
     int stepMax;
     int tMax;
@@ -29,7 +29,7 @@ class SARunner {
 
     States bestState;
     History *history;
-
+    const RuleInfo *rl;
     States generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]);
 
   public:
@@ -37,19 +37,19 @@ class SARunner {
     void print(States s, bool verbose = false);
     /**
      * @brief Construct a new SARunner object
-     *
      * @param chefList
      * @param recipeList
      * @param stepMax
      * @param tMax
      * @param tMin
-     * @param randomMoveFunc
+     * @param randomizeChef If false, randomize recipe.
+     * @param getEnergyFunc
      * @param coolingScheduleFunc
      */
     SARunner(
-        CList *chefList, RList *recipeList, int stepMax, int tMax, int tMin,
+        const RuleInfo *rl, CList *chefList, RList *recipeList, int stepMax,
+        int tMax, int tMin, bool randomizeChef,
         e::GetEnergy getEnergyFunc = e::getTotalPrice,
-        r::RandomMove randomMoveFun = r::randomRecipe,
         f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative);
     States run(States *s = NULL, bool progress = false, bool silent = false,
                const char *fn = NULL);

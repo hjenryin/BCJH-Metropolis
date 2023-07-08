@@ -1,3 +1,4 @@
+
 #include "include/json/json.h"
 #include "Chef.hpp"
 #include <string>
@@ -34,40 +35,15 @@ void loadUltimateSkills(std::map<int, int> &ultimateSkills,
     splitUltimateSkill(ultimateSkills, usrBuff["Partial"]["id"]);
     splitUltimateSkill(ultimateSkills, usrBuff["Self"]["id"]);
 }
-void loadChef(CList &chefList) {
+void loadChef(CList &chefList, Json::Value &gameData, Json::Value &usrData) {
     if (MODE == 2) {
         Chef::coinBuffOn = false;
     } else {
         Chef::coinBuffOn = true;
     }
-    Json::Value usrData;
-    Json::Value gameData;
-
-    // std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
-    // std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
-
-    std::ifstream gameDataF("data.min.json", std::ifstream::binary);
-    if (!gameDataF.good()) {
-        gameDataF.open("../data/data.min.json", std::ifstream::binary);
-        if (!gameDataF.good()) {
-            throw FileNotExistException();
-        }
-    }
-    std::ifstream usrDataF("userData.json", std::ifstream::binary);
-    if (!usrDataF.good()) {
-        usrDataF.open("../data/userData.json", std::ifstream::binary);
-        if (!usrDataF.good()) {
-            throw FileNotExistException();
-        }
-    }
-
-    usrDataF >> usrData;
-    usrDataF.close();
-    gameDataF >> gameData;
-    gameDataF.close();
 
     initBuff(usrData["userUltimate"]);
-    const Json::Value chefs = gameData["chefs"];
+    Json::Value chefs = gameData["chefs"];
     Skill::loadJson(gameData["skills"]);
     std::map<int, int> ultimateSkills;
     loadUltimateSkills(ultimateSkills, usrData["userUltimate"]);
@@ -116,8 +92,7 @@ void loadChef(CList &chefList) {
                "ed.csv中没有这一项。默认“制作三火料理售价加成”均为0。"
             << std::endl;
     }
-#endif
-#ifdef __linux__
+#else
     for (auto &chef : chefList) {
         toolEquipped(&chef);
     }
@@ -149,6 +124,9 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
                 }
             }
         }
+        if (this->id == 1452) {
+            std::cout << "lbr" << std::endl;
+        }
     } else {
         std::cout << chef << std::endl;
         throw std::logic_error("Chef Json Error");
@@ -162,13 +140,13 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
 }
 
 void Chef::print() {
-    std::cout << this->id << ": " << this->name << "\t"
-              << (this->male ? "M" : "") << (this->female ? "F" : "")
-              << std::endl;
+    std::cout << "ID: " << this->id << std::endl;
+    std::cout << "Name: " << this->name << std::endl;
+    std::cout << "Male: " << this->male << "; Female: " << this->female << "\n";
     this->skill.print();
 }
 CookAbility::CookAbility(Json::Value &v) {
-    // std::cout << "Here" << std::endl;
+
     if (v.isMember("stirfry") && v.isMember("bake") && v.isMember("boil") &&
         v.isMember("fry") && v.isMember("knife")) {
         // std::cout << "yes1" << std::endl;
@@ -198,8 +176,10 @@ void Skill::loadJson(Json::Value &v) {
         int id = skill["skillId"].asInt();
         skillList[id] = Skill();
         for (auto effect : skill["effect"]) {
+
             Skill skill;
             std::string condition = effect["condition"].asString();
+
             if (condition != "Global") {
                 if (condition == "Partial") {
                     skillList[id].type = PARTIAL;
@@ -260,7 +240,9 @@ void Skill::loadJson(Json::Value &v) {
                     auto effects = effect["conditionValueList"];
                     for (auto &e : effects) {
                         int rarity = getInt(e);
+
                         skill.rarityBuff[rarity] = value;
+
                     }
                 }
                 skillList[id].add(skill);
@@ -499,4 +481,5 @@ std::string getToolName(ToolEnum tool) {
         toolName = "无厨具";
     }
     return toolName;
+
 }

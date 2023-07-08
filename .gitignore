@@ -9,3 +9,8 @@ out/
 in/in.txt
 in/out.txt
 toolEquipped.hpp
+!build/bcjh.data
+!build/bcjh.js
+!build/bcjh.wasm
+!build/bcjh.worker.js
+!build/index.html

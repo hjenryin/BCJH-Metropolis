@@ -1,10 +1,10 @@
 #include "functions.hpp"
 #include "SARunner.hpp"
 #include "../config.hpp"
-#include "banquetRule.hpp"
 #include "exception.hpp"
 #include "activityRule.hpp"
 #include <cassert>
+#include "banquetRuleGen.hpp"
 const double bestToolProb = 0.9;
 
 ToolEnum toolHeuristic(States &s, int chefId) {
@@ -36,16 +36,9 @@ ToolEnum toolHeuristic(States &s, int chefId) {
     return best;
 }
 
-namespace r0 {
-States randomRecipe(States &, CList *, RList *);
-States swapRecipe(States &, CList *, RList *);
-States randomChef(States &, CList *, RList *);
-States swapChefTool(States &, CList *, RList *);
-} // namespace r0
-
-int e::getTotalPrice(States s, CList *chefList, RList *recipeList,
-                     bool verbose) {
-    return e0::sumPrice(s, chefList, recipeList, verbose, false);
+int e::getTotalPrice(const RuleInfo &rl, States s, CList *chefList,
+                     RList *recipeList, bool verbose) {
+    return e0::sumPrice(rl, s, chefList, recipeList, verbose, false);
 }
 bool repeatChef(Chef *chef, Chef *chefs[NUM_CHEFS], int except) {
     for (int i = 0; i < NUM_CHEFS; i++) {
@@ -55,8 +48,9 @@ bool repeatChef(Chef *chef, Chef *chefs[NUM_CHEFS], int except) {
     }
     return false;
 }
-States r0::randomChef(States &s, CList *chefList, RList *recipeList) {
-    // std::cout << "Test Here" << std::endl;
+States& ChefRandomizer::randomChef(States &s) const {
+    auto chefList = this->c;
+    auto recipeList = this->r;
     int chefNum = rand() % NUM_CHEFS;
     Chef *pChef = s.chef[chefNum];
     int count = 0;
@@ -70,8 +64,7 @@ States r0::randomChef(States &s, CList *chefList, RList *recipeList) {
     do {
         pChef = &chefList->at(rand() % chefList->size());
         count++;
-    } while (repeatChef(pChef, s.chef, chefNum) &&
-             count < RANDOM_SEARCH_TIMEOUT);
+    } while (repeatChef(pChef, s.chef, -1) && count < RANDOM_SEARCH_TIMEOUT);
     if (count >= RANDOM_SEARCH_TIMEOUT) {
         throw NoChefException();
     }
@@ -84,19 +77,16 @@ States r0::randomChef(States &s, CList *chefList, RList *recipeList) {
             auto target = s.recipe[dishNum + i];
             for (int j = 0; j < totalDishNum; j++) {
                 if (dishNum + i != j && s.recipe[j] == target) {
-                    r00::unrepeatedRandomRecipe(&pChef->recipeCapable, s.recipe,
-                                                totalDishNum, dishNum + i);
+                    this->unrepeatedRandomRecipe(&pChef->recipeCapable,
+                                                 s.recipe, totalDishNum,
+                                                 dishNum + i);
                 }
             }
         }
     }
-    SARunner saRunner(chefList, recipeList, ITER_RECIPE, T_MAX_RECIPE,
-                      T_MAX_RECIPE / 10, e::getTotalPrice, r::randomRecipe,
-                      f::t_dist_slow);
-    return saRunner.run(&s);
+    return s;
 }
-States r0::swapRecipe(States &s, CList *chefList, RList *r) {
-
+States RecipeRandomizer::swapRecipe(States &s) const {
     for (int i = 1; i < 10; i++) {
         int recipeNum1 = rand() % (NUM_CHEFS * DISH_PER_CHEF);
         int recipeNum2 = rand() % (NUM_CHEFS * DISH_PER_CHEF);
@@ -126,16 +116,16 @@ States r0::swapRecipe(States &s, CList *chefList, RList *r) {
     return s;
 }
 
-States r0::randomRecipe(States &s, CList *chefList, RList *r) {
+States RecipeRandomizer::randomRecipe(States &s) const {
     int recipeNum = rand() % (NUM_CHEFS * DISH_PER_CHEF);
     Chef *chef = s.chef[recipeNum / DISH_PER_CHEF];
     auto recipes = &chef->recipeCapable;
-    r00::unrepeatedRandomRecipe(recipes, s.recipe, NUM_CHEFS * DISH_PER_CHEF,
-                                recipeNum);
+    this->unrepeatedRandomRecipe(recipes, s.recipe, NUM_CHEFS * DISH_PER_CHEF,
+                                 recipeNum);
     return s;
 }
 
-States r0::swapChefTool(States &s, CList *chefList, RList *recipeList) {
+States &ChefRandomizer::swapChefTool(States &s) const {
     int chefNum = rand() % NUM_CHEFS;
     auto chef = s.chef[chefNum];
     int orig_tool = chef->getTool();
@@ -150,8 +140,8 @@ States r0::swapChefTool(States &s, CList *chefList, RList *recipeList) {
          i < chefNum * DISH_PER_CHEF + DISH_PER_CHEF; i++) {
         if (!s.chef[chefNum]->isCapable(s.recipe[i])) {
             auto rl = &s.chef[chefNum]->recipeCapable;
-            r00::unrepeatedRandomRecipe(rl, s.recipe, NUM_CHEFS * DISH_PER_CHEF,
-                                        i);
+            this->unrepeatedRandomRecipe(rl, s.recipe,
+                                         NUM_CHEFS * DISH_PER_CHEF, i);
         }
     }
 
@@ -162,8 +152,8 @@ States r0::swapChefTool(States &s, CList *chefList, RList *recipeList) {
  *
  * @return whether after deduction, the price is still the same
  */
-bool deductTool(States s, CList *chefList, RList *recipeList, int chefId,
-                int deduction) {
+bool deductTool(const RuleInfo &rl, States s, CList *chefList,
+                RList *recipeList, int chefId, int deduction) {
     Chef chef(*s.chef[chefId]);
     int tool = chef.getTool();
     int *cookAbility;
@@ -193,10 +183,11 @@ bool deductTool(States s, CList *chefList, RList *recipeList, int chefId,
         return true;
     }
     *cookAbility -= deduction;
-    int bestPrice = e0::sumPrice(s, chefList, recipeList, false, false);
+    int bestPrice = e0::sumPrice(rl, s, chefList, recipeList, false, false);
     States newState = s;
     newState.chef[chefId] = &chef;
-    int newPrice = e0::sumPrice(newState, chefList, recipeList, false, false);
+    int newPrice =
+        e0::sumPrice(rl, newState, chefList, recipeList, false, false);
     return newPrice == bestPrice;
 }
 /**
@@ -205,8 +196,8 @@ bool deductTool(States s, CList *chefList, RList *recipeList, int chefId,
  * should only be set true at the end of the function as it modifies the name of
  * the chefs.
  */
-int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
-                 bool exactChefTool) {
+int e0::sumPrice(const RuleInfo &rl, States s, CList *chefList,
+                 RList *recipeList, int log, bool exactChefTool) {
     if (exactChefTool) {
         for (int i = 0; i < NUM_CHEFS; i++) {
             s.chef[i]->modifyTool(s.toolCKPT[i]);
@@ -217,9 +208,9 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
             ToolEnum tool = s.chef[i]->getTool();
             std::string toolName = getToolName(tool);
             toolName = "-" + toolName;
-            if (deductTool(s, chefList, recipeList, i, 40)) {
-                if (deductTool(s, chefList, recipeList, i, 70)) {
-                    if (deductTool(s, chefList, recipeList, i, 100)) {
+            if (deductTool(rl, s, chefList, recipeList, i, 40)) {
+                if (deductTool(rl, s, chefList, recipeList, i, 70)) {
+                    if (deductTool(rl, s, chefList, recipeList, i, 100)) {
                         s.chef[i]->name += toolName + "(0)";
                     } else {
                         s.chef[i]->name += toolName + "(30)";
@@ -233,9 +224,9 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
         }
     }
     if (MODE == 1) {
-        BanquetRule rule[NUM_CHEFS * DISH_PER_CHEF];
-        int bestFull[NUM_GUESTS];
-        banquetRule(rule, s, bestFull);
+        BanquetRuleTogether rule[NUM_CHEFS * DISH_PER_CHEF];
+        auto bestFull = rl.bestFull;
+        banquetRuleGenerated(rule, s, rl);
         BanquetInfo bi[NUM_CHEFS * DISH_PER_CHEF];
         int totalScore = 0;
         int totalFull = 0;
@@ -335,33 +326,34 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
         exit(1);
     }
 }
-States r::randomRecipe(States s, CList *chefList, RList *recipeList) {
+States RecipeRandomizer::operator()(States s) const {
     double r = (double)rand() / RAND_MAX;
     double p_randomRecipe = 1;
     if (MODE == 1)
         p_randomRecipe = 0.9;
     if (r > p_randomRecipe) {
-        return r0::swapRecipe(s, chefList, recipeList);
+        return swapRecipe(s);
     } else {
-        return r0::randomRecipe(s, chefList, recipeList);
+        return randomRecipe(s);
     }
 }
-States r::randomChef(States s, CList *chefList, RList *recipeList) {
-    double r = (double)rand() / RAND_MAX;
+States ChefRandomizer::operator()(States s) const {
+    double random = (double)rand() / RAND_MAX;
     double p_randomChef = 0.9;
+    States newS = s;
     if (MODE == 1)
         p_randomChef = 0.85;
-    if (r < 0.1) {
-        return r0::swapChefTool(s, chefList, recipeList);
-    } else if (r >= 1 - p_randomChef) {
-        return r0::randomChef(s, chefList, recipeList);
+    if (random < 0.1) {
+        newS = this->swapChefTool(s);
+    } else if (random >= 1 - p_randomChef) {
+        newS = this->randomChef(s);
     } else { // swap Chef
         int chefIndex1 = rand() % NUM_CHEFS;
         int chefIndex2;
         do {
             chefIndex2 = rand() % NUM_CHEFS;
         } while (chefIndex1 == chefIndex2);
-        States newS = s;
+
         newS.chef[chefIndex1] = s.chef[chefIndex2];
         newS.chef[chefIndex2] = s.chef[chefIndex1];
         for (int i = 0; i < DISH_PER_CHEF; i++) {
@@ -370,8 +362,10 @@ States r::randomChef(States s, CList *chefList, RList *recipeList) {
             newS.recipe[chefIndex2 * DISH_PER_CHEF + i] =
                 s.recipe[chefIndex1 * DISH_PER_CHEF + i];
         }
-        return newS;
     }
+    SARunner saRunner(rl, c, r, ITER_RECIPE, T_MAX_RECIPE, T_MAX_RECIPE / 10,
+                      false, e::getTotalPrice, f::t_dist_slow);
+    return saRunner.run(&newS);
 }
 
 void swap(Recipe *&a, Recipe *&b) {
@@ -409,8 +403,8 @@ double f::one_over_n(int stepMax, int step, double tMax, double tMin) {
     return tMax / std::pow(step + 1, 0.1);
 }
 
-void r00::unrepeatedRandomRecipe(std::vector<Recipe *> *rl, Recipe **rs,
-                                 int size, int index) {
+void Randomizer::unrepeatedRandomRecipe(std::vector<Recipe *> *rl, Recipe **rs,
+                                        int size, int index) const {
     int count = 0;
     Recipe *r;
     do {
@@ -422,17 +416,17 @@ void r00::unrepeatedRandomRecipe(std::vector<Recipe *> *rl, Recipe **rs,
     }
     rs[index] = r;
 }
-States perfectTool(States &s) {
+States perfectTool(const RuleInfo &rl, States &s) {
     for (int i = 0; i < NUM_CHEFS; i++) {
         auto chef = s.chef[i];
         if (chef->getTool() == NO_TOOL)
             continue;
         chef->modifyTool(NOT_EQUIPPED);
-        int max = e0::sumPrice(s);
+        int max = e0::sumPrice(rl, s);
         ToolEnum bestTool = NOT_EQUIPPED;
         for (int j = 0; j < 6; j++) {
             chef->modifyTool(ToolEnum(j));
-            int temp = e0::sumPrice(s);
+            int temp = e0::sumPrice(rl, s);
             if (temp > max) {
                 max = temp;
                 bestTool = ToolEnum(j);
@@ -443,7 +437,7 @@ States perfectTool(States &s) {
     }
     return s;
 }
-States perfectChef(States &s, CList *c) {
+States perfectChef(const RuleInfo &rl, States &s, CList *c) {
     // perform a one-shot deviation from current state
     States newS = s;
     States bestS = s;
@@ -452,10 +446,12 @@ States perfectChef(States &s, CList *c) {
             if (repeatChef(&chef, newS.chef, i)) {
                 continue;
             }
+
             newS.chef[i] = &chef;
-            States pS = perfectTool(newS);
-            int pSs = e0::sumPrice(pS);
-            int bestSs = e0::sumPrice(bestS);
+            States pS = perfectTool(rl, newS);
+            int pSs = e0::sumPrice(rl, pS);
+            int bestSs = e0::sumPrice(rl, bestS);
+
             if (pSs > bestSs) {
                 bestS = pS;
             }

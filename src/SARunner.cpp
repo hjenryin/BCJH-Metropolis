@@ -11,19 +11,21 @@
 #include "exception.hpp"
 // #include "activityRule.hpp"
 #include <limits.h>
-SARunner::SARunner(CList *chefList, RList *recipeList, int stepMax, int tMax,
-                   int tMin, e::GetEnergy getEnergyFunc,
-                   r::RandomMove randomMoveFunc,
-                   f::CoolingSchedule coolingScheduleFunc) {
-    this->chefList = chefList;
-    this->recipeList = recipeList;
-    this->randomMoveFunc = randomMoveFunc;
-    this->coolingScheduleFunc = coolingScheduleFunc;
-    this->stepMax = stepMax;
-    this->tMax = tMax;
-    this->tMin = tMin;
+SARunner::SARunner(const RuleInfo *rl, CList *chefList, RList *recipeList,
+                   int stepMax, int tMax, int tMin, bool randomizeChef,
+                   e::GetEnergy getEnergyFunc,
+                   f::CoolingSchedule coolingScheduleFunc)
+    : rl(rl), chefList(chefList), recipeList(recipeList),
+      coolingScheduleFunc(coolingScheduleFunc), getEnergyFunc(getEnergyFunc),
+      stepMax(stepMax), tMax(tMax), tMin(tMin) {
+    if (randomizeChef) {
+        this->randomMoveFunc = new ChefRandomizer(chefList, recipeList, rl);
+    } else {
+        this->randomMoveFunc = new RecipeRandomizer(chefList, recipeList, rl);
+    }
+
     this->history = new History[stepMax];
-    this->getEnergyFunc = getEnergyFunc;
+
 #ifdef SEARCH_TARGET_SCORE
     // if (MODE != 2) {
     //     std::cout << "config.hpp中改了不该改的东西，请改回来" << std::endl;
@@ -34,7 +36,10 @@ SARunner::SARunner(CList *chefList, RList *recipeList, int stepMax, int tMax,
     this->targetScore = INT_MAX;
 #endif
 }
-SARunner::~SARunner() { delete[] this->history; }
+SARunner::~SARunner() {
+    delete[] this->history;
+    delete this->randomMoveFunc;
+}
 States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
     States s;
 
@@ -96,7 +101,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
     } else {
         s = *s0;
     }
-    int energy = getEnergyFunc(s, this->chefList, this->recipeList, false);
+    int energy = getEnergyFunc(*rl, s, this->chefList, this->recipeList, false);
     // std::cout << "Initial energy: " << energy << std::endl;
     this->bestState = s;
     this->bestEnergy = energy;
@@ -117,7 +122,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
         }
         States newS;
         try {
-            newS = randomMoveFunc(s, this->chefList, this->recipeList);
+            newS = (*randomMoveFunc)(s);
 
         } catch (NoRecipeException &e) {
             std::cout << e.what() << std::endl;
@@ -129,14 +134,18 @@ States SARunner::run(States *s0, bool progress, bool silent,
         // std::cin >> step;
         // print(newS);
         int newEnergy =
-            getEnergyFunc(newS, this->chefList, this->recipeList, false);
+            getEnergyFunc(*rl, newS, this->chefList, this->recipeList, false);
         double prob = 0;
         int delta = energy - newEnergy;
-        if (delta / t < -30) {
+        // if (delta != 0) {
+        //     std::cout << "larger" << std::endl;
+        // }
+        double orig_ratio = delta / t;
+        if (orig_ratio < -30) {
             prob = 1.01;
         } else {
             // prob = 1.0 / (1 + std::exp(delta / (3 * t + 0.0)));
-            prob = std::exp(-delta / t);
+            prob = std::exp(-orig_ratio);
         }
         if (prob > (double)rand() / RAND_MAX) {
             s = newS;
@@ -152,7 +161,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
             this->bestState = s;
             if (progress && !silent) {
 
-                int tmp = e0::sumPrice(this->bestState);
+                int tmp = e0::sumPrice(*rl, this->bestState);
                 std::cout << " ";
             }
         }
@@ -216,6 +225,6 @@ void SARunner::print(States s, bool verbose) {
         //         getPrice(*s.chef[i], *s.recipe[r++], true);
         //     }
         // }
-        this->getEnergyFunc(s, this->chefList, this->recipeList, true);
+        this->getEnergyFunc(*rl, s, this->chefList, this->recipeList, true);
     }
 }

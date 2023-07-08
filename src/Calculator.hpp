@@ -42,21 +42,30 @@ class BanquetAddRule {
         buff += rule.buff;
     }
 };
-struct BanquetRule;
+struct BanquetRuleTogether;
+
+class BanquetRule {
+  public:
+    BanquetAddRule addRule;
+    BanquetBaseRule baseRule;
+    virtual void oneMore() = 0;
+};
 /**
  * @brief 描述“下阶段blahblah”的规则，即不受“意图生效次数”的影响
  *
  */
-struct BanquetStrictRule {
-    BanquetAddRule addRule;
-    BanquetBaseRule baseRule;
+struct BanquetStrictRule : public BanquetRule {
+    void oneMore() {
+        std::cout << "BanquetStrictRule has no oneMore()";
+        exit(1);
+    }
 };
+
 class BanquetLenientRule {
     friend BanquetInfo getPrice(Skill &, Recipe *, BanquetRule, bool);
 
+
   public:
-    BanquetAddRule addRule;
-    BanquetBaseRule baseRule;
     BanquetLenientRule() = default;
     void oneMore() { this->duplicateTime += 1; }
 
@@ -79,7 +88,7 @@ class BanquetLenientRule {
         baseRule.add(rule.baseRule);
     }
 };
-struct BanquetRule {
+struct BanquetRuleTogether {
     BanquetLenientRule lenientRule;
     BanquetStrictRule
         strictRule; // 描述“下阶段blahblah”的规则，即不受“意图生效次数”的影响
@@ -91,7 +100,9 @@ struct ActivityBuff {
 };
 int getPrice(Skill &, Recipe &recipe, ActivityBuff *p = NULL,
              bool verbose = false);
+
 BanquetInfo getPrice(Skill &, Recipe *recipe, BanquetRule rule,
                      bool verbose = false);
+
 
 #endif
