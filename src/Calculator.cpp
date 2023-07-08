@@ -91,7 +91,7 @@ BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule r, bool verbose) {
         if (verbose)
             std::cout << "Grade 0" << std::endl;
         {
-            BanquetInfo b = {0, 0};
+            BanquetInfo b = {0, 50};
             return b;
         }
     }
