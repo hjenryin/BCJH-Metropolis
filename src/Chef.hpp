@@ -29,6 +29,7 @@ class Chef {
     std::string name;
     Skill skill;
     Skill companyBuff;
+    Skill nextBuff;
     std::vector<Recipe *> recipeCapable;
     std::vector<Recipe *> recipeLearned;
 

@@ -198,79 +198,84 @@ void Skill::loadJson(Json::Value &v) {
         int id = skill["skillId"].asInt();
         skillList[id] = Skill();
         for (auto effect : skill["effect"]) {
-            auto skill = &skillList[id];
+            Skill skill;
             std::string condition = effect["condition"].asString();
             if (condition != "Global") {
                 if (condition == "Partial") {
-                    skill->self = false;
+                    skillList[id].type = PARTIAL;
                 } else if (condition == "Self") {
-                    skill->self = true;
+                    skillList[id].type = SELF;
+                } else if (condition == "Next") {
+                    skillList[id].type = NEXT;
                 }
                 std::string type = effect["type"].asString();
                 int value = effect["value"].asInt();
                 if (type == "Gold_Gain") {
-                    skill->coinBuff = value;
+                    skill.coinBuff = value;
                 } else if (type == "Stirfry") {
-                    skill->ability.stirfry = value;
+                    skill.ability.stirfry = value;
                 } else if (type == "Bake") {
-                    skill->ability.bake = value;
+                    skill.ability.bake = value;
                 } else if (type == "Boil") {
-                    skill->ability.boil = value;
+                    skill.ability.boil = value;
                 } else if (type == "Steam") {
-                    skill->ability.steam = value;
+                    skill.ability.steam = value;
                 } else if (type == "Fry") {
-                    skill->ability.fry = value;
+                    skill.ability.fry = value;
                 } else if (type == "Knife") {
-                    skill->ability.knife = value;
+                    skill.ability.knife = value;
                 } else if (type == "UseStirfry") {
-                    skill->abilityBuff.stirfry = value;
+                    skill.abilityBuff.stirfry = value;
                 } else if (type == "UseBake") {
-                    skill->abilityBuff.bake = value;
+                    skill.abilityBuff.bake = value;
                 } else if (type == "UseBoil") {
-                    skill->abilityBuff.boil = value;
+                    skill.abilityBuff.boil = value;
                 } else if (type == "UseSteam") {
-                    skill->abilityBuff.steam = value;
+                    skill.abilityBuff.steam = value;
                 } else if (type == "UseFry") {
-                    skill->abilityBuff.fry = value;
+                    skill.abilityBuff.fry = value;
                 } else if (type == "UseKnife") {
-                    skill->abilityBuff.knife = value;
+                    skill.abilityBuff.knife = value;
                 } else if (type == "UseSweet") {
-                    skill->flavorBuff.sweet = value;
+                    skill.flavorBuff.sweet = value;
                 } else if (type == "UseSour") {
-                    skill->flavorBuff.sour = value;
+                    skill.flavorBuff.sour = value;
                 } else if (type == "UseSalty") {
-                    skill->flavorBuff.salty = value;
+                    skill.flavorBuff.salty = value;
                 } else if (type == "UseBitter") {
-                    skill->flavorBuff.bitter = value;
+                    skill.flavorBuff.bitter = value;
                 } else if (type == "UseSpicy") {
-                    skill->flavorBuff.spicy = value;
+                    skill.flavorBuff.spicy = value;
                 } else if (type == "UseTasty") {
-                    skill->flavorBuff.tasty = value;
+                    skill.flavorBuff.tasty = value;
                 } else if (type == "UseVegetable") {
-                    skill->materialBuff.vegetable = value;
+                    skill.materialBuff.vegetable = value;
                 } else if (type == "UseMeat") {
-                    skill->materialBuff.meat = value;
+                    skill.materialBuff.meat = value;
                 } else if (type == "UseFish") {
-                    skill->materialBuff.fish = value;
+                    skill.materialBuff.fish = value;
                 } else if (type == "UseCreation") {
-                    skill->materialBuff.creation = value;
+                    skill.materialBuff.creation = value;
                 } else if (type == "CookbookPrice") {
                     auto effects = effect["conditionValueList"];
                     for (auto &e : effects) {
                         int rarity = getInt(e);
-                        skill->rarityBuff[rarity] = value;
+                        skill.rarityBuff[rarity] = value;
                     }
                 }
+                skillList[id].add(skill);
             }
         }
     }
 }
 void Chef::addSkill(int id) {
     auto skill = Skill::skillList[id];
-    if (skill.self) {
+    if (skill.type == Skill::SELF) {
         this->skill.add(skill);
-    } else {
+    } else if (skill.type ==Skill::PARTIAL) {
         this->companyBuff.add(skill);
+    }else if (skill.type == Skill::NEXT) {
+        this->nextBuff.add(skill);
     }
 }
 

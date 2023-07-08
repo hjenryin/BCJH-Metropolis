@@ -140,9 +140,10 @@ class RarityBuff {
     }
 };
 class Skill {
-  private:
   public:
-    bool self = true;
+    enum Type { SELF, NEXT, PARTIAL };
+    Type type = SELF;
+    bool next = false;
     static std::map<int, Skill> skillList;
     CookAbility ability;
     AbilityBuff abilityBuff;

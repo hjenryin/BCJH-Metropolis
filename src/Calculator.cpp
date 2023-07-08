@@ -2,11 +2,10 @@
 #include "Chef.hpp"
 #include <cmath>
 
-int getPrice(Chef &chef, Skill &companyBuff, Recipe &recipe,
-             ActivityBuff *activityBuff, bool verbose) {
+int getPrice(Skill &skill, Recipe &recipe, ActivityBuff *activityBuff,
+             bool verbose) {
     // if (verbose)
     //     std::cout << chef.name << " " << recipe.name << std::endl;
-    auto skill = chef.skill + companyBuff;
     int grade = skill.ability / recipe.cookAbility;
     // std::cout << grade << std::endl;
     int gradebuff = 0;
@@ -54,7 +53,7 @@ int getPrice(Chef &chef, Skill &companyBuff, Recipe &recipe,
                     recipe.cookAbility * skill.abilityBuff +
                     recipe.materialCategories * skill.materialBuff +
                     rb.dishBuff;
-    int buff = gradebuff + skillBuff + (chef.coinBuffOn ? skill.coinBuff : 0) +
+    int buff = gradebuff + skillBuff + (Chef::coinBuffOn ? skill.coinBuff : 0) +
                activityBuffValue;
     // std::cout << buff << std::endl;
     double bonus = 1.0 + buff / 100.0;
@@ -72,7 +71,7 @@ int getPrice(Chef &chef, Skill &companyBuff, Recipe &recipe,
                   << recipe.cookAbility * skill.abilityBuff << " + "
                   << recipe.materialCategories * skill.materialBuff << " + "
                   << rb.dishBuff << ")"
-                  << " + 金币" << (chef.coinBuffOn ? skill.coinBuff : 0) << ")"
+                  << " + 金币" << (Chef::coinBuffOn ? skill.coinBuff : 0) << ")"
                   << std::endl;
         if (activityBuff != NULL)
             std::cout << "规则: " << activityBuffValue << std::endl;
@@ -82,10 +81,9 @@ int getPrice(Chef &chef, Skill &companyBuff, Recipe &recipe,
     return totalPrice;
 }
 
-BanquetInfo getPrice(Chef *chef, Skill &companyBuff, Recipe *recipe,
-                     BanquetRule r, bool verbose) {
+BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRule r,
+                     bool verbose) {
     // std::cout << chef.name << " " << recipe.name << std::endl;
-    auto skill = chef->skill + companyBuff;
     int grade = skill.ability / recipe->cookAbility;
     // std::cout << grade << std::endl;
     int gradebuff = 0;
@@ -122,15 +120,23 @@ BanquetInfo getPrice(Chef *chef, Skill &companyBuff, Recipe *recipe,
     int skillBuff = recipe->flavor * skill.flavorBuff +
                     recipe->cookAbility * skill.abilityBuff +
                     recipe->materialCategories * skill.materialBuff +
-                    rb.dishBuff + (chef->coinBuffOn ? skill.coinBuff : 0);
+                    rb.dishBuff + (Chef::coinBuffOn ? skill.coinBuff : 0);
     int buff = gradebuff + skillBuff + intentionAddBuff;
     int singlePrice = (int)std::ceil((recipe->price + rule.baseRule.directAdd) *
                                      (1.0 + intentionBaseBuff / 100.0) *
                                      (1.0 + buff / 100.0));
     // std::cout << singlePrice << std::endl;
     int totalPrice = singlePrice * rb.dishNum;
+    int full;
+    if (rule.addRule.fullAdd) {
+        full = recipe->rarity + rule.addRule.full;
+    } else {
+        full = rule.addRule.full;
+    }
+    BanquetInfo b = {totalPrice, full};
     if (verbose) {
         // chef->print();
+        std::cout << "╭--> ";
         recipe->print();
         std::cout << "等级: " << grade << "，加成" << gradebuff << "%"
                   << std::endl;
@@ -139,20 +145,14 @@ BanquetInfo getPrice(Chef *chef, Skill &companyBuff, Recipe *recipe,
                   << recipe->cookAbility * skill.abilityBuff << " + 食材"
                   << recipe->materialCategories * skill.materialBuff
                   << " + 修炼" << rb.dishBuff << " + 金币"
-                  << (chef->coinBuffOn ? skill.coinBuff : 0) << ")"
+                  << (Chef::coinBuffOn ? skill.coinBuff : 0) << ")"
                   << std::endl;
         std::cout << "Intention: (基础+" << rule.baseRule.directAdd << "，+"
                   << intentionBaseBuff << "%；售价+" << intentionAddBuff
                   << "%) " << std::endl;
         std::cout << "售价总计Buff: " << buff << "%" << std::endl;
-        std::cout << "╰--> 总价: " << totalPrice << std::endl;
+        std::cout << "╰--> 饱腹度: " << full << "\t总价: " << totalPrice
+                  << std::endl;
     }
-    int full;
-    if (rule.addRule.fullAdd) {
-        full = recipe->rarity + rule.addRule.full;
-    } else {
-        full = rule.addRule.full;
-    }
-    BanquetInfo b = {totalPrice, full};
     return b;
 }

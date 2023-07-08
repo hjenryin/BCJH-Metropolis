@@ -52,7 +52,7 @@ struct BanquetStrictRule {
     BanquetBaseRule baseRule;
 };
 class BanquetLenientRule {
-    friend BanquetInfo getPrice(Chef *, Skill &, Recipe *, BanquetRule, bool);
+    friend BanquetInfo getPrice(Skill &, Recipe *, BanquetRule, bool);
 
   public:
     BanquetAddRule addRule;
@@ -89,9 +89,9 @@ struct ActivityBuff {
     std::map<int, int> rarityBuff; // 几火就是几，不用减一
     std::map<FlavorEnum, int> flavorBuff;
 };
-int getPrice(Chef &chef, Skill &, Recipe &recipe, ActivityBuff *p = NULL,
+int getPrice(Skill &, Recipe &recipe, ActivityBuff *p = NULL,
              bool verbose = false);
-BanquetInfo getPrice(Chef *chef, Recipe *recipe, Skill &, BanquetRule rule,
+BanquetInfo getPrice(Skill &, Recipe *recipe, BanquetRule rule,
                      bool verbose = false);
 
 #endif
