@@ -34,47 +34,15 @@ void loadUltimateSkills(std::map<int, int> &ultimateSkills,
     splitUltimateSkill(ultimateSkills, usrBuff["Partial"]["id"]);
     splitUltimateSkill(ultimateSkills, usrBuff["Self"]["id"]);
 }
-void loadChef(CList &chefList, std::stringstream *ss) {
+void loadChef(CList &chefList, Json::Value &gameData, Json::Value &usrData) {
     if (MODE == 2) {
         Chef::coinBuffOn = false;
     } else {
         Chef::coinBuffOn = true;
     }
 
-    Json::Value gameData;
-    // std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
-    // std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
-
-    std::ifstream gameDataF("data.min.json", std::ifstream::binary);
-    if (!gameDataF.good()) {
-        gameDataF.open("../data/data.min.json", std::ifstream::binary);
-        if (!gameDataF.good()) {
-            std::cout << "data not exist" << std::endl;
-            throw FileNotExistException();
-        }
-    }
-    gameDataF >> gameData;
-    gameDataF.close();
-    std::cout << "gameData loaded" << std::endl;
-    Json::Value usrData;
-    if (ss != NULL) {
-        *ss >> usrData;
-    } else {
-        std::ifstream usrDataF("userData.json", std::ifstream::binary);
-        if (!usrDataF.good()) {
-            usrDataF.open("../data/userData.json", std::ifstream::binary);
-            if (!usrDataF.good()) {
-                std::cout << "user data not exist" << std::endl;
-                throw FileNotExistException();
-            }
-        }
-        usrDataF >> usrData;
-
-        usrDataF.close();
-    }
-
     initBuff(usrData["userUltimate"]);
-    const Json::Value chefs = gameData["chefs"];
+    Json::Value chefs = gameData["chefs"];
     Skill::loadJson(gameData["skills"]);
     std::map<int, int> ultimateSkills;
     loadUltimateSkills(ultimateSkills, usrData["userUltimate"]);

@@ -81,7 +81,8 @@ int getPrice(Chef &chef, Recipe &recipe, ActivityBuff *activityBuff,
     return totalPrice;
 }
 
-BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule r, bool verbose) {
+BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRuleTogether r,
+                     bool verbose) {
     // std::cout << chef.name << " " << recipe.name << std::endl;
     int grade = chef->skill.ability / recipe->cookAbility;
     // std::cout << grade << std::endl;
@@ -91,7 +92,7 @@ BanquetInfo getPrice(Chef *chef, Recipe *recipe, BanquetRule r, bool verbose) {
         if (verbose)
             std::cout << "Grade 0" << std::endl;
         {
-            BanquetInfo b = {0, 0};
+            BanquetInfo b = {-100000, 0};
             return b;
         }
     }

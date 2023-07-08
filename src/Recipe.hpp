@@ -103,6 +103,28 @@ class Flavor {
         }
         return sum;
     }
+    bool operator[](std::string flavor) {
+        if (flavor == "Sweet") {
+            return this->sweet;
+        }
+        if (flavor == "Salty") {
+            return this->salty;
+        }
+        if (flavor == "Sour") {
+            return this->sour;
+        }
+        if (flavor == "Bitter") {
+            return this->bitter;
+        }
+        if (flavor == "Spicy") {
+            return this->spicy;
+        }
+        if (flavor == "Tasty") {
+            return this->tasty;
+        }
+
+        return false;
+    }
 };
 
 class Recipe {
@@ -126,5 +148,5 @@ class Recipe {
     static void initRarityBuff(Json::Value &usrBuff);
 };
 typedef std::vector<Recipe> RList;
-void loadRecipe(RList &recipeList, std::stringstream *ss = NULL);
+void loadRecipe(RList &recipeList, Json::Value &gameData, Json::Value &usrData);
 #endif
