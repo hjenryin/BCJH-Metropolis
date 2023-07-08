@@ -81,8 +81,7 @@ int getPrice(Skill &skill, Recipe &recipe, ActivityBuff *activityBuff,
     return totalPrice;
 }
 
-
-BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRule r,
+BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRuleTogether r,
                      bool verbose) {
 
     // std::cout << chef.name << " " << recipe.name << std::endl;
