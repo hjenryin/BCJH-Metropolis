@@ -28,6 +28,7 @@ class Chef {
     void NoTool() { this->tool = NO_TOOL; }
     std::string name;
     Skill skill;
+    Skill companyBuff;
     std::vector<Recipe *> recipeCapable;
     std::vector<Recipe *> recipeLearned;
 

@@ -251,14 +251,19 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
             totalFull = 0;
             scoreCache = 0;
             fullCache = 0;
-            for (int i = 0; i < 9; i++) {
+            Skill companyBuff;
+            for (int c = 0; c < CHEFS_PER_GUEST; c++) {
+                companyBuff.add(s.chef[d2 + c]->companyBuff);
+            }
+            for (int i = 0; i < DISH_PER_CHEF * CHEFS_PER_GUEST; i++) {
                 if ((log & 0x10) && i % 3 == 0) {
                     std::cout << "VERBOSE************" << std::endl;
                     s.chef[d2 + i / 3]->print();
                     std::cout << "************" << std::endl;
                 }
-                bi[d + i] = getPrice(s.chef[d2 + i / 3], s.recipe[d + i],
-                                     rule[d + i], (log & 0x10));
+                bi[d + i] =
+                    getPrice(s.chef[d2 + i / 3], companyBuff, s.recipe[d + i],
+                             rule[d + i], (log & 0x10));
                 totalFull += bi[d + i].full;
                 totalScore += bi[d + i].price;
                 scoreCache += bi[d + i].price;
@@ -307,11 +312,15 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
             if (log & 0x1)
                 std::cout << "厨师：" << s.chef[i]->name << std::endl
                           << "菜谱：";
+            Skill companyBuff;
+            for (int c = 0; c < NUM_CHEFS; c++) {
+                companyBuff.add(s.chef[c]->companyBuff);
+            }
             for (int j = 0; j < DISH_PER_CHEF; j++) {
                 if (log & 0x1)
                     std::cout << s.recipe[r]->name << "；";
-                scoreCache +=
-                    getPrice(*s.chef[i], *s.recipe[r++], p, (log & 0x10));
+                scoreCache += getPrice(*s.chef[i], companyBuff, *s.recipe[r++],
+                                       p, (log & 0x10));
             }
             energy += scoreCache;
             if (log & 0x1)

@@ -199,7 +199,13 @@ void Skill::loadJson(Json::Value &v) {
         skillList[id] = Skill();
         for (auto effect : skill["effect"]) {
             auto skill = &skillList[id];
-            if (effect["condition"].asString() != "Global") {
+            std::string condition = effect["condition"].asString();
+            if (condition != "Global") {
+                if (condition == "Partial") {
+                    skill->self = false;
+                } else if (condition == "Self") {
+                    skill->self = true;
+                }
                 std::string type = effect["type"].asString();
                 int value = effect["value"].asInt();
                 if (type == "Gold_Gain") {
@@ -256,7 +262,14 @@ void Skill::loadJson(Json::Value &v) {
         }
     }
 }
-void Chef::addSkill(int id) { this->skill.add(Skill::skillList[id]); }
+void Chef::addSkill(int id) {
+    auto skill = Skill::skillList[id];
+    if (skill.self) {
+        this->skill.add(skill);
+    } else {
+        this->companyBuff.add(skill);
+    }
+}
 
 int CookAbility::operator/(const Ability &a) {
     int grade = 5;

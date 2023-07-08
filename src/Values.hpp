@@ -142,6 +142,7 @@ class RarityBuff {
 class Skill {
   private:
   public:
+    bool self = true;
     static std::map<int, Skill> skillList;
     CookAbility ability;
     AbilityBuff abilityBuff;
@@ -170,6 +171,11 @@ class Skill {
         this->flavorBuff.add(s.flavorBuff);
         this->materialBuff.add(s.materialBuff);
         this->coinBuff += s.coinBuff;
+    }
+    Skill operator+(const Skill &s) {
+        Skill tmp(*this);
+        tmp.add(s);
+        return tmp;
     }
     void print() {
         this->ability.print();
