@@ -126,15 +126,15 @@ class CookAbility : public Ability {
     int operator*(const AbilityBuff &a);
 };
 class RarityBuff {
-    int rarityBuff[5] = {0, 0, 0, 0, 0};
+    int data[5] = {0, 0, 0, 0, 0};
 
   public:
     /*几火就是几，不用减一*/
-    int &operator[](int i) { return rarityBuff[i - 1]; }
+    int &operator[](int i) { return data[i - 1]; }
     void print() {
         std::cout << "RarityBuff: ";
         for (int i = 0; i < 5; i++) {
-            std::cout << rarityBuff[i] << "% ";
+            std::cout << data[i] << "% ";
         }
         std::cout << std::endl;
     }
@@ -165,14 +165,17 @@ class Skill {
     }
     Skill getSkill(int id) { return skillList[id]; }
     static void loadJson(Json::Value &v);
-    void add(const Skill &s) {
+    void add(Skill &s) {
         this->ability.add(s.ability);
         this->abilityBuff.add(s.abilityBuff);
         this->flavorBuff.add(s.flavorBuff);
         this->materialBuff.add(s.materialBuff);
         this->coinBuff += s.coinBuff;
+        for (int i = 0; i < 5; i++) {
+            this->rarityBuff[i + 1] += s.rarityBuff[i + 1];
+        }
     }
-    Skill operator+(const Skill &s) {
+    Skill operator+(Skill &s) {
         Skill tmp(*this);
         tmp.add(s);
         return tmp;
