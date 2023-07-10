@@ -8,6 +8,7 @@
 #include <exception>
 #include "Recipe.hpp"
 #include "Values.hpp"
+#include "Types.hpp"
 #include <vector>
 class Recipe;
 

@@ -6,7 +6,7 @@
 #include <cmath>
 #include "../config.hpp"
 #include "../src/Chef.hpp"
-#include "types.hpp"
+#include "States.hpp"
 #include "exception.hpp"
 class SARunner;
 extern double randomRecipeTime;

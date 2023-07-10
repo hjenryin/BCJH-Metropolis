@@ -2,7 +2,7 @@
 #ifndef RULE_HPP
 #define RULE_HPP
 #include "Calculator.hpp"
-#include "types.hpp"
+#include "States.hpp"
 // 风云宴 韩湘子
 int banquetRule2(BanquetStrictRule **, BanquetLenientRule **, States &, Skill *,
                  int);
