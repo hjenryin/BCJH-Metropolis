@@ -1,5 +1,5 @@
 #include "json.hpp"
-int getInt(Json::Value &v) {
+int getInt(const Json::Value &v) {
     try {
         return v.asInt();
     } catch (Json::LogicError &e) {

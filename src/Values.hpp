@@ -2,6 +2,39 @@
 #define VALUE_HPP
 #include <iostream>
 #include "include/json/json.h"
+#define TOOL_ENUM_START 0
+#define FLAVOR_ENUM_START 0x100
+enum ToolEnum {
+    NO_TOOL = TOOL_ENUM_START,
+    NOT_EQUIPPED,
+    STIRFRY,
+    BAKE,
+    BOIL,
+    STEAM,
+    FRY,
+    KNIFE,
+    TOOL_ENUM_END
+};
+const int ABILITY_ENUM_START = TOOL_ENUM_START + 2;
+const int ABILITY_ENUM_END = TOOL_ENUM_END;
+enum FlavorEnum {
+    UNIDENTIFIED_FLAVOR = FLAVOR_ENUM_START,
+    SWEET,
+    SALTY,
+    SOUR,
+    BITTER,
+    SPICY,
+    TASTY,
+    FLAVOR_ENUM_END
+};
+
+enum ToolFileType {
+    NO_FILE__NO_TOOL,
+    EMPTY_FILE__NOT_EQUIPPED,
+    CUSTOMIZE_TOOL
+};
+
+int getEnum(const std::string &s);
 class MaterialCategoryBuff {
   public:
     int vegetable;
@@ -15,7 +48,7 @@ class MaterialCategoryBuff {
         this->fish += m.fish;
         this->creation += m.creation;
     }
-    void print() {
+    void print() const {
         std::cout << "MaterialCategoryBuff: Vegetable: " << this->vegetable
                   << "; Meat: " << this->meat << "; Fish: " << this->fish
                   << "; Creation: " << this->creation << std::endl;
@@ -39,7 +72,7 @@ class FlavorBuff {
         this->spicy += f.spicy;
         this->tasty += f.tasty;
     }
-    void print() {
+    void print() const {
         std::cout << "FlavorBuff: Sweet: " << this->sweet
                   << "; Salty: " << this->salty << "; Sour: " << this->sour
                   << "; Bitter: " << this->bitter << "; Spicy: " << this->spicy
@@ -83,7 +116,7 @@ class Ability {
         this->knife += a;
     }
     void print(std::string title, std::string end = "\n",
-               bool percent = false) {
+               bool percent = false) const {
         auto perstr = percent ? "%" : "";
         std::cout
             << title
@@ -105,6 +138,29 @@ class Ability {
             std::cout << "无";
         std::cout << end;
     }
+    /* Knife, Stirfry, Bake, Boil, Steam, Fry */
+    const int operator[](int name) {
+        if (name == KNIFE) {
+            return this->knife;
+        }
+        if (name == STIRFRY) {
+            return this->stirfry;
+        }
+        if (name == BAKE) {
+            return this->bake;
+        }
+        if (name == BOIL) {
+            return this->boil;
+        }
+        if (name == STEAM) {
+            return this->steam;
+        }
+        if (name == FRY) {
+            return this->fry;
+        }
+        std::cout << "Ability::operator[]: Error: " << name << std::endl;
+        exit(1);
+    }
 };
 
 class AbilityBuff : public Ability {
@@ -112,7 +168,7 @@ class AbilityBuff : public Ability {
     AbilityBuff() {}
     AbilityBuff(int stirfry, int bake, int boil, int steam, int fry, int knife)
         : Ability(stirfry, bake, boil, steam, fry, knife) {}
-    void print() { this->Ability::print("AbilityBuff: ", "\n", true); }
+    void print() const { this->Ability::print("AbilityBuff: ", "\n", true); }
 };
 class CookAbility : public Ability {
 
@@ -120,9 +176,9 @@ class CookAbility : public Ability {
     CookAbility(int stirfry, int bake, int boil, int steam, int fry, int knife)
         : Ability(stirfry, bake, boil, steam, fry, knife) {}
     CookAbility() : Ability() {}
-    CookAbility(Json::Value &v);
-    int operator/(const Ability &a);
-    void print() { this->Ability::print("CookAbility: "); }
+    CookAbility(const Json::Value &v);
+    int operator/(const Ability &a) const;
+    void print() const { this->Ability::print("CookAbility: "); }
     int operator*(const AbilityBuff &a);
 };
 class RarityBuff {
@@ -131,7 +187,8 @@ class RarityBuff {
   public:
     /*几火就是几，不用减一*/
     int &operator[](int i) { return data[i - 1]; }
-    void print() {
+    int operator[](int i) const { return data[i - 1]; }
+    void print() const {
         std::cout << "RarityBuff: ";
         for (int i = 0; i < 5; i++) {
             std::cout << data[i] << "% ";
@@ -140,10 +197,11 @@ class RarityBuff {
     }
 };
 class Skill {
+
   public:
     enum Type { SELF, NEXT, PARTIAL };
     Type type = SELF;
-    bool next = false;
+
     static std::map<int, Skill> skillList;
     CookAbility ability;
     AbilityBuff abilityBuff;
@@ -165,8 +223,8 @@ class Skill {
         this->coinBuff = 0;
     }
     Skill getSkill(int id) { return skillList[id]; }
-    static void loadJson(Json::Value &v);
-    void add(Skill &s) {
+    static void loadJson(const Json::Value &v);
+    void operator+=(const Skill &s) {
         this->ability.add(s.ability);
         this->abilityBuff.add(s.abilityBuff);
         this->flavorBuff.add(s.flavorBuff);
@@ -176,12 +234,12 @@ class Skill {
             this->rarityBuff[i + 1] += s.rarityBuff[i + 1];
         }
     }
-    Skill operator+(Skill &s) {
+    Skill operator+(const Skill &s) {
         Skill tmp(*this);
-        tmp.add(s);
-        return tmp;
+        tmp += s;
+        return std::move(tmp);
     }
-    void print() {
+    void print() const {
         this->ability.print();
         this->abilityBuff.print();
         this->flavorBuff.print();
@@ -190,20 +248,5 @@ class Skill {
         this->rarityBuff.print();
     }
 };
-enum ToolEnum {
-    NO_TOOL = -2,
-    NOT_EQUIPPED = -1,
-    STIRFRY,
-    BAKE,
-    BOIL,
-    STEAM,
-    FRY,
-    KNIFE
-};
-enum FlavorEnum { UNIDENTIFIED = -1, SWEET, SALTY, SOUR, BITTER, SPICY, TASTY };
-enum ToolFileType {
-    NO_FILE__NO_TOOL,
-    EMPTY_FILE__NOT_EQUIPPED,
-    CUSTOMIZE_TOOL
-};
+
 #endif

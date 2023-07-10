@@ -30,10 +30,10 @@ class Chef {
     Skill skill;
     Skill companyBuff;
     Skill nextBuff;
-    std::vector<Recipe *> recipeCapable;
+    // std::vector<Recipe *> recipeCapable;
     std::vector<Recipe *> recipeLearned;
 
-    void loadRecipeCapable(std::vector<Recipe> &recipeList);
+    // void loadRecipeCapable(std::vector<Recipe> &recipeList);
     bool isCapable(Recipe *r);
 
     static void setGlobalBuff(CookAbility buff) { globalAbilityBuff = buff; }
@@ -50,7 +50,7 @@ class Chef {
 
     Chef(Json::Value &v, int ultimateSkillId);
     Chef() {}
-    void print();
+    void print() const;
     void modifyTool(ToolEnum);
     Chef addTool_modify_name(ToolEnum);
 };

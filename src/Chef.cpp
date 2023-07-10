@@ -161,13 +161,13 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
     this->tool = NOT_EQUIPPED;
 }
 
-void Chef::print() {
+void Chef::print() const {
     std::cout << this->id << ": " << this->name << "\t"
               << (this->male ? "M" : "") << (this->female ? "F" : "")
               << std::endl;
     this->skill.print();
 }
-CookAbility::CookAbility(Json::Value &v) {
+CookAbility::CookAbility(const Json::Value &v) {
     // std::cout << "Here" << std::endl;
     if (v.isMember("stirfry") && v.isMember("bake") && v.isMember("boil") &&
         v.isMember("fry") && v.isMember("knife")) {
@@ -193,7 +193,7 @@ CookAbility::CookAbility(Json::Value &v) {
         throw std::logic_error("CookAbility: Invalid Json");
     }
 }
-void Skill::loadJson(Json::Value &v) {
+void Skill::loadJson(const Json::Value &v) {
     for (auto skill : v) {
         int id = skill["skillId"].asInt();
         skillList[id] = Skill();
@@ -263,7 +263,7 @@ void Skill::loadJson(Json::Value &v) {
                         skill.rarityBuff[rarity] = value;
                     }
                 }
-                skillList[id].add(skill);
+                skillList[id] += skill;
             }
         }
     }
@@ -271,15 +271,15 @@ void Skill::loadJson(Json::Value &v) {
 void Chef::addSkill(int id) {
     auto skill = Skill::skillList[id];
     if (skill.type == Skill::SELF) {
-        this->skill.add(skill);
+        this->skill += skill;
     } else if (skill.type ==Skill::PARTIAL) {
-        this->companyBuff.add(skill);
+        this->companyBuff += skill;
     }else if (skill.type == Skill::NEXT) {
-        this->nextBuff.add(skill);
+        this->nextBuff += skill;
     }
 }
 
-int CookAbility::operator/(const Ability &a) {
+int CookAbility::operator/(const Ability &a) const {
     int grade = 5;
     if (a.stirfry != 0) {
         grade = grade < (this->stirfry / a.stirfry)
@@ -389,33 +389,33 @@ bool Chef::isCapable(Recipe *recipe) {
     }
     return false;
 }
-void Chef::loadRecipeCapable(std::vector<Recipe> &recipeList) {
-    if (this->tool == NO_TOOL) {
-        for (auto &recipe : recipeList) {
-            if (this->isCapable(&recipe)) {
-                this->recipeCapable.push_back(&recipe);
-            }
-        }
-    } else if (this->tool == NOT_EQUIPPED) {
-        std::vector<Recipe *> recipeListCopy;
-        for (auto &recipe : recipeList) {
-            recipeListCopy.push_back(&recipe);
-        }
-        for (int i = 0; i < 6; i++) {
-            this->modifyTool((ToolEnum)i);
-            auto iter = recipeListCopy.begin();
-            while (iter != recipeListCopy.end()) {
-                if (this->isCapable(*iter)) {
-                    this->recipeCapable.push_back(*iter);
-                    iter = recipeListCopy.erase(iter);
-                } else {
-                    iter++;
-                }
-            }
-        }
-        this->modifyTool(NOT_EQUIPPED);
-    }
-}
+// void Chef::loadRecipeCapable(std::vector<Recipe> &recipeList) {
+//     if (this->tool == NO_TOOL) {
+//         for (auto &recipe : recipeList) {
+//             if (this->isCapable(&recipe)) {
+//                 this->recipeCapable.push_back(&recipe);
+//             }
+//         }
+//     } else if (this->tool == NOT_EQUIPPED) {
+//         std::vector<Recipe *> recipeListCopy;
+//         for (auto &recipe : recipeList) {
+//             recipeListCopy.push_back(&recipe);
+//         }
+//         for (int i = 0; i < 6; i++) {
+//             this->modifyTool((ToolEnum)i);
+//             auto iter = recipeListCopy.begin();
+//             while (iter != recipeListCopy.end()) {
+//                 if (this->isCapable(*iter)) {
+//                     this->recipeCapable.push_back(*iter);
+//                     iter = recipeListCopy.erase(iter);
+//                 } else {
+//                     iter++;
+//                 }
+//             }
+//         }
+//         this->modifyTool(NOT_EQUIPPED);
+//     }
+// }
 void Chef::modifyTool(ToolEnum a) {
     if (this->tool == NO_TOOL)
         return;

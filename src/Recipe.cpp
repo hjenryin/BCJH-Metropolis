@@ -59,13 +59,12 @@ const struct MaterialList {
     int creation[6] = {11, 20, 21, 29, 34, 35};
 } materialList;
 
-void Recipe::print() {
+void Recipe::print(const std::string &startLine) const {
     std::cout << this->id << ": " << this->name << "（原价" << this->price
-              << "）" << std::endl;
-    std::cout << "Rarity: " << this->rarity;
+              << "）—— " << this->rarity << "火 * ";
     auto rb = rarityBuff[this->rarity - 1];
-    std::cout << " (Num: " << rb.dishNum << ", +" << rb.dishBuff << "%)"
-              << std::endl;
+    std::cout << rb.dishNum << ", +" << rb.dishBuff << "%" << std::endl;
+    std::cout << startLine;
     this->flavor.print("\t");
     this->materialCategories.print("\t");
     this->cookAbility.print();

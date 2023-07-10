@@ -21,8 +21,8 @@
 // ** 以下内容不建议修改，除非你清楚地知道这是什么意思 ** //
 // ************************************************** //
 
-#define T_MAX_CHEF TARGET_SCORE_APPROXIMATE / 100 // 选择厨师时的初始温度
-#define T_MAX_RECIPE                                                           \
+#define T_MAX_CHEF_orig TARGET_SCORE_APPROXIMATE / 100 // 选择厨师时的初始温度
+#define T_MAX_RECIPE_orig                                                      \
     TARGET_SCORE_APPROXIMATE / 400 // 对于每一组厨师，选择菜谱时的初始温度
 
 #define SEARCH_TARGET_SCORE                                                    \

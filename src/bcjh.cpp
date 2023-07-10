@@ -14,6 +14,11 @@
 #include "exception.hpp"
 #include <future>
 #include <vector>
+
+const int targetScore = 3170000;
+const int T_MAX_CHEF = targetScore / 100;
+const int T_MAX_RECIPE = targetScore / 400;
+
 bool Chef::coinBuffOn = true;
 void initChefRecipePairs(CList &, RList &);
 struct Result {
@@ -66,10 +71,11 @@ void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &calculate,
 }
 
 int main(int argc, char *argv[]) {
-
+    SARunner::init(T_MAX_CHEF, T_MAX_RECIPE, ITER_CHEF, ITER_RECIPE,
+                   targetScore);
     bool silent = false;
     int log = 0; // 0x0: 无输出 0x1: 正常输出 0x10: 详细输出
-    int seed = (int)time(NULL);
+    int seed = (int)(time(NULL) * 100);
     bool calculate = false;
     bool mp = true;
     parseArgs(argc, argv, silent, log, calculate, mp, seed);
@@ -94,9 +100,9 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    for (auto chef = chefList.begin(); chef != chefList.end(); chef++) {
-        chef->loadRecipeCapable(recipeList);
-    }
+    // for (auto chef = chefList.begin(); chef != chefList.end(); chef++) {
+    //     chef->loadRecipeCapable(recipeList);
+    // }
     // Count time used
     clock_t start, end;
     start = clock();
@@ -108,7 +114,6 @@ int main(int argc, char *argv[]) {
         if (!mp) {
             num_threads = 1;
         }
-        seed *= num_threads;
         std::cout << "启用" << num_threads
                   << "线程，建议期间不要离开窗口，否则可能影响速度。"
                   << std::endl;
@@ -145,9 +150,8 @@ int main(int argc, char *argv[]) {
         std::cout << "**************\n总分: " << result.score
                   << "\n***************" << std::endl;
         if (!silent) {
-            SARunner saRunnerPrint(
-                result.chefList, &result.recipeList, ITER_RECIPE, T_MAX_RECIPE,
-                0, e::getTotalPrice, r::randomRecipe, f::t_dist_fast);
+            SARunner saRunnerPrint(result.chefList, &result.recipeList, false,
+                                   e::getTotalPrice, f::t_dist_fast);
             saRunnerPrint.run(result.state, false, silent, "../out/recipe");
         }
         delete result.chefList;
@@ -164,8 +168,7 @@ Result run(const CList &chefList, RList &recipeList, int log, bool silent,
     CList *chefListPtr = new CList(chefList);
     *chefListPtr = chefList;
     srand(seed);
-    SARunner saRunner(chefListPtr, &recipeList, ITER_CHEF, T_MAX_CHEF,
-                      T_MAX_CHEF / 10, e::getTotalPrice, r::randomChef,
+    SARunner saRunner(chefListPtr, &recipeList, true, e::getTotalPrice,
                       f::t_dist_slow);
     // std::cout << log << std::endl;
     States *s = new States;
@@ -179,23 +182,24 @@ void calculator(CList &chefList, RList &recipeList) {
     std::ifstream f;
     f.open("../in/out.txt");
     States s;
-    for (int i = 0; i < NUM_CHEFS; i++) {
-        int c, t;
-        f >> c >> t;
-        if (t == NO_TOOL) {
-            t = 0;
-        }
-        s.chef[i] = &chefList[c * 6 + t];
-        s.chef[i]->print();
-    }
-    for (int i = 0; i < NUM_CHEFS * DISH_PER_CHEF; i++) {
-        int r;
-        f >> r;
-        s.recipe[i] = &recipeList[r];
-    }
-    f.close();
-    int score = e0::sumPrice(s, &chefList, &recipeList, false, true);
-    SARunner saRunner(&chefList, &recipeList, ITER_CHEF, T_MAX_CHEF, 0);
-    saRunner.print(s, true);
-    std::cout << "\n\nScore: " << score << std::endl;
+    throw std::runtime_error("Not implemented");
+    // for (int i = 0; i < NUM_CHEFS; i++) {
+    //     int c, t;
+    //     f >> c >> t;
+    //     if (t == NO_TOOL) {
+    //         t = 0;
+    //     }
+    //     s.chef[i] = &chefList[c * 6 + t];
+    //     s.chef[i]->print();
+    // }
+    // for (int i = 0; i < NUM_CHEFS * DISH_PER_CHEF; i++) {
+    //     int r;
+    //     f >> r;
+    //     s.recipe[i] = &recipeList[r];
+    // }
+    // f.close();
+    // int score = e0::sumPrice(s, &chefList, &recipeList, false, true);
+    // SARunner saRunner(&chefList, &recipeList, ITER_CHEF, T_MAX_CHEF, 0);
+    // saRunner.print(s, true);
+    // std::cout << "\n\nScore: " << score << std::endl;
 }

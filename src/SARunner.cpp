@@ -11,28 +11,29 @@
 #include "exception.hpp"
 // #include "activityRule.hpp"
 #include <limits.h>
-SARunner::SARunner(CList *chefList, RList *recipeList, int stepMax, int tMax,
-                   int tMin, e::GetEnergy getEnergyFunc,
-                   r::RandomMove randomMoveFunc,
-                   f::CoolingSchedule coolingScheduleFunc) {
-    this->chefList = chefList;
-    this->recipeList = recipeList;
-    this->randomMoveFunc = randomMoveFunc;
-    this->coolingScheduleFunc = coolingScheduleFunc;
-    this->stepMax = stepMax;
-    this->tMax = tMax;
-    this->tMin = tMin;
+
+bool SARunner::inited = false;
+int SARunner::T_MAX_CHEF, SARunner::T_MAX_RECIPE, SARunner::iterChef,
+    SARunner::iterRecipe, SARunner::targetScore;
+SARunner::SARunner(CList *chefList, RList *recipeList, bool randomizeChef,
+                   e::GetEnergy getEnergyFunc,
+                   f::CoolingSchedule coolingScheduleFunc)
+    : chefList(chefList), recipeList(recipeList),
+      coolingScheduleFunc(coolingScheduleFunc), getEnergyFunc(getEnergyFunc) {
+    if (randomizeChef) {
+        this->randomMoveFunc =
+            new ChefRandomizer(chefList, recipeList, targetScore);
+        this->tMax = T_MAX_CHEF;
+        this->tMin = T_MAX_CHEF / 10;
+        this->stepMax = iterChef;
+    } else {
+        this->randomMoveFunc = new RecipeRandomizer(chefList, recipeList);
+        this->tMax = T_MAX_RECIPE;
+        this->tMin = T_MAX_RECIPE / 10;
+        this->stepMax = iterRecipe;
+    }
+
     this->history = new History[stepMax];
-    this->getEnergyFunc = getEnergyFunc;
-#ifdef SEARCH_TARGET_SCORE
-    // if (MODE != 2) {
-    //     std::cout << "config.hpp中改了不该改的东西，请改回来" << std::endl;
-    //     exit(1);
-    // }
-    this->targetScore = SEARCH_TARGET_SCORE;
-#else
-    this->targetScore = INT_MAX;
-#endif
 }
 SARunner::~SARunner() { delete[] this->history; }
 States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
@@ -47,39 +48,50 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
         }
         for (int j = 0; j < NUM_CHEFS; j++) {
             int count = 0;
+            Chef *randomChef;
             do {
-                s.chef[j] = &chefList->at(rand() % chefList->size());
+                randomChef = &chefList->at(rand() % chefList->size());
+                s.setChef(j, randomChef);
                 count++;
-            } while (inArray(s.chef, j, s.chef[j]) &&
+            } while (inArray(s.getChefs(), j, randomChef) &&
                      count < RANDOM_SEARCH_TIMEOUT);
             if (count >= RANDOM_SEARCH_TIMEOUT) {
+
                 throw NoChefException();
             }
         }
+
     } else {
         for (int i = 0; i < NUM_CHEFS; i++) {
-            s.chef[i] = chefs[i];
+            s.setChef(i, chefs[i]);
         }
     }
+
     int r = 0;
+    RList *recipeList = this->randomMoveFunc->r;
+
     for (int j = 0; j < NUM_CHEFS; j++) {
-        auto recipeList = &s.chef[j]->recipeCapable;
+        auto &skill = s.getSkills()[j];
         for (int i = 0; i < DISH_PER_CHEF; i++) {
             int count = 0;
+            Recipe *newRecipe;
             do {
-                s.recipe[r] = recipeList->at(rand() % recipeList->size());
+                newRecipe = &recipeList->at(rand() % recipeList->size());
                 count++;
-            } while (inArray(s.recipe, r, s.recipe[r]) &&
-                     count < RANDOM_SEARCH_TIMEOUT);
-            if (count >= RANDOM_SEARCH_TIMEOUT) {
+            } while (((skill.ability / newRecipe->cookAbility == 0) ||
+                      inArray(s.recipe, r, newRecipe)) &&
+                     count < RANDOM_SEARCH_TIMEOUT * RANDOM_SEARCH_TIMEOUT);
+            s.recipe[r] = newRecipe;
+            if (count >= RANDOM_SEARCH_TIMEOUT * RANDOM_SEARCH_TIMEOUT) {
+                // std::cout << "generate State";
                 throw NoRecipeException();
             }
             r++;
         }
     }
+
     return s;
 }
-
 States SARunner::run(States *s0, bool progress, bool silent,
                      const char *filename) {
     States s;
@@ -117,7 +129,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
         }
         States newS;
         try {
-            newS = randomMoveFunc(s, this->chefList, this->recipeList);
+            newS = (*randomMoveFunc)(s);
 
         } catch (NoRecipeException &e) {
             std::cout << e.what() << std::endl;
@@ -146,12 +158,9 @@ States SARunner::run(States *s0, bool progress, bool silent,
         }
         if (energy > this->bestEnergy) {
             this->bestEnergy = energy;
-            for (int i = 0; i < NUM_CHEFS; i++) {
-                s.toolCKPT[i] = s.chef[i]->getTool();
-            }
+            s.saveChefTool();
             this->bestState = s;
             if (progress && !silent) {
-
                 int tmp = e0::sumPrice(this->bestState);
                 std::cout << " ";
             }
@@ -197,11 +206,12 @@ States SARunner::run(States *s0, bool progress, bool silent,
     return this->bestState;
 }
 
-void SARunner::print(States s, bool verbose) {
+void SARunner::print(States s, bool verbose) const {
     int r = 0;
     for (int i = 0; i < NUM_CHEFS; i++) {
 
-        std::cout << "Chef: " << s.chef[i]->name << std::endl << "Recipe ";
+        std::cout << "Chef: " << s.getConstChef(i)->name << std::endl
+                  << "Recipe ";
         for (int j = 0; j < DISH_PER_CHEF; j++) {
             std::cout << j << ": " << s.recipe[r++]->name;
         }

@@ -81,7 +81,7 @@ int getPrice(Skill &skill, Recipe &recipe, ActivityBuff *activityBuff,
     return totalPrice;
 }
 
-BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRule r,
+BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
                      bool verbose) {
     // std::cout << chef.name << " " << recipe.name << std::endl;
     int grade = skill.ability / recipe->cookAbility;
@@ -136,22 +136,22 @@ BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRule r,
     BanquetInfo b = {totalPrice, full};
     if (verbose) {
         // chef->print();
-        std::cout << "╭--> ";
-        recipe->print();
-        std::cout << "等级: " << grade << "，加成" << gradebuff << "%"
+        std::cout << "╭─> ";
+        recipe->print("│");
+        std::cout << "│等级: " << grade << "，加成" << gradebuff << "%"
                   << std::endl;
-        std::cout << "Skill: " << skillBuff << "% ( = 味道"
+        std::cout << "│Skill: " << skillBuff << "% ( = 味道"
                   << recipe->flavor * skill.flavorBuff << " + 技法"
                   << recipe->cookAbility * skill.abilityBuff << " + 食材"
                   << recipe->materialCategories * skill.materialBuff
                   << " + 修炼" << rb.dishBuff << " + 金币"
                   << (Chef::coinBuffOn ? skill.coinBuff : 0) << ")"
                   << std::endl;
-        std::cout << "Intention: (基础+" << rule.baseRule.directAdd << "，+"
+        std::cout << "│Intention: (基础+" << rule.baseRule.directAdd << "，+"
                   << intentionBaseBuff << "%；售价+" << intentionAddBuff
                   << "%) " << std::endl;
-        std::cout << "售价总计Buff: " << buff << "%" << std::endl;
-        std::cout << "╰--> 饱腹度: " << full << "\t总价: " << totalPrice
+        std::cout << "│售价总计Buff: " << buff << "%" << std::endl;
+        std::cout << "╰─> 饱腹度: " << full << "\t总价: " << totalPrice
                   << std::endl;
     }
     return b;

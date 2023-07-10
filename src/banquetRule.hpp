@@ -2,7 +2,7 @@
 #ifndef RULE_HPP
 #define RULE_HPP
 #include "Calculator.hpp"
-#include "functions.hpp"
+#include "types.hpp"
 // 风云宴 韩湘子
 int banquetRule2(BanquetStrictRule **, BanquetLenientRule **, States &, Skill *,
                  int);
@@ -18,7 +18,7 @@ int banquetRule13(BanquetStrictRule **, BanquetLenientRule **, States &,
  * @param bestfull
  * @return void
  */
-void banquetRule(BanquetRule *const &rule, States &s, int *bestfull) {
+void banquetRule(BanquetRuleTogether *const &rule, States &s, int *bestfull) {
     BanquetStrictRule
         *strictRule[NUM_CHEFS *
                     DISH_PER_CHEF]; // 下一阶段的规则，不受意图生效次数的影响
@@ -27,8 +27,8 @@ void banquetRule(BanquetRule *const &rule, States &s, int *bestfull) {
         strictRule[i] = &rule[i].strictRule;
         lenientRule[i] = &rule[i].lenientRule;
     }
-    Skill skill[NUM_CHEFS];
-    s.getSkills(skill);
+
+    auto skill = s.getSkills();
     bestfull[0] = banquetRule2(strictRule, lenientRule, s, skill, 0);
     bestfull[1] = banquetRule13(strictRule, lenientRule, s, skill, 1);
     return;

@@ -21,7 +21,7 @@ class Materials {
     bool fish;
     bool creation;
     Materials() : vegetable(false), meat(false), fish(false), creation(false) {}
-    void print(std::string end = "\n") {
+    void print(std::string end = "\n") const {
         std::cout << (this->vegetable ? "菜 " : "") << (this->meat ? "肉 " : "")
                   << (this->fish ? "鱼 " : "") << (this->creation ? "面 " : "")
                   << end;
@@ -54,7 +54,7 @@ class Flavor {
     Flavor()
         : sweet(false), salty(false), sour(false), bitter(false), spicy(false),
           tasty(false) {}
-    void print(std::string end = "\n") {
+    void print(std::string end = "\n") const {
         if (this->sweet) {
             std::cout << "甜";
         }
@@ -94,7 +94,7 @@ class Flavor {
         if (this-> tasty){
             return FlavorEnum::TASTY;
         }
-        return FlavorEnum::UNIDENTIFIED;
+        return FlavorEnum::UNIDENTIFIED_FLAVOR;
     }
     int operator*(FlavorBuff &buff) {
         int sum = 0;
@@ -137,7 +137,7 @@ class Recipe {
     Flavor flavor;
     Recipe(Json::Value &recipe);
     Recipe() {}
-    void print();
+    void print(const std::string &startLine = "") const;
     static void initRarityBuff(Json::Value &usrBuff);
 };
 typedef std::vector<Recipe> RList;
