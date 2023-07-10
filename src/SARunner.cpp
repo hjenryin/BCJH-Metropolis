@@ -161,7 +161,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
             s.saveChefTool();
             this->bestState = s;
             if (progress && !silent) {
-                int tmp = e0::sumPrice(this->bestState);
+                e0::sumPrice(this->bestState);
                 std::cout << " ";
             }
         }

@@ -45,7 +45,6 @@ int e::getTotalPrice(States s, CList *chefList, RList *recipeList,
 
 bool ChefRandomizer::randomChef(States &s) const {
     auto &chefList = this->c;
-    auto &recipeList = this->r;
     int chefNum = rand() % NUM_CHEFS;
     Chef *pChef = s.getChef(chefNum);
     int count = 0;

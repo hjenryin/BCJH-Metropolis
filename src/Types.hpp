@@ -205,7 +205,7 @@ class Skill {
     Skill operator+(const Skill &s) {
         Skill tmp(*this);
         tmp += s;
-        return std::move(tmp);
+        return tmp;
     }
     void print() const {
         this->ability.print();

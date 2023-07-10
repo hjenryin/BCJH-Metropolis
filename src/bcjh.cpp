@@ -145,8 +145,8 @@ int main(int argc, char *argv[]) {
 
         log += 0x1;
         std::cout << "随机种子：" << result.seed << std::endl;
-        int score = e0::sumPrice(*result.state, result.chefList,
-                                 &result.recipeList, log, true);
+        e0::sumPrice(*result.state, result.chefList, &result.recipeList, log,
+                     true);
         std::cout << "**************\n总分: " << result.score
                   << "\n***************" << std::endl;
         if (!silent) {

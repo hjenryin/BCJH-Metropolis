@@ -176,7 +176,7 @@ CSVWarning loadToolFromFile(Chef *chef, ToolFileType t) {
             continue;
         }
         chef->NoTool();
-        int j = 1;
+        unsigned int j = 1;
         auto skill = &chef->skill;
         auto ability = &skill->ability;
         auto abilityBuff = &skill->abilityBuff;
