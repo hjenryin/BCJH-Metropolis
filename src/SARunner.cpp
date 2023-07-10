@@ -12,7 +12,6 @@
 // #include "activityRule.hpp"
 #include <limits.h>
 
-bool SARunner::inited = false;
 int SARunner::T_MAX_CHEF, SARunner::T_MAX_RECIPE, SARunner::iterChef,
     SARunner::iterRecipe, SARunner::targetScore;
 SARunner::SARunner(CList *chefList, RList *recipeList, bool randomizeChef,

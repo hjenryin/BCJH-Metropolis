@@ -34,14 +34,10 @@ class SARunner {
     static int T_MAX_RECIPE;
     static int iterChef;
     static int iterRecipe;
-    static bool inited;
 
   public:
     static void init(int T_MAX_CHEF, int T_MAX_RECIPE, int iterChef,
                      int iterRecipe, int targetScore) {
-        if (inited)
-            return;
-        inited = true;
         SARunner::T_MAX_CHEF = T_MAX_CHEF;
         SARunner::T_MAX_RECIPE = T_MAX_RECIPE;
         SARunner::iterChef = iterChef;
