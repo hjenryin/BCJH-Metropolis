@@ -151,13 +151,37 @@ class AbilityBuff : public Ability {
 class CookAbility : public Ability {
 
   public:
+    Ability percent = Ability();
     CookAbility(int stirfry, int bake, int boil, int steam, int fry, int knife)
         : Ability(stirfry, bake, boil, steam, fry, knife) {}
     CookAbility() : Ability() {}
     CookAbility(const Json::Value &v);
     int operator/(const Ability &a) const;
-    void print() const { this->Ability::print("CookAbility: "); }
+    void print() const {
+        this->Ability::print("CookAbility: ");
+        this->percent.print("CookAbilityPercent: ");
+    }
     int operator*(const AbilityBuff &a) const;
+    void add(const CookAbility &a) {
+        this->Ability::add(a);
+        this->percent.add(a.percent);
+    }
+    void add(const Ability &a) { this->Ability::add(a); }
+    void add(int a) { this->Ability::add(a); }
+    void handle_percent() {
+        if (this->percent.stirfry)
+            this->stirfry = int(ceil(this->stirfry * (this->percent.stirfry + 100) / 100.0));
+        if (this->percent.bake)
+            this->bake = int(ceil(this->bake * (this->percent.bake + 100) / 100.0));
+        if (this->percent.boil)
+            this->boil = int(ceil(this->boil * (this->percent.boil + 100) / 100.0));
+        if (this->percent.steam)
+            this->steam = int(ceil(this->steam * (this->percent.steam + 100) / 100.0));
+        if (this->percent.fry)
+            this->fry = int(ceil(this->fry * (this->percent.fry + 100) / 100.0));
+        if (this->percent.knife)
+            this->knife = int(ceil(this->knife * (this->percent.knife + 100) / 100.0));
+    }
 };
 class RarityBuff {
     int data[5] = {0, 0, 0, 0, 0};

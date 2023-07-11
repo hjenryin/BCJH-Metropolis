@@ -1,4 +1,5 @@
 #include "States.hpp"
+#include <math.h>
 double getStatesSkillsTime = 0;
 
 Skill *States::getSkills() {
@@ -23,6 +24,21 @@ Skill *States::getSkills() {
                  i++) {
                 skillsCache[i] += chefs[i - 1]->nextBuff;
             }
+        }
+        for (int i = 0; i < NUM_CHEFS; i++) {
+            CookAbility &a = skillsCache[i].ability;
+            if (a.percent.bake)
+                a.bake = int(ceil(a.bake * (a.percent.bake + 100) / 100.0));
+            if (a.percent.boil)
+                a.boil = int(ceil(a.boil * (a.percent.boil + 100) / 100.0));
+            if (a.percent.steam)
+                a.steam = int(ceil(a.steam * (a.percent.steam + 100) / 100.0));
+            if (a.percent.stirfry)
+                a.stirfry = int(ceil(a.stirfry * (a.percent.stirfry + 100) / 100.0));
+            if (a.percent.knife)
+                a.knife = int(ceil(a.knife * (a.percent.knife + 100) / 100.0));
+            if (a.percent.fry)
+                a.fry = int(ceil(a.fry * (a.percent.fry + 100) / 100.0));
         }
     }
 #ifdef MEASURE_TIME

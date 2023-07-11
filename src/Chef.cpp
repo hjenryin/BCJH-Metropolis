@@ -190,17 +190,29 @@ void Skill::loadJson(const Json::Value &v) {
                 if (type == "Gold_Gain") {
                     skill.coinBuff = value;
                 } else if (type == "Stirfry") {
-                    skill.ability.stirfry = value;
+                    std::string cal = effect["cal"].asString();
+                    if (cal == "Abs") skill.ability.stirfry = value;
+                        else skill.ability.percent.stirfry = value;
                 } else if (type == "Bake") {
-                    skill.ability.bake = value;
+                    std::string cal = effect["cal"].asString();
+                    if (cal == "Abs") skill.ability.bake = value;
+                        else skill.ability.percent.bake = value;
                 } else if (type == "Boil") {
-                    skill.ability.boil = value;
+                    std::string cal = effect["cal"].asString();
+                    if (cal == "Abs") skill.ability.boil = value;
+                        else skill.ability.percent.boil = value;
                 } else if (type == "Steam") {
-                    skill.ability.steam = value;
+                    std::string cal = effect["cal"].asString();
+                    if (cal == "Abs") skill.ability.steam = value;
+                        else skill.ability.percent.steam = value;
                 } else if (type == "Fry") {
-                    skill.ability.fry = value;
+                    std::string cal = effect["cal"].asString();
+                    if (cal == "Abs") skill.ability.fry = value;
+                        else skill.ability.percent.fry = value;
                 } else if (type == "Knife") {
-                    skill.ability.knife = value;
+                    std::string cal = effect["cal"].asString();
+                    if (cal == "Abs") skill.ability.knife = value;
+                        else skill.ability.percent.knife = value;
                 } else if (type == "UseStirfry") {
                     skill.abilityBuff.stirfry = value;
                 } else if (type == "UseBake") {
