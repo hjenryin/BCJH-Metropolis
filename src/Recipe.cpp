@@ -34,21 +34,21 @@ Recipe::Recipe(Json::Value &recipe) {
 //     flavor.tasty = flavorStr.find("Tasty") != std::string::npos;
 //     return flavor;
 // }
-Flavor Recipe::getFlavor(Json::Value &flavorJson) {
+FlavorEnum Recipe::getFlavor(Json::Value &flavorJson) {
     std::string flavorStr = flavorJson.asString();
-    Flavor f;
+    FlavorEnum f;
     if (flavorStr.find("Sweet") != std::string::npos)
-        f.sweet = true;
+        f = SWEET;
     else if (flavorStr.find("Salty") != std::string::npos)
-        f.salty = true;
+        f = SALTY;
     else if (flavorStr.find("Sour") != std::string::npos)
-        f.sour = true;
+        f = SOUR;
     else if (flavorStr.find("Bitter") != std::string::npos)
-        f.bitter = true;
+        f = BITTER;
     else if (flavorStr.find("Spicy") != std::string::npos)
-        f.spicy = true;
+        f = SPICY;
     else if (flavorStr.find("Tasty") != std::string::npos)
-        f.tasty = true;
+        f = TASTY;
     return f;
 }
 const struct MaterialList {
@@ -59,44 +59,18 @@ const struct MaterialList {
     int creation[6] = {11, 20, 21, 29, 34, 35};
 } materialList;
 
-void Recipe::print() {
+void Recipe::print(const std::string &startLine) const {
     std::cout << this->id << ": " << this->name << "（原价" << this->price
-              << "）" << std::endl;
-    std::cout << "Rarity: " << this->rarity;
+              << "）—— " << this->rarity << "火 * ";
     auto rb = rarityBuff[this->rarity - 1];
-    std::cout << " (Num: " << rb.dishNum << ", +" << rb.dishBuff << "%)"
-              << std::endl;
-    this->flavor.print("\t");
+    std::cout << rb.dishNum << ", +" << rb.dishBuff << "%" << std::endl;
+    std::cout << startLine;
+    this->printFlavor("\t");
     this->materialCategories.print("\t");
     this->cookAbility.print();
 }
-void loadRecipe(RList &recipeList) {
-    Json::Value usrData;
-    Json::Value gameData;
-    // std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
-    // std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
-
-    std::ifstream gameDataF("data.min.json", std::ifstream::binary);
-    if (!gameDataF.good()) {
-        gameDataF.open("../data/data.min.json", std::ifstream::binary);
-        if (!gameDataF.good()) {
-            throw FileNotExistException();
-        }
-    }
-    std::ifstream usrDataF("userData.json", std::ifstream::binary);
-    if (!usrDataF.good()) {
-        usrDataF.open("../data/userData.json", std::ifstream::binary);
-        if (!usrDataF.good()) {
-            throw FileNotExistException();
-        }
-    }
-
-    // std::cout << gameDataF.fail() << std::endl;
-    gameDataF >> gameData;
-    gameDataF.close();
-    // std::cout << "Game data loaded" << std::endl;
-    usrDataF >> usrData;
-    usrDataF.close();
+void loadRecipe(RList &recipeList, const Json::Value &usrData,
+                const Json::Value &gameData) {
     Recipe::initRarityBuff(usrData["userUltimate"]);
     auto recipes = gameData["recipes"];
     auto recipeGot = usrData["repGot"];
@@ -110,7 +84,7 @@ void loadRecipe(RList &recipeList) {
 
 // #define jsonStr2Int(v) atoi(v.asCString())
 DishBuff Recipe::rarityBuff[5];
-void Recipe::initRarityBuff(Json::Value &usrBuff) {
+void Recipe::initRarityBuff(const Json::Value &usrBuff) {
     DishBuff r[5];
     r[0].dishNum = 40;
     r[1].dishNum = 30;

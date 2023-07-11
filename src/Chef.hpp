@@ -8,6 +8,7 @@
 #include <exception>
 #include "Recipe.hpp"
 #include "Values.hpp"
+#include "Types.hpp"
 #include <vector>
 class Recipe;
 
@@ -29,10 +30,11 @@ class Chef {
     std::string name;
     Skill skill;
     Skill companyBuff;
-    std::vector<Recipe *> recipeCapable;
+    Skill nextBuff;
+    // std::vector<Recipe *> recipeCapable;
     std::vector<Recipe *> recipeLearned;
 
-    void loadRecipeCapable(std::vector<Recipe> &recipeList);
+    // void loadRecipeCapable(std::vector<Recipe> &recipeList);
     bool isCapable(Recipe *r);
 
     static void setGlobalBuff(CookAbility buff) { globalAbilityBuff = buff; }
@@ -49,12 +51,13 @@ class Chef {
 
     Chef(Json::Value &v, int ultimateSkillId);
     Chef() {}
-    void print();
+    void print() const;
     void modifyTool(ToolEnum);
     Chef addTool_modify_name(ToolEnum);
 };
 typedef std::vector<Chef> CList;
-void loadChef(CList &chefList);
+void loadChef(CList &chefList, const Json::Value &userData,
+              const Json::Value &gameData);
 
 // void loadChefTools(CList &chefList, CList &newChefList);
 std::string getToolName(ToolEnum tool);

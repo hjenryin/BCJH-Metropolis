@@ -2,6 +2,7 @@
 #ifndef TOOLEQUIPPED_HPP
 #define TOOLEQUIPPED_HPP
 #include "src/Chef.hpp"
+#include "src/Types.hpp"
 #include "src/Values.hpp"
 
 #ifdef _WIN32

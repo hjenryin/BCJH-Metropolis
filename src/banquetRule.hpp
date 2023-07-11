@@ -2,11 +2,13 @@
 #ifndef RULE_HPP
 #define RULE_HPP
 #include "Calculator.hpp"
-#include "functions.hpp"
+#include "States.hpp"
 // 风云宴 韩湘子
-int banquetRule2(BanquetStrictRule **, BanquetLenientRule **, States &, int);
+int banquetRule2(BanquetStrictRule **, BanquetLenientRule **, States &, Skill *,
+                 int);
 // 风云宴 钟离权
-int banquetRule13(BanquetStrictRule **, BanquetLenientRule **, States &, int);
+int banquetRule13(BanquetStrictRule **, BanquetLenientRule **, States &,
+                  Skill *, int);
 
 /**
  * @brief
@@ -16,7 +18,7 @@ int banquetRule13(BanquetStrictRule **, BanquetLenientRule **, States &, int);
  * @param bestfull
  * @return void
  */
-void banquetRule(BanquetRule *const &rule, States &s, int *bestfull) {
+void banquetRule(BanquetRuleTogether *const &rule, States &s, int *bestfull) {
     BanquetStrictRule
         *strictRule[NUM_CHEFS *
                     DISH_PER_CHEF]; // 下一阶段的规则，不受意图生效次数的影响
@@ -25,15 +27,19 @@ void banquetRule(BanquetRule *const &rule, States &s, int *bestfull) {
         strictRule[i] = &rule[i].strictRule;
         lenientRule[i] = &rule[i].lenientRule;
     }
-    bestfull[0] = banquetRule2(strictRule, lenientRule, s, 0);
-    bestfull[1] = banquetRule13(strictRule, lenientRule, s, 1);
+
+    auto skill = s.getSkills();
+    bestfull[0] = banquetRule2(strictRule, lenientRule, s, skill, 0);
+    bestfull[1] = banquetRule13(strictRule, lenientRule, s, skill, 1);
     return;
 }
 
 // 风云宴 韩湘子
 int banquetRule2(BanquetStrictRule **strictRule,
-                 BanquetLenientRule **lenientRule, States &s, int rank) {
+                 BanquetLenientRule **lenientRule, States &s, Skill *skill,
+                 int rank) {
     int d = rank * DISH_PER_CHEF * CHEFS_PER_GUEST;
+
     // 第1轮
     // 条件：三道炒：下两阶段切技法料理饱腹感-1
     if (s.recipe[d + 0]->cookAbility.stirfry > 0 &&
@@ -75,14 +81,14 @@ int banquetRule2(BanquetStrictRule **strictRule,
     // 第2轮
     // 条件：苦：本道料理售价+100%
     for (int i = d + 3; i < d + 6; i++) {
-        if (s.recipe[i]->flavor.bitter) {
+        if (s.recipe[i]->flavor == BITTER) {
             lenientRule[i]->addRule.buff += 100;
             break;
         }
     }
     // 条件：辣：本道料理意图生效次数加一
     for (int i = d + 3; i < d + 6; i++) {
-        if (s.recipe[i]->flavor.spicy) {
+        if (s.recipe[i]->flavor == SPICY) {
             lenientRule[i]->oneMore();
             break;
         }
@@ -99,28 +105,28 @@ int banquetRule2(BanquetStrictRule **strictRule,
     // 第3轮
     // 条件：优：本道料理基础售价+50%
     for (int i = d + 6; i < d + 9; i++) {
-        if (s.chef[i / 3]->skill.ability / s.recipe[i]->cookAbility >= 2) {
+        if (skill[i / 3].ability / s.recipe[i]->cookAbility >= 2) {
             lenientRule[i]->baseRule.buff += 50;
             break;
         }
     }
     // 条件：特：本道料理饱腹感+2
     for (int i = d + 6; i < d + 9; i++) {
-        if (s.chef[i / 3]->skill.ability / s.recipe[i]->cookAbility >= 3) {
+        if (skill[i / 3].ability / s.recipe[i]->cookAbility >= 3) {
             lenientRule[i]->addRule.full += 2;
             break;
         }
     }
     // 条件：神：本道料理饱腹感+3
     for (int i = d + 6; i < d + 9; i++) {
-        if (s.chef[i / 3]->skill.ability / s.recipe[i]->cookAbility >= 4) {
+        if (skill[i / 3].ability / s.recipe[i]->cookAbility >= 4) {
             lenientRule[i]->addRule.full += 3;
             break;
         }
     }
     // 条件：传：本道料理饱腹感+4
     for (int i = d + 6; i < d + 9; i++) {
-        if (s.chef[i / 3]->skill.ability / s.recipe[i]->cookAbility >= 5) {
+        if (skill[i / 3].ability / s.recipe[i]->cookAbility >= 5) {
             lenientRule[i]->addRule.full += 4;
             break;
         }
@@ -130,7 +136,8 @@ int banquetRule2(BanquetStrictRule **strictRule,
 // 本程序由generateRule.py生成
 // 风云宴 钟离权
 int banquetRule13(BanquetStrictRule **strictRule,
-                  BanquetLenientRule **lenientRule, States &s, int rank) {
+                  BanquetLenientRule **lenientRule, States &s, Skill *skill,
+                  int rank) {
     int d = rank * DISH_PER_CHEF * CHEFS_PER_GUEST;
 
     // 第1轮
@@ -160,7 +167,7 @@ int banquetRule13(BanquetStrictRule **strictRule,
     // 效果：下道料理为辣时售价+100%
     for (int i = d + 0; i < d + 2; i++) {
         if (s.recipe[i]->rarity == 3) {
-            if (s.recipe[i + 1]->flavor.spicy) {
+            if (s.recipe[i + 1]->flavor == SPICY) {
                 lenientRule[i + 1]->addRule.buff += 100;
             }
             break;
@@ -169,7 +176,7 @@ int banquetRule13(BanquetStrictRule **strictRule,
     // 条件：神
     // 效果：本道料理基础售价+50%
     for (int i = d + 0; i < d + 3; i++) {
-        if (s.chef[i / 3]->skill.ability / s.recipe[i]->cookAbility >= 4) {
+        if (skill[i / 3].ability / s.recipe[i]->cookAbility >= 4) {
             lenientRule[i]->baseRule.buff += 50;
             break;
         }
@@ -179,7 +186,7 @@ int banquetRule13(BanquetStrictRule **strictRule,
     // 条件：辣
     // 效果：本道料理饱腹感+5
     for (int i = d + 3; i < d + 6; i++) {
-        if (s.recipe[i]->flavor.spicy) {
+        if (s.recipe[i]->flavor == SPICY) {
             lenientRule[i]->addRule.full += 5;
             break;
         }
@@ -191,7 +198,7 @@ int banquetRule13(BanquetStrictRule **strictRule,
     // 效果：下道料理为辣时售价+100%
     for (int i = d + 3; i < d + 5; i++) {
         if (s.recipe[i]->rarity == 2) {
-            if (s.recipe[i + 1]->flavor.spicy) {
+            if (s.recipe[i + 1]->flavor == SPICY) {
                 lenientRule[i + 1]->addRule.buff += 100;
             }
             break;
@@ -200,7 +207,7 @@ int banquetRule13(BanquetStrictRule **strictRule,
     // 条件：优
     // 效果：本道料理基础售价+200
     for (int i = d + 3; i < d + 6; i++) {
-        if (s.chef[i / 3]->skill.ability / s.recipe[i]->cookAbility >= 2) {
+        if (skill[i / 3].ability / s.recipe[i]->cookAbility >= 2) {
             lenientRule[i]->baseRule.directAdd += 200;
             break;
         }
@@ -218,7 +225,7 @@ int banquetRule13(BanquetStrictRule **strictRule,
     // 条件：特
     // 效果：本道料理饱腹感+2
     for (int i = d + 6; i < d + 9; i++) {
-        if (s.chef[i / 3]->skill.ability / s.recipe[i]->cookAbility >= 3) {
+        if (skill[i / 3].ability / s.recipe[i]->cookAbility >= 3) {
             lenientRule[i]->addRule.full += 2;
             break;
         }
@@ -226,7 +233,7 @@ int banquetRule13(BanquetStrictRule **strictRule,
     // 条件：神
     // 效果：本道料理基础售价+200
     for (int i = d + 6; i < d + 9; i++) {
-        if (s.chef[i / 3]->skill.ability / s.recipe[i]->cookAbility >= 4) {
+        if (skill[i / 3].ability / s.recipe[i]->cookAbility >= 4) {
             lenientRule[i]->baseRule.directAdd += 200;
             break;
         }
@@ -234,7 +241,7 @@ int banquetRule13(BanquetStrictRule **strictRule,
     // 条件：传
     // 效果：本道料理基础售价+50%
     for (int i = d + 6; i < d + 9; i++) {
-        if (s.chef[i / 3]->skill.ability / s.recipe[i]->cookAbility >= 5) {
+        if (skill[i / 3].ability / s.recipe[i]->cookAbility >= 5) {
             lenientRule[i]->baseRule.buff += 50;
             break;
         }

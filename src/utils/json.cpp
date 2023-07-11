@@ -1,8 +1,8 @@
 #include "json.hpp"
-int getInt(Json::Value &v) {
-    try {
+int getInt(const Json::Value &v) {
+    if (v.isInt()) {
         return v.asInt();
-    } catch (Json::LogicError &e) {
+    } else {
         return atoi(v.asCString());
     }
 }

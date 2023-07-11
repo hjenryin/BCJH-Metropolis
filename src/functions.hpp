@@ -6,18 +6,12 @@
 #include <cmath>
 #include "../config.hpp"
 #include "../src/Chef.hpp"
-
-
+#include "States.hpp"
+#include "exception.hpp"
 class SARunner;
-struct States {
-    Chef *chef[NUM_CHEFS];
-    ToolEnum toolCKPT[NUM_CHEFS];
-    Recipe *recipe[DISH_PER_CHEF * NUM_CHEFS];
-};
-namespace r00 {
-// void unrepeatedRandomChef(CList *, Chef **&, int);
-void unrepeatedRandomRecipe(std::vector<Recipe *> *, Recipe **, int, int);
-} // namespace r00
+extern double randomRecipeTime;
+extern double randomChefTime;
+extern double banquetRuleTime;
 
 void swap(Recipe *&a, Recipe *&b);
 
@@ -29,22 +23,67 @@ template <typename T> bool inArray(T **array, int size, T *value) {
     }
     return false;
 }
-bool chefCanCook(Chef *, Recipe *);
+inline bool hasRepeatedRecipe(Recipe **recipelist) {
+#ifndef DEBUG_REPEAT_CHEF
+    return false;
+#else
+    for (int i = 0; i < NUM_CHEFS * DISH_PER_CHEF; i++) {
+        for (int j = i + 1; j < NUM_CHEFS * DISH_PER_CHEF; j++) {
+            if (recipelist[i] == recipelist[j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+#endif
+}
+class Randomizer {
+  public:
+    CList *c;
+    RList *r;
+    int success;
+    int calls;
+    Randomizer(CList *c, RList *r) : c(c), r(r), success(0), calls(0) {}
+    Randomizer() : success(0), calls(0) {}
+    virtual States operator()(States s) = 0;
+    virtual ~Randomizer() {}
 
-namespace r {
+  protected:
+    bool swapRecipe(States &s) const;
+    bool unrepeatedRandomRecipe(Skill &skill, Recipe **rs, int size, int index,
+                                int repeats = RANDOM_SEARCH_TIMEOUT) const;
+};
+class RecipeRandomizer : public Randomizer {
+
+  public:
+    RecipeRandomizer(CList *c, RList *r) : Randomizer(c, r) {}
+    States operator()(States s) override;
+
+  private:
+    bool randomRecipe(States &s) const;
+};
+class ChefRandomizer : public Randomizer {
+    int targetScore;
+
+  public:
+    ChefRandomizer(CList *c, RList *r, int targetScore)
+        : Randomizer(c, r), targetScore(targetScore) {}
+    States operator()(States s) override;
+
+  private:
+    bool randomChef(States &s) const;
+    bool swapChefTool(States &s) const;
+};
 typedef States (*RandomMove)(States, CList *, RList *);
-States randomRecipe(States, CList *, RList *);
-States randomChef(States, CList *, RList *);
 
-} // namespace r
 namespace e0 {
 int sumPrice(States s, CList *c = NULL, RList *r = NULL, int log = false,
              bool exactChefTool = false);
 }
 namespace e {
 
-typedef int (*GetEnergy)(States, CList *, RList *,  bool);
-int getTotalPrice(States s, CList *c, RList *r,  bool vb = false);
+typedef int (*GetEnergy)(States, CList *, RList *, bool);
+int getTotalPrice(States s, CList *c, RList *r, bool vb = false);
 } // namespace e
 
 namespace f {

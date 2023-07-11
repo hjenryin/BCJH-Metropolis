@@ -2,6 +2,7 @@
 #define LOADTOOLEQUIPPED_HPP
 #include "Chef.hpp"
 #include "Values.hpp"
+#include "Types.hpp"
 #include <fstream>
 #include <vector>
 #include <exception>
@@ -29,20 +30,23 @@ struct ToolInfoBlock {
 };
 typedef vector<ToolInfoBlock> ToolInfoFile;
 typedef vector<ToolInfo> Tools;
-ToolInfoBlock *tibptr;
+static ToolInfoBlock *tibptr;
 
 ToolFileType loadToolFile() {
 
+    auto dirs = {"./", "../data/"};
+
     auto fname = "toolEquipped.csv";
-    ifstream toolFile(fname, ios::in);
-
+    ifstream toolFile;
+    for (const std::string &dir : dirs) {
+        toolFile.open(dir + fname, ios::in);
+        if (toolFile.good()) {
+            break;
+        }
+        toolFile.close();
+    }
     if (!toolFile.good()) {
-
-        auto fname = "..\\data\\toolEquipped.csv";
-        ifstream toolFile(fname, ios::in);
-        if (!toolFile.good())
-            tibptr = NULL;
-
+        tibptr = NULL;
         return NO_FILE__NO_TOOL;
     }
     string line;
@@ -175,7 +179,7 @@ CSVWarning loadToolFromFile(Chef *chef, ToolFileType t) {
             continue;
         }
         chef->NoTool();
-        int j = 1;
+        unsigned int j = 1;
         auto skill = &chef->skill;
         auto ability = &skill->ability;
         auto abilityBuff = &skill->abilityBuff;

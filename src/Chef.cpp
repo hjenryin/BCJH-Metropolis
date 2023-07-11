@@ -15,13 +15,14 @@ CookAbility Chef::globalAbilityBuff;
 int Chef::globalAbilityMale = 0;
 int Chef::globalAbilityFemale = 0;
 std::map<int, Skill> Skill::skillList;
-void initBuff(Json::Value usrBuff) {
+void initBuff(const Json::Value usrBuff) {
     Chef::setGlobalBuff(CookAbility(usrBuff));
     Chef::setGlobalAbilityMale(getInt(usrBuff["Male"]));
     Chef::setGlobalAbilityFemale(getInt(usrBuff["Female"]));
     Chef::setGlobalAbilityAll(getInt(usrBuff["All"]));
 }
-void splitUltimateSkill(std::map<int, int> &ultimateSkills, Json::Value &ids) {
+void splitUltimateSkill(std::map<int, int> &ultimateSkills,
+                        const Json::Value &ids) {
     for (auto pair : ids) {
         auto str = pair.asString();
         int id = atoi(str.substr(0, str.find(",")).c_str());
@@ -30,41 +31,17 @@ void splitUltimateSkill(std::map<int, int> &ultimateSkills, Json::Value &ids) {
     }
 }
 void loadUltimateSkills(std::map<int, int> &ultimateSkills,
-                        Json::Value &usrBuff) {
+                        const Json::Value &usrBuff) {
     splitUltimateSkill(ultimateSkills, usrBuff["Partial"]["id"]);
     splitUltimateSkill(ultimateSkills, usrBuff["Self"]["id"]);
 }
-void loadChef(CList &chefList) {
+void loadChef(CList &chefList, const Json::Value &usrData,
+              const Json::Value &gameData) {
     if (MODE == 2) {
         Chef::coinBuffOn = false;
     } else {
         Chef::coinBuffOn = true;
     }
-    Json::Value usrData;
-    Json::Value gameData;
-
-    // std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
-    // std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
-
-    std::ifstream gameDataF("data.min.json", std::ifstream::binary);
-    if (!gameDataF.good()) {
-        gameDataF.open("../data/data.min.json", std::ifstream::binary);
-        if (!gameDataF.good()) {
-            throw FileNotExistException();
-        }
-    }
-    std::ifstream usrDataF("userData.json", std::ifstream::binary);
-    if (!usrDataF.good()) {
-        usrDataF.open("../data/userData.json", std::ifstream::binary);
-        if (!usrDataF.good()) {
-            throw FileNotExistException();
-        }
-    }
-
-    usrDataF >> usrData;
-    usrDataF.close();
-    gameDataF >> gameData;
-    gameDataF.close();
 
     initBuff(usrData["userUltimate"]);
     const Json::Value chefs = gameData["chefs"];
@@ -161,13 +138,13 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
     this->tool = NOT_EQUIPPED;
 }
 
-void Chef::print() {
+void Chef::print() const {
     std::cout << this->id << ": " << this->name << "\t"
               << (this->male ? "M" : "") << (this->female ? "F" : "")
               << std::endl;
     this->skill.print();
 }
-CookAbility::CookAbility(Json::Value &v) {
+CookAbility::CookAbility(const Json::Value &v) {
     // std::cout << "Here" << std::endl;
     if (v.isMember("stirfry") && v.isMember("bake") && v.isMember("boil") &&
         v.isMember("fry") && v.isMember("knife")) {
@@ -193,158 +170,116 @@ CookAbility::CookAbility(Json::Value &v) {
         throw std::logic_error("CookAbility: Invalid Json");
     }
 }
-void Skill::loadJson(Json::Value &v) {
+void Skill::loadJson(const Json::Value &v) {
     for (auto skill : v) {
         int id = skill["skillId"].asInt();
         skillList[id] = Skill();
         for (auto effect : skill["effect"]) {
-            auto skill = &skillList[id];
+            Skill skill;
             std::string condition = effect["condition"].asString();
             if (condition != "Global") {
                 if (condition == "Partial") {
-                    skill->self = false;
+                    skillList[id].type = PARTIAL;
                 } else if (condition == "Self") {
-                    skill->self = true;
+                    skillList[id].type = SELF;
+                } else if (condition == "Next") {
+                    skillList[id].type = NEXT;
                 }
                 std::string type = effect["type"].asString();
                 int value = effect["value"].asInt();
                 if (type == "Gold_Gain") {
-                    skill->coinBuff = value;
+                    skill.coinBuff = value;
                 } else if (type == "Stirfry") {
-                    skill->ability.stirfry = value;
+                    skill.ability.stirfry = value;
                 } else if (type == "Bake") {
-                    skill->ability.bake = value;
+                    skill.ability.bake = value;
                 } else if (type == "Boil") {
-                    skill->ability.boil = value;
+                    skill.ability.boil = value;
                 } else if (type == "Steam") {
-                    skill->ability.steam = value;
+                    skill.ability.steam = value;
                 } else if (type == "Fry") {
-                    skill->ability.fry = value;
+                    skill.ability.fry = value;
                 } else if (type == "Knife") {
-                    skill->ability.knife = value;
+                    skill.ability.knife = value;
                 } else if (type == "UseStirfry") {
-                    skill->abilityBuff.stirfry = value;
+                    skill.abilityBuff.stirfry = value;
                 } else if (type == "UseBake") {
-                    skill->abilityBuff.bake = value;
+                    skill.abilityBuff.bake = value;
                 } else if (type == "UseBoil") {
-                    skill->abilityBuff.boil = value;
+                    skill.abilityBuff.boil = value;
                 } else if (type == "UseSteam") {
-                    skill->abilityBuff.steam = value;
+                    skill.abilityBuff.steam = value;
                 } else if (type == "UseFry") {
-                    skill->abilityBuff.fry = value;
+                    skill.abilityBuff.fry = value;
                 } else if (type == "UseKnife") {
-                    skill->abilityBuff.knife = value;
+                    skill.abilityBuff.knife = value;
                 } else if (type == "UseSweet") {
-                    skill->flavorBuff.sweet = value;
+                    skill.flavorBuff.sweet = value;
                 } else if (type == "UseSour") {
-                    skill->flavorBuff.sour = value;
+                    skill.flavorBuff.sour = value;
                 } else if (type == "UseSalty") {
-                    skill->flavorBuff.salty = value;
+                    skill.flavorBuff.salty = value;
                 } else if (type == "UseBitter") {
-                    skill->flavorBuff.bitter = value;
+                    skill.flavorBuff.bitter = value;
                 } else if (type == "UseSpicy") {
-                    skill->flavorBuff.spicy = value;
+                    skill.flavorBuff.spicy = value;
                 } else if (type == "UseTasty") {
-                    skill->flavorBuff.tasty = value;
+                    skill.flavorBuff.tasty = value;
                 } else if (type == "UseVegetable") {
-                    skill->materialBuff.vegetable = value;
+                    skill.materialBuff.vegetable = value;
                 } else if (type == "UseMeat") {
-                    skill->materialBuff.meat = value;
+                    skill.materialBuff.meat = value;
                 } else if (type == "UseFish") {
-                    skill->materialBuff.fish = value;
+                    skill.materialBuff.fish = value;
                 } else if (type == "UseCreation") {
-                    skill->materialBuff.creation = value;
+                    skill.materialBuff.creation = value;
                 } else if (type == "CookbookPrice") {
                     auto effects = effect["conditionValueList"];
                     for (auto &e : effects) {
                         int rarity = getInt(e);
-                        skill->rarityBuff[rarity] = value;
+                        skill.rarityBuff[rarity] = value;
                     }
                 }
+                skillList[id] += skill;
             }
         }
     }
 }
 void Chef::addSkill(int id) {
     auto skill = Skill::skillList[id];
-    if (skill.self) {
-        this->skill.add(skill);
-    } else {
-        this->companyBuff.add(skill);
+    if (skill.type == Skill::SELF) {
+        this->skill += skill;
+    } else if (skill.type == Skill::PARTIAL) {
+        this->companyBuff += skill;
+    } else if (skill.type == Skill::NEXT) {
+        this->nextBuff += skill;
     }
 }
 
-int CookAbility::operator/(const Ability &a) {
+int CookAbility::operator/(const Ability &a) const {
     int grade = 5;
-    if (a.stirfry != 0) {
-        grade = grade < (this->stirfry / a.stirfry)
-                    ? grade
-                    : (this->stirfry / a.stirfry);
-        // std::cout << grade << std::endl;
-    }
-    if (a.bake != 0) {
-        grade = grade < (this->bake / a.bake) ? grade : (this->bake / a.bake);
-        // std::cout << grade << std::endl;
-    }
-    if (a.boil != 0) {
-        grade = grade < (this->boil / a.boil) ? grade : (this->boil / a.boil);
-        // std::cout << grade << std::endl;
-    }
-    if (a.steam != 0) {
-        grade =
-            grade < (this->steam / a.steam) ? grade : (this->steam / a.steam);
-        // std::cout << grade << std::endl;
-    }
-    if (a.fry != 0) {
-        grade = grade < (this->fry / a.fry) ? grade : (this->fry / a.fry);
-        // std::cout << grade << std::endl;
-    }
-    if (a.knife != 0) {
-        grade =
-            grade < (this->knife / a.knife) ? grade : (this->knife / a.knife);
-        // std::cout << grade << std::endl;
+    const int *thisptr = &this->stirfry;
+    const int *aptr = &a.stirfry;
+    for (int i = 0; i < 6; i++) {
+        if (aptr[i] != 0) {
+            grade =
+                grade < (thisptr[i] / aptr[i]) ? grade : (thisptr[i] / aptr[i]);
+        }
     }
     return grade;
 }
-int CookAbility::operator*(const AbilityBuff &a) {
-    int grade = 0;
-    if (this->stirfry != 0) {
-        grade += a.stirfry;
+int CookAbility::operator*(const AbilityBuff &a) const {
+    int buff = 0;
+    const int *thisptr = &this->stirfry;
+    const int *aptr = &a.stirfry;
+    for (int i = 0; i < 6; i++) {
+        if (thisptr[i] != 0) {
+            buff += aptr[i];
+        }
     }
-    if (this->bake != 0) {
-        grade += a.bake;
-    }
-    if (this->boil != 0) {
-        grade += a.boil;
-    }
-    if (this->steam != 0) {
-        grade += a.steam;
-    }
-    if (this->fry != 0) {
-        grade += a.fry;
-    }
-    if (this->knife != 0) {
-        grade += a.knife;
-    }
-
-    return grade;
+    return buff;
 }
 
-// void loadChefTools(CList &chefList) {
-//     for (auto &chef : chefList) {
-//         int id = chef.id;
-
-//         if (chef.tool != NO_TOOL) {
-//             for (int i = 0; i < 6; i++) {
-//                 newChefList[id * 6 + i] = chef.addTool((ToolEnum)i);
-//             }
-//         } else {
-//             for (int i = 0; i < 6; i++) {
-//                 newChefList[id * 6 + i] = chef;
-//             }
-//         }
-//     }
-// }
 Chef Chef::addTool_modify_name(ToolEnum a) {
     Chef newChef(*this);
     newChef.tool = a;
@@ -384,33 +319,33 @@ bool Chef::isCapable(Recipe *recipe) {
     }
     return false;
 }
-void Chef::loadRecipeCapable(std::vector<Recipe> &recipeList) {
-    if (this->tool == NO_TOOL) {
-        for (auto &recipe : recipeList) {
-            if (this->isCapable(&recipe)) {
-                this->recipeCapable.push_back(&recipe);
-            }
-        }
-    } else if (this->tool == NOT_EQUIPPED) {
-        std::vector<Recipe *> recipeListCopy;
-        for (auto &recipe : recipeList) {
-            recipeListCopy.push_back(&recipe);
-        }
-        for (int i = 0; i < 6; i++) {
-            this->modifyTool((ToolEnum)i);
-            auto iter = recipeListCopy.begin();
-            while (iter != recipeListCopy.end()) {
-                if (this->isCapable(*iter)) {
-                    this->recipeCapable.push_back(*iter);
-                    iter = recipeListCopy.erase(iter);
-                } else {
-                    iter++;
-                }
-            }
-        }
-        this->modifyTool(NOT_EQUIPPED);
-    }
-}
+// void Chef::loadRecipeCapable(std::vector<Recipe> &recipeList) {
+//     if (this->tool == NO_TOOL) {
+//         for (auto &recipe : recipeList) {
+//             if (this->isCapable(&recipe)) {
+//                 this->recipeCapable.push_back(&recipe);
+//             }
+//         }
+//     } else if (this->tool == NOT_EQUIPPED) {
+//         std::vector<Recipe *> recipeListCopy;
+//         for (auto &recipe : recipeList) {
+//             recipeListCopy.push_back(&recipe);
+//         }
+//         for (int i = 0; i < 6; i++) {
+//             this->modifyTool((ToolEnum)i);
+//             auto iter = recipeListCopy.begin();
+//             while (iter != recipeListCopy.end()) {
+//                 if (this->isCapable(*iter)) {
+//                     this->recipeCapable.push_back(*iter);
+//                     iter = recipeListCopy.erase(iter);
+//                 } else {
+//                     iter++;
+//                 }
+//             }
+//         }
+//         this->modifyTool(NOT_EQUIPPED);
+//     }
+// }
 void Chef::modifyTool(ToolEnum a) {
     if (this->tool == NO_TOOL)
         return;
