@@ -60,28 +60,23 @@ class Ability {
         : stirfry(stirfry), bake(bake), boil(boil), steam(steam), fry(fry),
           knife(knife) {}
     void multiply(double a) {
-        this->stirfry = int(this->stirfry * a);
-        this->bake = int(this->bake * a);
-        this->boil = int(this->boil * a);
-        this->steam = int(this->steam * a);
-        this->fry = int(this->fry * a);
-        this->knife = int(this->knife * a);
+        int *ptr = &this->stirfry;
+        for (int i = 0; i < 6; i++) {
+            ptr[i] = int(ptr[i] * a);
+        }
     }
     void add(const Ability &a) {
-        this->stirfry += a.stirfry;
-        this->bake += a.bake;
-        this->boil += a.boil;
-        this->steam += a.steam;
-        this->fry += a.fry;
-        this->knife += a.knife;
+        int *thisptr = &this->stirfry;
+        const int *aptr = &a.stirfry;
+        for (int i = 0; i < 6; i++) {
+            thisptr[i] += aptr[i];
+        }
     }
     void add(int a) {
-        this->stirfry += a;
-        this->bake += a;
-        this->boil += a;
-        this->steam += a;
-        this->fry += a;
-        this->knife += a;
+        int *ptr = &this->stirfry;
+        for (int i = 0; i < 6; i++) {
+            ptr[i] += a;
+        }
     }
     void print(std::string title, std::string end = "\n",
                bool percent = false) const {
@@ -147,7 +142,7 @@ class CookAbility : public Ability {
     CookAbility(const Json::Value &v);
     int operator/(const Ability &a) const;
     void print() const { this->Ability::print("CookAbility: "); }
-    int operator*(const AbilityBuff &a);
+    int operator*(const AbilityBuff &a) const;
 };
 class RarityBuff {
     int data[5] = {0, 0, 0, 0, 0};

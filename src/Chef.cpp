@@ -258,75 +258,28 @@ void Chef::addSkill(int id) {
 
 int CookAbility::operator/(const Ability &a) const {
     int grade = 5;
-    if (a.stirfry != 0) {
-        grade = grade < (this->stirfry / a.stirfry)
-                    ? grade
-                    : (this->stirfry / a.stirfry);
-        // std::cout << grade << std::endl;
-    }
-    if (a.bake != 0) {
-        grade = grade < (this->bake / a.bake) ? grade : (this->bake / a.bake);
-        // std::cout << grade << std::endl;
-    }
-    if (a.boil != 0) {
-        grade = grade < (this->boil / a.boil) ? grade : (this->boil / a.boil);
-        // std::cout << grade << std::endl;
-    }
-    if (a.steam != 0) {
-        grade =
-            grade < (this->steam / a.steam) ? grade : (this->steam / a.steam);
-        // std::cout << grade << std::endl;
-    }
-    if (a.fry != 0) {
-        grade = grade < (this->fry / a.fry) ? grade : (this->fry / a.fry);
-        // std::cout << grade << std::endl;
-    }
-    if (a.knife != 0) {
-        grade =
-            grade < (this->knife / a.knife) ? grade : (this->knife / a.knife);
-        // std::cout << grade << std::endl;
+    const int *thisptr = &this->stirfry;
+    const int *aptr = &a.stirfry;
+    for (int i = 0; i < 6; i++) {
+        if (aptr[i] != 0) {
+            grade =
+                grade < (thisptr[i] / aptr[i]) ? grade : (thisptr[i] / aptr[i]);
+        }
     }
     return grade;
 }
-int CookAbility::operator*(const AbilityBuff &a) {
-    int grade = 0;
-    if (this->stirfry != 0) {
-        grade += a.stirfry;
+int CookAbility::operator*(const AbilityBuff &a) const {
+    int buff = 0;
+    const int *thisptr = &this->stirfry;
+    const int *aptr = &a.stirfry;
+    for (int i = 0; i < 6; i++) {
+        if (thisptr[i] != 0) {
+            buff += aptr[i];
+        }
     }
-    if (this->bake != 0) {
-        grade += a.bake;
-    }
-    if (this->boil != 0) {
-        grade += a.boil;
-    }
-    if (this->steam != 0) {
-        grade += a.steam;
-    }
-    if (this->fry != 0) {
-        grade += a.fry;
-    }
-    if (this->knife != 0) {
-        grade += a.knife;
-    }
-
-    return grade;
+    return buff;
 }
 
-// void loadChefTools(CList &chefList) {
-//     for (auto &chef : chefList) {
-//         int id = chef.id;
-
-//         if (chef.tool != NO_TOOL) {
-//             for (int i = 0; i < 6; i++) {
-//                 newChefList[id * 6 + i] = chef.addTool((ToolEnum)i);
-//             }
-//         } else {
-//             for (int i = 0; i < 6; i++) {
-//                 newChefList[id * 6 + i] = chef;
-//             }
-//         }
-//     }
-// }
 Chef Chef::addTool_modify_name(ToolEnum a) {
     Chef newChef(*this);
     newChef.tool = a;

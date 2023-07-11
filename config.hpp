@@ -10,7 +10,7 @@
 #define TARGET_SCORE_APPROXIMATE 3170000
 // 这里输分数线，达标之后将停止搜索
 
-#define VIS_HISTORY
+// #define VIS_HISTORY
 #define ITER_CHEF 5000   // 选择厨师时的迭代次数
 #define ITER_RECIPE 1000 // 对于每一组厨师，选择菜谱时的迭代次数
 

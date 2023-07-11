@@ -11,10 +11,7 @@ extern double calculatePriceTime, calculatePriceTimeOut;
 
 ToolEnum toolHeuristic(States &s, int chefId) {
     auto chef = s.getChef(chefId);
-    Recipe *recipes[DISH_PER_CHEF];
-    for (int i = 0; i < DISH_PER_CHEF; i++) {
-        recipes[i] = s.recipe[chefId * DISH_PER_CHEF + i];
-    }
+    Recipe **recipes = &s.recipe[chefId * DISH_PER_CHEF];
     if (chef->getTool() == NO_TOOL)
         return NO_TOOL;
     ToolEnum best = NOT_EQUIPPED;
@@ -282,7 +279,7 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
         struct timespec start, finish;
         clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
 #endif
-        BanquetInfo bi[NUM_CHEFS * DISH_PER_CHEF];
+        BanquetInfo biCache;
         int totalScore = 0;
         int totalFull = 0;
         int scoreCache = 0;
@@ -304,13 +301,13 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
                     s.getConstChef(chefStart + i / 3)->print();
                     std::cout << "************" << std::endl;
                 }
-                bi[dishStart + i] =
+                biCache =
                     getPrice(skills[chefStart + i / 3], s.recipe[dishStart + i],
                              rule[dishStart + i], (log & 0x10));
-                totalFull += bi[dishStart + i].full;
-                totalScore += bi[dishStart + i].price;
-                scoreCache += bi[dishStart + i].price;
-                fullCache += bi[dishStart + i].full;
+                totalFull += biCache.full;
+                totalScore += biCache.price;
+                scoreCache += biCache.price;
+                fullCache += biCache.full;
                 if ((log & 0x1) && i % 3 == 2) {
                     std::cout << "  厨师："
                               << s.getConstChef(chefStart + i / 3)->name
