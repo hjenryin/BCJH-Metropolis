@@ -8,6 +8,7 @@
 const double bestToolProb = 0.9;
 extern double generateBanquetRuleTime, generateBanquetRuleTimeOut;
 extern double calculatePriceTime, calculatePriceTimeOut;
+std::string getGradeName(Skill &a, Recipe &b);
 
 ToolEnum toolHeuristic(States &s, int chefId) {
     auto chef = s.getChef(chefId);
@@ -287,6 +288,7 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
         int ans = 0;
         int dishStart = 0;
         int chefStart = 0;
+        int scoreCacheList[DISH_PER_CHEF];
         for (int g = 0; g < NUM_GUESTS; g++) {
             dishStart = DISH_PER_CHEF * CHEFS_PER_GUEST * g;
             chefStart = CHEFS_PER_GUEST * g;
@@ -308,17 +310,25 @@ int e0::sumPrice(States s, CList *chefList, RList *recipeList, int log,
                 totalScore += biCache.price;
                 scoreCache += biCache.price;
                 fullCache += biCache.full;
+                scoreCacheList[i % 3] = biCache.price;
                 if ((log & 0x1) && i % 3 == 2) {
-                    std::cout << "  厨师："
+                    std::cout << "    厨师："
                               << s.getConstChef(chefStart + i / 3)->name
                               << " -> " << fullCache << " / " << scoreCache
                               << std::endl;
                     scoreCache = 0;
                     fullCache = 0;
-                    std::cout << "  菜谱：" << s.recipe[dishStart + i - 2]->name
-                              << "；" << s.recipe[dishStart + i - 1]->name
-                              << "；" << s.recipe[dishStart + i]->name
-                              << std::endl;
+                    std::cout << "    菜谱：" 
+                                << "[" << getGradeName(skills[chefStart + i / 3], *s.recipe[dishStart + i - 2]) << "]"
+                            << s.recipe[dishStart + i - 2]->name                                 
+                                << "(" << scoreCacheList[0] << ")" << "；"
+                                << "[" << getGradeName(skills[chefStart + i / 3], *s.recipe[dishStart + i - 1]) << "]"
+                            << s.recipe[dishStart + i - 1]->name 
+                                << "(" << scoreCacheList[1] << ")" << "；" 
+                                << "[" << getGradeName(skills[chefStart + i / 3], *s.recipe[dishStart + i]) << "]"
+                            << s.recipe[dishStart + i]->name 
+                                << "(" << scoreCacheList[2] << ")" << "；" 
+                            << std::endl;
                 }
             }
             int guestScore;
@@ -585,4 +595,22 @@ States perfectChef(States &s, CList *c) {
     }
     bestS.loadChefTool();
     return bestS;
+}
+std::string getGradeName(Skill &a, Recipe &b) {
+    int grade = a.ability / b.cookAbility;
+    switch (grade)
+    {
+    case 1:
+        return "可";    
+    case 2:
+        return "优";
+    case 3:
+        return "特";
+    case 4:
+        return "神";
+    case 5:
+        return "传";
+    default:
+        return "BUG";
+    }
 }
