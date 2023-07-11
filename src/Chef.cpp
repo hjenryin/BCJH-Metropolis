@@ -4,7 +4,6 @@
 #include <fstream>
 #include <iostream>
 #include <map>
-#include <unistd.h> // add this line
 #include "../config.hpp"
 #include "Calculator.hpp"
 #include "utils/json.hpp"
@@ -16,13 +15,14 @@ CookAbility Chef::globalAbilityBuff;
 int Chef::globalAbilityMale = 0;
 int Chef::globalAbilityFemale = 0;
 std::map<int, Skill> Skill::skillList;
-void initBuff(Json::Value usrBuff) {
+void initBuff(const Json::Value usrBuff) {
     Chef::setGlobalBuff(CookAbility(usrBuff));
     Chef::setGlobalAbilityMale(getInt(usrBuff["Male"]));
     Chef::setGlobalAbilityFemale(getInt(usrBuff["Female"]));
     Chef::setGlobalAbilityAll(getInt(usrBuff["All"]));
 }
-void splitUltimateSkill(std::map<int, int> &ultimateSkills, Json::Value &ids) {
+void splitUltimateSkill(std::map<int, int> &ultimateSkills,
+                        const Json::Value &ids) {
     for (auto pair : ids) {
         auto str = pair.asString();
         int id = atoi(str.substr(0, str.find(",")).c_str());
@@ -31,50 +31,17 @@ void splitUltimateSkill(std::map<int, int> &ultimateSkills, Json::Value &ids) {
     }
 }
 void loadUltimateSkills(std::map<int, int> &ultimateSkills,
-                        Json::Value &usrBuff) {
+                        const Json::Value &usrBuff) {
     splitUltimateSkill(ultimateSkills, usrBuff["Partial"]["id"]);
     splitUltimateSkill(ultimateSkills, usrBuff["Self"]["id"]);
 }
-void loadChef(CList &chefList) {
+void loadChef(CList &chefList, const Json::Value &usrData,
+              const Json::Value &gameData) {
     if (MODE == 2) {
         Chef::coinBuffOn = false;
     } else {
         Chef::coinBuffOn = true;
     }
-    Json::Value usrData;
-    Json::Value gameData;
-
-    // std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
-    // std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
-
-    // print the working dir
-    char cwd[1024];
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-        printf("Current working dir: %s\n", cwd);
-    } else {
-        perror("getcwd() error");
-        return;
-    }
-
-    std::ifstream gameDataF("data.min.json", std::ifstream::binary);
-    if (!gameDataF.good()) {
-        gameDataF.open("../data/data.min.json", std::ifstream::binary);
-        if (!gameDataF.good()) {
-            throw FileNotExistException();
-        }
-    }
-    std::ifstream usrDataF("userData.json", std::ifstream::binary);
-    if (!usrDataF.good()) {
-        usrDataF.open("../data/userData.json", std::ifstream::binary);
-        if (!usrDataF.good()) {
-            throw FileNotExistException();
-        }
-    }
-
-    usrDataF >> usrData;
-    usrDataF.close();
-    gameDataF >> gameData;
-    gameDataF.close();
 
     initBuff(usrData["userUltimate"]);
     const Json::Value chefs = gameData["chefs"];
@@ -282,9 +249,9 @@ void Chef::addSkill(int id) {
     auto skill = Skill::skillList[id];
     if (skill.type == Skill::SELF) {
         this->skill += skill;
-    } else if (skill.type ==Skill::PARTIAL) {
+    } else if (skill.type == Skill::PARTIAL) {
         this->companyBuff += skill;
-    }else if (skill.type == Skill::NEXT) {
+    } else if (skill.type == Skill::NEXT) {
         this->nextBuff += skill;
     }
 }

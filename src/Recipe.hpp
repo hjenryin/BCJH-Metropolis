@@ -139,8 +139,9 @@ class Recipe {
     Recipe(Json::Value &recipe);
     Recipe() {}
     void print(const std::string &startLine = "") const;
-    static void initRarityBuff(Json::Value &usrBuff);
+    static void initRarityBuff(const Json::Value &usrBuff);
 };
 typedef std::vector<Recipe> RList;
-void loadRecipe(RList &recipeList);
+void loadRecipe(RList &recipeList, const Json::Value &userData,
+                const Json::Value &gameData);
 #endif

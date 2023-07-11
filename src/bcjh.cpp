@@ -14,6 +14,11 @@
 #include "exception.hpp"
 #include <future>
 #include <vector>
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <unistd.h>
+#endif
 
 const int targetScore = 3170000;
 const int T_MAX_CHEF = targetScore / 100;
@@ -30,6 +35,7 @@ struct Result {
 };
 Result run(const CList &, RList &, int, bool, int);
 void calculator(CList &, RList &);
+std::pair<Json::Value, Json::Value> loadJsonFile();
 
 void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &calculate,
                bool &mp, int &seed) {
@@ -79,18 +85,14 @@ int main(int argc, char *argv[]) {
     bool calculate = false;
     bool mp = true;
     parseArgs(argc, argv, silent, log, calculate, mp, seed);
-
+    auto [usrData, gameData] = loadJsonFile();
     CList chefList;
     RList recipeList;
     try {
         std::cout << "正在读取文件..." << std::endl;
-        loadChef(chefList);
-        loadRecipe(recipeList);
+        loadChef(chefList, usrData, gameData);
+        loadRecipe(recipeList, usrData, gameData);
         std::cout << "读取文件成功。" << std::endl;
-    } catch (FileNotExistException &e) {
-        std::cout << "json文件缺失。如果在网页端，请确认已经上传了文件；如果在"
-                     "本地，请确认已经下载了文件。\n";
-        exit(1);
     } catch (Json::RuntimeError &e) {
         std::cout << "json文件格式不正确。如果文件内容是手动复制的，确认文件已"
                      "经复制完整。\n";
@@ -202,4 +204,68 @@ void calculator(CList &chefList, RList &recipeList) {
     // SARunner saRunner(&chefList, &recipeList, ITER_CHEF, T_MAX_CHEF, 0);
     // saRunner.print(s, true);
     // std::cout << "\n\nScore: " << score << std::endl;
+}
+/**
+ * @return userData, gameData
+ */
+std::pair<Json::Value, Json::Value> loadJsonFile() {
+    Json::Value usrData;
+    Json::Value gameData;
+
+    auto dirs = {"./", "../data/", "../../data/"};
+    // std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
+    // std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
+
+    std::ifstream gameDataF;
+    for (const std::string &dir : dirs) {
+        gameDataF.open(dir + "/data.min.json", std::ifstream::binary);
+        if (gameDataF.good()) {
+            break;
+        }
+        gameDataF.close();
+    }
+    if (!gameDataF.good()) {
+
+#ifdef _WIN32
+        char buf[256];
+        _getcwd(buf, 256);
+#else
+        char buf[256];
+        getcwd(buf, 256);
+#endif
+        std::cout << "当前工作目录：" << buf << std::endl;
+        std::cout << "json文件缺失。如果在网页端，请确认已经上传了文件；如果在"
+                     "本地，请确认已经下载了文件。\n";
+        exit(1);
+    }
+
+    std::ifstream usrDataF;
+    for (const std::string &dir : dirs) {
+        usrDataF.open(dir + "/userData.json", std::ifstream::binary);
+        if (usrDataF.good()) {
+            break;
+        }
+        usrDataF.close();
+    }
+    if (!usrDataF.good()) {
+        // get current working dir
+#ifdef _WIN32
+        char buf[256];
+        _getcwd(buf, 256);
+#else
+        char buf[256];
+        getcwd(buf, 256);
+#endif
+        std::cout << "当前工作目录：" << buf << std::endl;
+        std::cout << "json文件缺失。如果在网页端，请确认已经上传了文件；如果在"
+                     "本地，请确认已经下载了文件。\n";
+        exit(1);
+    }
+
+    usrDataF >> usrData;
+    usrDataF.close();
+    gameDataF >> gameData;
+    gameDataF.close();
+
+    return {std::move(usrData), std::move(gameData)};
 }

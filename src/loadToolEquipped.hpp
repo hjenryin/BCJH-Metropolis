@@ -30,20 +30,23 @@ struct ToolInfoBlock {
 };
 typedef vector<ToolInfoBlock> ToolInfoFile;
 typedef vector<ToolInfo> Tools;
-ToolInfoBlock *tibptr;
+static ToolInfoBlock *tibptr;
 
 ToolFileType loadToolFile() {
 
+    auto dirs = {"./", "../data/"};
+
     auto fname = "toolEquipped.csv";
-    ifstream toolFile(fname, ios::in);
-
+    ifstream toolFile;
+    for (const std::string &dir : dirs) {
+        toolFile.open(dir + fname, ios::in);
+        if (toolFile.good()) {
+            break;
+        }
+        toolFile.close();
+    }
     if (!toolFile.good()) {
-
-        auto fname = "..\\data\\toolEquipped.csv";
-        ifstream toolFile(fname, ios::in);
-        if (!toolFile.good())
-            tibptr = NULL;
-
+        tibptr = NULL;
         return NO_FILE__NO_TOOL;
     }
     string line;
