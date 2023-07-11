@@ -2,6 +2,8 @@
 #include "Chef.hpp"
 #include <cmath>
 
+int otherBuff(Skill &skill, Recipe &recipe, DishBuff &rb);
+
 int getPrice(Skill &skill, Recipe &recipe, ActivityBuff *activityBuff,
              bool verbose) {
     // if (verbose)
@@ -53,6 +55,7 @@ int getPrice(Skill &skill, Recipe &recipe, ActivityBuff *activityBuff,
                     recipe.cookAbility * skill.abilityBuff +
                     recipe.materialCategories * skill.materialBuff +
                     rb.dishBuff;
+    skillBuff += otherBuff(skill, recipe, rb);
     int buff = gradebuff + skillBuff + (Chef::coinBuffOn ? skill.coinBuff : 0) +
                activityBuffValue;
     // std::cout << buff << std::endl;
@@ -121,6 +124,8 @@ BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
                     recipe->cookAbility * skill.abilityBuff +
                     recipe->materialCategories * skill.materialBuff +
                     rb.dishBuff + (Chef::coinBuffOn ? skill.coinBuff : 0);
+    int otherSkillBuff = otherBuff(skill, *recipe, rb);
+    skillBuff += otherSkillBuff;
     int buff = gradebuff + skillBuff + intentionAddBuff;
     int singlePrice = (int)std::ceil((recipe->price + rule.baseRule.directAdd) *
                                      (1.0 + intentionBaseBuff / 100.0) *
@@ -145,8 +150,9 @@ BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
                   << recipe->cookAbility * skill.abilityBuff << " + 食材"
                   << recipe->materialCategories * skill.materialBuff
                   << " + 修炼" << rb.dishBuff << " + 金币"
-                  << (Chef::coinBuffOn ? skill.coinBuff : 0) << ")"
-                  << std::endl;
+                  << (Chef::coinBuffOn ? skill.coinBuff : 0)
+                  << " + 其它" << otherSkillBuff
+                  << ")" << std::endl;
         std::cout << "│Intention: (基础+" << rule.baseRule.directAdd << "，+"
                   << intentionBaseBuff << "%；售价+" << intentionAddBuff
                   << "%) " << std::endl;
@@ -155,4 +161,17 @@ BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
                   << std::endl;
     }
     return b;
+}
+
+int otherBuff(Skill &skill, Recipe &recipe, DishBuff &rb) {
+    int strangeBuff = 0;
+    if (~skill.otherBuff.ExcessCookbookNum.dishNum) {
+        if (rb.dishNum >= skill.otherBuff.ExcessCookbookNum.dishNum)
+            strangeBuff += skill.otherBuff.ExcessCookbookNum.dishBuff;
+    }
+    if (~skill.otherBuff.Rank.dishNum) {
+        if (skill.ability / recipe.cookAbility >= skill.otherBuff.Rank.dishNum)
+            strangeBuff += skill.otherBuff.Rank.dishBuff;
+    }
+    return strangeBuff;
 }

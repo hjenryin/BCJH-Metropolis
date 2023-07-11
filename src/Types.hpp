@@ -156,12 +156,48 @@ class RarityBuff {
     /*几火就是几，不用减一*/
     int &operator[](int i) { return data[i - 1]; }
     int operator[](int i) const { return data[i - 1]; }
+    void add(const RarityBuff &r) { for (int i = 0; i < 5; i++) this->data[i] += r.data[i]; }
     void print() const {
         std::cout << "RarityBuff: ";
         for (int i = 0; i < 5; i++) {
             std::cout << data[i] << "% ";
         }
         std::cout << std::endl;
+    }
+};
+class OtherBuff {
+  public:
+    DishBuff ExcessCookbookNum;
+    DishBuff Rank;
+    OtherBuff() {
+        this->ExcessCookbookNum.dishNum = -1;
+        this->Rank.dishNum = -1;
+    }
+    void add(const OtherBuff &s) {
+        if (~s.ExcessCookbookNum.dishNum) {
+            if (~this->ExcessCookbookNum.dishNum) {
+                this->ExcessCookbookNum.dishBuff += s.ExcessCookbookNum.dishBuff;
+            } else {
+                this->ExcessCookbookNum.dishNum = s.ExcessCookbookNum.dishNum;
+                this->ExcessCookbookNum.dishBuff = s.ExcessCookbookNum.dishBuff;
+            }
+        }
+        if (~s.Rank.dishNum) {
+            if (~this->Rank.dishNum) {
+                this->Rank.dishBuff += s.Rank.dishBuff;
+            } else {
+                this->Rank.dishNum = s.Rank.dishNum;
+                this->Rank.dishBuff = s.Rank.dishBuff;
+            }
+        }
+    }
+    void print() const {
+        if (~this->ExcessCookbookNum.dishNum)
+            std::cout << "ExcessCookbookNum: " << this->ExcessCookbookNum.dishNum 
+                    << "(" << this->ExcessCookbookNum.dishBuff << ")" << std::endl;
+        if (~this->Rank.dishNum)
+            std::cout << "Rank: " << this->Rank.dishNum 
+                    << "(" << this->Rank.dishBuff << ")" << std::endl;
     }
 };
 class Skill {
@@ -176,18 +212,20 @@ class Skill {
     FlavorBuff flavorBuff;
     MaterialCategoryBuff materialBuff;
     RarityBuff rarityBuff;
+    OtherBuff otherBuff;
     int coinBuff;
     Skill(CookAbility ability, AbilityBuff abilityBuff, FlavorBuff flavorBuff,
-          MaterialCategoryBuff materialBuff, RarityBuff rarityBuff,
+          MaterialCategoryBuff materialBuff, RarityBuff rarityBuff, OtherBuff otherBuff,
           int coinBuff)
         : ability(ability), abilityBuff(abilityBuff), flavorBuff(flavorBuff),
-          materialBuff(materialBuff), coinBuff(coinBuff),
-          rarityBuff(rarityBuff) {}
+          materialBuff(materialBuff), rarityBuff(rarityBuff), otherBuff(otherBuff),
+          coinBuff(coinBuff) {}
     Skill() {
         this->ability = CookAbility();
         this->abilityBuff = AbilityBuff();
         this->flavorBuff = FlavorBuff();
         this->materialBuff = MaterialCategoryBuff();
+        this->otherBuff = OtherBuff();
         this->coinBuff = 0;
     }
     Skill getSkill(int id) { return skillList[id]; }
@@ -197,10 +235,9 @@ class Skill {
         this->abilityBuff.add(s.abilityBuff);
         this->flavorBuff.add(s.flavorBuff);
         this->materialBuff.add(s.materialBuff);
+        this->rarityBuff.add(s.rarityBuff);
+        this->otherBuff.add(s.otherBuff);
         this->coinBuff += s.coinBuff;
-        for (int i = 0; i < 5; i++) {
-            this->rarityBuff[i + 1] += s.rarityBuff[i + 1];
-        }
     }
     Skill operator+(const Skill &s) {
         Skill tmp(*this);
@@ -214,6 +251,7 @@ class Skill {
         this->materialBuff.print();
         std::cout << "CoinBuff: " << this->coinBuff << "; ";
         this->rarityBuff.print();
+        this->otherBuff.print();
     }
 };
 

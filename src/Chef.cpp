@@ -234,10 +234,22 @@ void Skill::loadJson(const Json::Value &v) {
                 } else if (type == "UseCreation") {
                     skill.materialBuff.creation = value;
                 } else if (type == "CookbookPrice") {
-                    auto effects = effect["conditionValueList"];
-                    for (auto &e : effects) {
-                        int rarity = getInt(e);
-                        skill.rarityBuff[rarity] = value;
+                    std::string conditionType =
+                        effect["conditionType"].asString();
+                    if (conditionType == "CookbookRarity") {
+                        for (auto num : effect["conditionValueList"]) {
+                            skill.rarityBuff[getInt(num)] = value;
+                        }
+                    } else
+                    if (conditionType == "ExcessCookbookNum") {
+                        int num = effect["conditionValue"].asInt();
+                        skill.otherBuff.ExcessCookbookNum.dishNum = num;
+                        skill.otherBuff.ExcessCookbookNum.dishBuff = value;
+                    } else
+                    if (conditionType == "Rank") {
+                        int num = effect["conditionValue"].asInt();
+                        skill.otherBuff.Rank.dishNum = num;
+                        skill.otherBuff.Rank.dishBuff = value;
                     }
                 }
                 skillList[id] += skill;
