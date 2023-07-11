@@ -119,7 +119,7 @@ BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
     r.lenientRule.merge(r.strictRule); // vscode报错不认友元，但是编译没问题
     BanquetLenientRule rule = r.lenientRule;
     int intentionAddBuff = rule.addRule.buff;
-    int intentionBaseBuff = rule.baseRule.buff;
+    int intentionBaseBuff = rule.baseRule.buff + skill.abilityBuff.basic;
     int skillBuff = skill.flavorBuff * recipe->flavor +
                     recipe->cookAbility * skill.abilityBuff +
                     recipe->materialCategories * skill.materialBuff +

@@ -251,6 +251,8 @@ void Skill::loadJson(const Json::Value &v) {
                         skill.otherBuff.Rank.dishNum = num;
                         skill.otherBuff.Rank.dishBuff = value;
                     }
+                } else if (type == "BasicPrice") {
+                    skill.abilityBuff.basic = value;
                 }
                 skillList[id] += skill;
             }

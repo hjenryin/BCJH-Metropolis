@@ -133,10 +133,20 @@ class Ability {
 
 class AbilityBuff : public Ability {
   public:
+    int basic = 0;
     AbilityBuff() {}
     AbilityBuff(int stirfry, int bake, int boil, int steam, int fry, int knife)
         : Ability(stirfry, bake, boil, steam, fry, knife) {}
-    void print() const { this->Ability::print("AbilityBuff: ", "\n", true); }
+    void print() const {
+        this->Ability::print("AbilityBuff: ", "", true);
+        std::cout << " Basic: " << this->basic << std::endl;
+    }
+    void add(const AbilityBuff &a) {
+        this->Ability::add(a);
+        this->basic += a.basic;
+    }
+    void add(const Ability &a) { this->Ability::add(a); }
+    void add(int a){ this->Ability::add(a); }
 };
 class CookAbility : public Ability {
 
