@@ -31,10 +31,11 @@ SARunner::SARunner(CList *chefList, RList *recipeList, bool randomizeChef,
         this->tMin = T_MAX_RECIPE / 10;
         this->stepMax = iterRecipe;
     }
-
+#ifdef VIS_HISTORY
     this->history = new History[stepMax];
+#endif
 }
-SARunner::~SARunner() { delete[] this->history; }
+
 States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
     States s;
 
@@ -168,14 +169,17 @@ States SARunner::run(States *s0, bool progress, bool silent,
         if (t <= this->tMin) {
             break;
         }
+#ifdef VIS_HISTORY
         this->history[step].energy = energy;
         this->history[step].t = t;
         this->history[step].states = s;
+#endif
         if (energy >= this->targetScore) {
             break;
         }
         step++;
     }
+#ifdef VIS_HISTORY
     if (progress && !silent) {
         std::fstream file;
         file.open("../out/history.csv", std::ios::out);
@@ -187,6 +191,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
         // std::cout << "Saved to ../out/history.csv!" <<std::endl;
         system("python ../src/plot.py &");
     }
+
     if (filename) {
 
         std::fstream file;
@@ -201,7 +206,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
         std::string cmd = "python ../src/plot.py -f " + fn + " &";
         system(cmd.c_str());
     }
-
+#endif
     return this->bestState;
 }
 

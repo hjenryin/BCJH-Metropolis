@@ -28,7 +28,9 @@ class SARunner {
     static int targetScore;
 
     States bestState;
+#ifdef VIS_HISTORY
     History *history;
+#endif
     States generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]);
     static int T_MAX_CHEF;
     static int T_MAX_RECIPE;
@@ -60,6 +62,8 @@ class SARunner {
         f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative);
     States run(States *s = NULL, bool progress = false, bool silent = false,
                const char *fn = NULL);
-    ~SARunner();
+#ifdef VIS_HISTORY
+    ~SARunner() { delete[] this->history; }
+#endif
 };
 #endif

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <unistd.h> // add this line
 #include "../config.hpp"
 #include "Calculator.hpp"
 #include "utils/json.hpp"
@@ -45,6 +46,15 @@ void loadChef(CList &chefList) {
 
     // std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
     // std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
+
+    // print the working dir
+    char cwd[1024];
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        printf("Current working dir: %s\n", cwd);
+    } else {
+        perror("getcwd() error");
+        return;
+    }
 
     std::ifstream gameDataF("data.min.json", std::ifstream::binary);
     if (!gameDataF.good()) {
