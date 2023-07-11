@@ -31,6 +31,7 @@ class Chef {
     Skill skill;
     Skill companyBuff;
     Skill nextBuff;
+    Skill conditionSkill;
     // std::vector<Recipe *> recipeCapable;
     std::vector<Recipe *> recipeLearned;
 

@@ -223,6 +223,11 @@ void Skill::loadJson(const Json::Value &v) {
                     skill.abilityBuff.steam = value;
                 } else if (type == "UseFry") {
                     skill.abilityBuff.fry = value;
+                    try {
+                        std::string conditionType =
+                            effect["conditionType"].asString();
+                        if (conditionType == "SameSkill") skill.condition.type = 2;
+                    }catch (Json::LogicError &e) {}
                 } else if (type == "UseKnife") {
                     skill.abilityBuff.knife = value;
                 } else if (type == "UseSweet") {
@@ -265,6 +270,14 @@ void Skill::loadJson(const Json::Value &v) {
                     }
                 } else if (type == "BasicPrice") {
                     skill.abilityBuff.basic = value;
+                    try {
+                        std::string conditionType =
+                            effect["conditionType"].asString();
+                        if (conditionType == "PerRank"){
+                            skill.condition.type = 1;
+                            skill.condition.value = effect["conditionValue"].asInt();
+                        }
+                    }catch (Json::LogicError &e) {}
                 }
                 skillList[id] += skill;
             }
@@ -273,7 +286,9 @@ void Skill::loadJson(const Json::Value &v) {
 }
 void Chef::addSkill(int id) {
     auto skill = Skill::skillList[id];
-    if (skill.type == Skill::SELF) {
+    if (skill.condition.type > 0) {
+        this->conditionSkill += skill;
+    } else if (skill.type == Skill::SELF) {
         this->skill += skill;
     } else if (skill.type == Skill::PARTIAL) {
         this->companyBuff += skill;

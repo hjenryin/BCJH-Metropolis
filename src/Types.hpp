@@ -234,6 +234,27 @@ class OtherBuff {
                     << "(" << this->Rank.dishBuff << ")" << std::endl;
     }
 };
+class Condition {
+  public:
+    int type;
+    int value;
+    Condition() {
+        this->type = 0;
+        this->value = 0;
+    }
+    void print() const {
+        switch (this->type)
+        {
+        case 1:
+            std::cout << "特殊技能条件: " << "每制作一种" << this->value << "级料理";
+            break;
+        case 2:
+            std::cout << "特殊技能条件: " << "制作三种同技法料理";
+        default:
+            break;
+        }
+    }
+};
 class Skill {
 
   public:
@@ -248,12 +269,13 @@ class Skill {
     RarityBuff rarityBuff;
     OtherBuff otherBuff;
     int coinBuff;
+    Condition condition;
     Skill(CookAbility ability, AbilityBuff abilityBuff, FlavorBuff flavorBuff,
           MaterialCategoryBuff materialBuff, RarityBuff rarityBuff, OtherBuff otherBuff,
-          int coinBuff)
+          int coinBuff, Condition condition)
         : ability(ability), abilityBuff(abilityBuff), flavorBuff(flavorBuff),
           materialBuff(materialBuff), rarityBuff(rarityBuff), otherBuff(otherBuff),
-          coinBuff(coinBuff) {}
+          coinBuff(coinBuff), condition(condition) {}
     Skill() {
         this->ability = CookAbility();
         this->abilityBuff = AbilityBuff();
@@ -261,6 +283,7 @@ class Skill {
         this->materialBuff = MaterialCategoryBuff();
         this->otherBuff = OtherBuff();
         this->coinBuff = 0;
+        this->condition = Condition();
     }
     Skill getSkill(int id) { return skillList[id]; }
     static void loadJson(const Json::Value &v);
