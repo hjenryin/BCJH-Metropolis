@@ -81,14 +81,14 @@ int banquetRule2(BanquetStrictRule **strictRule,
     // 第2轮
     // 条件：苦：本道料理售价+100%
     for (int i = d + 3; i < d + 6; i++) {
-        if (s.recipe[i]->flavor.bitter) {
+        if (s.recipe[i]->flavor == BITTER) {
             lenientRule[i]->addRule.buff += 100;
             break;
         }
     }
     // 条件：辣：本道料理意图生效次数加一
     for (int i = d + 3; i < d + 6; i++) {
-        if (s.recipe[i]->flavor.spicy) {
+        if (s.recipe[i]->flavor == SPICY) {
             lenientRule[i]->oneMore();
             break;
         }
@@ -167,7 +167,7 @@ int banquetRule13(BanquetStrictRule **strictRule,
     // 效果：下道料理为辣时售价+100%
     for (int i = d + 0; i < d + 2; i++) {
         if (s.recipe[i]->rarity == 3) {
-            if (s.recipe[i + 1]->flavor.spicy) {
+            if (s.recipe[i + 1]->flavor == SPICY) {
                 lenientRule[i + 1]->addRule.buff += 100;
             }
             break;
@@ -186,7 +186,7 @@ int banquetRule13(BanquetStrictRule **strictRule,
     // 条件：辣
     // 效果：本道料理饱腹感+5
     for (int i = d + 3; i < d + 6; i++) {
-        if (s.recipe[i]->flavor.spicy) {
+        if (s.recipe[i]->flavor == SPICY) {
             lenientRule[i]->addRule.full += 5;
             break;
         }
@@ -198,7 +198,7 @@ int banquetRule13(BanquetStrictRule **strictRule,
     // 效果：下道料理为辣时售价+100%
     for (int i = d + 3; i < d + 5; i++) {
         if (s.recipe[i]->rarity == 2) {
-            if (s.recipe[i + 1]->flavor.spicy) {
+            if (s.recipe[i + 1]->flavor == SPICY) {
                 lenientRule[i + 1]->addRule.buff += 100;
             }
             break;

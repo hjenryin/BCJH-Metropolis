@@ -44,87 +44,29 @@ class Materials {
         return sum;
     }
 };
-class Flavor {
-  public:
-    bool sweet;
-    bool salty;
-    bool sour;
-    bool bitter;
-    bool spicy;
-    bool tasty;
-    Flavor()
-        : sweet(false), salty(false), sour(false), bitter(false), spicy(false),
-          tasty(false) {}
-    void print(std::string end = "\n") const {
-        if (this->sweet) {
-            std::cout << "甜";
-        }
-        if (this->salty) {
-            std::cout << "咸";
-        }
-        if (this->sour) {
-            std::cout << "酸";
-        }
-        if (this->bitter) {
-            std::cout << "苦";
-        }
-        if (this->spicy) {
-            std::cout << "辣";
-        }
-        if (this->tasty) {
-            std::cout << "鲜";
-        }
-        std::cout << end;
-    }
-    FlavorEnum get_flavor() {
-        if (this-> sweet){
-            return FlavorEnum::SWEET;
-        }
-        if (this-> salty){
-            return FlavorEnum::SALTY;
-        }
-        if (this-> sour){
-            return FlavorEnum::SOUR;
-        }
-        if (this-> bitter){
-            return FlavorEnum::BITTER;
-        }
-        if (this-> spicy){
-            return FlavorEnum::SPICY;
-        }
-        if (this-> tasty){
-            return FlavorEnum::TASTY;
-        }
-        return FlavorEnum::UNIDENTIFIED_FLAVOR;
-    }
-    int operator*(FlavorBuff &buff) {
-        int sum = 0;
-        if (this->sweet) {
-            sum += buff.sweet;
-        }
-        if (this->salty) {
-            sum += buff.salty;
-        }
-        if (this->sour) {
-            sum += buff.sour;
-        }
-        if (this->bitter) {
-            sum += buff.bitter;
-        }
-        if (this->spicy) {
-            sum += buff.spicy;
-        }
-        if (this->tasty) {
-            sum += buff.tasty;
-        }
-        return sum;
-    }
-};
 
 class Recipe {
   private:
-    Flavor getFlavor(Json::Value &flavorJson);
+    FlavorEnum getFlavor(Json::Value &flavorJson);
     void getMaterials(Json::Value &materialsJson);
+    void printFlavor(std::string end = "\n") const {
+        if (this->flavor == SWEET) {
+            std::cout << "甜";
+        } else if (this->flavor == SALTY) {
+            std::cout << "咸";
+        } else if (this->flavor == SOUR) {
+            std::cout << "酸";
+        } else if (this->flavor == BITTER) {
+            std::cout << "苦";
+        } else if (this->flavor == SPICY) {
+            std::cout << "辣";
+        } else if (this->flavor == TASTY) {
+            std::cout << "鲜";
+        } else {
+            std::cout << "未知";
+        }
+        std::cout << end;
+    }
 
   public:
     static DishBuff rarityBuff[5];
@@ -135,9 +77,9 @@ class Recipe {
     std::map<int, int> materials;
     Materials materialCategories;
     CookAbility cookAbility;
-    Flavor flavor;
+    FlavorEnum flavor;
     Recipe(Json::Value &recipe);
-    Recipe() {}
+    Recipe() : flavor(UNIDENTIFIED_FLAVOR) {}
     void print(const std::string &startLine = "") const;
     static void initRarityBuff(const Json::Value &usrBuff);
 };

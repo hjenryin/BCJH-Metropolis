@@ -19,6 +19,7 @@ const int ABILITY_ENUM_START = TOOL_ENUM_START + 2;
 const int ABILITY_ENUM_END = TOOL_ENUM_END;
 enum FlavorEnum {
     UNIDENTIFIED_FLAVOR = FLAVOR_ENUM_START,
+    // Order MATTERS!
     SWEET,
     SALTY,
     SOUR,

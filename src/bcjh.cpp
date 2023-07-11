@@ -262,10 +262,21 @@ std::pair<Json::Value, Json::Value> loadJsonFile() {
         exit(1);
     }
 
-    usrDataF >> usrData;
-    usrDataF.close();
-    gameDataF >> gameData;
-    gameDataF.close();
+    try {
+        usrDataF >> usrData;
+        usrDataF.close();
+        gameDataF >> gameData;
+        gameDataF.close();
 
+    } catch (Json::RuntimeError &e) {
+
+        std::cout
+            << "json文件格式不正确。如果文件内容是手动复制的，确认文件已"
+               "经复制完整。如果文件是从powershell下载的，请确认编码是utf-8\n";
+        exit(1);
+    } catch (Json::LogicError &e) {
+        std::cout << "json文件格式不正确。请确认文件来自白菜菊花而非图鉴网。\n";
+        exit(1);
+    }
     return {std::move(usrData), std::move(gameData)};
 }

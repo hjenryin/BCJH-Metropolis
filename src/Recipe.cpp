@@ -34,21 +34,21 @@ Recipe::Recipe(Json::Value &recipe) {
 //     flavor.tasty = flavorStr.find("Tasty") != std::string::npos;
 //     return flavor;
 // }
-Flavor Recipe::getFlavor(Json::Value &flavorJson) {
+FlavorEnum Recipe::getFlavor(Json::Value &flavorJson) {
     std::string flavorStr = flavorJson.asString();
-    Flavor f;
+    FlavorEnum f;
     if (flavorStr.find("Sweet") != std::string::npos)
-        f.sweet = true;
+        f = SWEET;
     else if (flavorStr.find("Salty") != std::string::npos)
-        f.salty = true;
+        f = SALTY;
     else if (flavorStr.find("Sour") != std::string::npos)
-        f.sour = true;
+        f = SOUR;
     else if (flavorStr.find("Bitter") != std::string::npos)
-        f.bitter = true;
+        f = BITTER;
     else if (flavorStr.find("Spicy") != std::string::npos)
-        f.spicy = true;
+        f = SPICY;
     else if (flavorStr.find("Tasty") != std::string::npos)
-        f.tasty = true;
+        f = TASTY;
     return f;
 }
 const struct MaterialList {
@@ -65,7 +65,7 @@ void Recipe::print(const std::string &startLine) const {
     auto rb = rarityBuff[this->rarity - 1];
     std::cout << rb.dishNum << ", +" << rb.dishBuff << "%" << std::endl;
     std::cout << startLine;
-    this->flavor.print("\t");
+    this->printFlavor("\t");
     this->materialCategories.print("\t");
     this->cookAbility.print();
 }

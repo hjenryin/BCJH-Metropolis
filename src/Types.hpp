@@ -25,6 +25,7 @@ class MaterialCategoryBuff {
 
 class FlavorBuff {
   public:
+    // Order MATTERS!
     int sweet;
     int salty;
     int sour;
@@ -45,6 +46,10 @@ class FlavorBuff {
                   << "; Salty: " << this->salty << "; Sour: " << this->sour
                   << "; Bitter: " << this->bitter << "; Spicy: " << this->spicy
                   << "; Tasty: " << this->tasty << std::endl;
+    }
+    int operator*(const FlavorEnum f) const {
+        const int *ptr = &this->sweet;
+        return ptr[f - FLAVOR_ENUM_START - 1];
     }
 };
 class Ability {

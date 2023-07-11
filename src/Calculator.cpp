@@ -42,14 +42,14 @@ int getPrice(Skill &skill, Recipe &recipe, ActivityBuff *activityBuff,
             }
         }
         for (auto &i : activityBuff->flavorBuff) {
-            if (recipe.flavor.get_flavor() == i.first) {
+            if (recipe.flavor == i.first) {
                 activityBuffValue += i.second;
             }
         }
     }
     // std::cout << "activityBuff: " << activityBuff << std::endl;
     auto rb = recipe.rarityBuff[recipe.rarity - 1];
-    int skillBuff = recipe.flavor * skill.flavorBuff +
+    int skillBuff = skill.flavorBuff * recipe.flavor +
                     recipe.cookAbility * skill.abilityBuff +
                     recipe.materialCategories * skill.materialBuff +
                     rb.dishBuff;
@@ -67,7 +67,7 @@ int getPrice(Skill &skill, Recipe &recipe, ActivityBuff *activityBuff,
         std::cout << "等级: " << grade << "，加成" << gradebuff << "%"
                   << std::endl;
         std::cout << "Skill: " << skillBuff
-                  << " (=" << recipe.flavor * skill.flavorBuff << " + "
+                  << " (=" << skill.flavorBuff * recipe.flavor << " + "
                   << recipe.cookAbility * skill.abilityBuff << " + "
                   << recipe.materialCategories * skill.materialBuff << " + "
                   << rb.dishBuff << ")"
@@ -117,7 +117,7 @@ BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
     BanquetLenientRule rule = r.lenientRule;
     int intentionAddBuff = rule.addRule.buff;
     int intentionBaseBuff = rule.baseRule.buff;
-    int skillBuff = recipe->flavor * skill.flavorBuff +
+    int skillBuff = skill.flavorBuff * recipe->flavor +
                     recipe->cookAbility * skill.abilityBuff +
                     recipe->materialCategories * skill.materialBuff +
                     rb.dishBuff + (Chef::coinBuffOn ? skill.coinBuff : 0);
@@ -141,7 +141,7 @@ BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
         std::cout << "│等级: " << grade << "，加成" << gradebuff << "%"
                   << std::endl;
         std::cout << "│Skill: " << skillBuff << "% ( = 味道"
-                  << recipe->flavor * skill.flavorBuff << " + 技法"
+                  << skill.flavorBuff * recipe->flavor << " + 技法"
                   << recipe->cookAbility * skill.abilityBuff << " + 食材"
                   << recipe->materialCategories * skill.materialBuff
                   << " + 修炼" << rb.dishBuff << " + 金币"
