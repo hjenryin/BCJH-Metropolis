@@ -7,7 +7,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/std:c++17>")
     # add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Qvec-report:2>")
 else()
-    add_compile_options("-fexec-charset=gbk")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread")
 endif()
 
