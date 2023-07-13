@@ -13,8 +13,8 @@ ToolEnum toolHeuristic(States &s, int chefId) {
     for (int i = 0; i < DISH_PER_CHEF; i++) {
         max += (chef->skill->ability + best) / recipes[i]->cookAbility;
     }
-    for (int i = ABILITY_ENUM_START; i < ABILITY_ENUM_END; i++) {
-        auto tool = (ToolEnum)i;
+    for (int t = ABILITY_ENUM_START; t < ABILITY_ENUM_END; t++) {
+        auto tool = (ToolEnum)t;
         s.modifyTool(chefId, tool);
         if (!s.capable()) {
             continue;

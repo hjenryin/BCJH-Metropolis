@@ -34,7 +34,7 @@ static ToolInfoBlock *tibptr;
 
 ToolFileType loadToolFile() {
 
-    auto dirs = {"./", "../data/"};
+    auto dirs = {"./", "../data/", "../"};
 
     auto fname = "toolEquipped.csv";
     ifstream toolFile;
@@ -102,8 +102,9 @@ ToolFileType loadToolFile() {
         cin >> i;
 
         if (!(i >= 0 && i < int(tif.size()))) {
-            cout << "输入的不是0到" << tif.size() - 1 << "之间的整数。" << endl;
-            exit(1);
+            cout << "输入的不是0到" << tif.size() - 1
+                 << "之间的整数，默认使用配置0." << endl;
+            i = 0;
         } else {
             cout << "使用配置" << i << "。" << endl;
         }
