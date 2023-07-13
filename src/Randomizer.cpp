@@ -21,7 +21,9 @@ ToolEnum toolHeuristic(States &s, int chefId) {
         }
         int value = 0;
         for (int i = 0; i < DISH_PER_CHEF; i++) {
-            value += (chef->skill->ability + tool) / recipes[i]->cookAbility;
+            auto skill = (chef->skill->ability + tool);
+            auto thisgrade = skill / recipes[i]->cookAbility;
+            value += thisgrade;
         }
         if (value > max) {
             max = value;

@@ -2,6 +2,7 @@
 #define TYPES_HPP
 #include <iostream>
 #include "include/json/json.h"
+#include "Values.hpp"
 
 class MaterialCategoryBuff {
   public:
@@ -54,12 +55,12 @@ class FlavorBuff {
 };
 class Ability {
   public:
-    int stirfry;
-    int bake;
-    int boil;
-    int steam;
-    int fry;
-    int knife;
+    int stirfry = 0;
+    int bake = 0;
+    int boil = 0;
+    int steam = 0;
+    int fry = 0;
+    int knife = 0;
     Ability() : stirfry(0), bake(0), boil(0), steam(0), fry(0), knife(0) {}
     Ability(int stirfry, int bake, int boil, int steam, int fry, int knife)
         : stirfry(stirfry), bake(bake), boil(boil), steam(steam), fry(fry),
