@@ -9,6 +9,7 @@
 #include <cmath>
 #include <random>
 #include <fstream>
+#include "Randomizer.hpp"
 
 struct History {
     States states;
@@ -24,7 +25,6 @@ class SARunner {
     int tMin;
     CList *chefList;
     RList *recipeList;
-    e::GetEnergy getEnergyFunc;
     static int targetScore;
 
     States bestState;
@@ -58,7 +58,6 @@ class SARunner {
      */
     SARunner(
         CList *chefList, RList *recipeList, bool randomizeChef,
-        e::GetEnergy getEnergyFunc = e::getTotalPrice,
         f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative);
     States run(States *s = NULL, bool progress = false, bool silent = false,
                const char *fn = NULL);

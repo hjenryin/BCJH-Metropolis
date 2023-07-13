@@ -11,14 +11,14 @@
 #include "exception.hpp"
 // #include "activityRule.hpp"
 #include <limits.h>
+#include "Randomizer.hpp"
 
 int SARunner::T_MAX_CHEF, SARunner::T_MAX_RECIPE, SARunner::iterChef,
     SARunner::iterRecipe, SARunner::targetScore;
 SARunner::SARunner(CList *chefList, RList *recipeList, bool randomizeChef,
-                   e::GetEnergy getEnergyFunc,
                    f::CoolingSchedule coolingScheduleFunc)
     : chefList(chefList), recipeList(recipeList),
-      coolingScheduleFunc(coolingScheduleFunc), getEnergyFunc(getEnergyFunc) {
+      coolingScheduleFunc(coolingScheduleFunc){
     if (randomizeChef) {
         this->randomMoveFunc =
             new ChefRandomizer(chefList, recipeList, targetScore);
@@ -108,7 +108,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
     } else {
         s = *s0;
     }
-    int energy = getEnergyFunc(s, this->chefList, this->recipeList, false);
+    int energy = sumPrice(s, this->chefList, this->recipeList, false);
     // std::cout << "Initial energy: " << energy << std::endl;
     this->bestState = s;
     this->bestEnergy = energy;
@@ -141,7 +141,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
         // std::cin >> step;
         // print(newS);
         int newEnergy =
-            getEnergyFunc(newS, this->chefList, this->recipeList, false);
+            sumPrice(newS, this->chefList, this->recipeList, false);
         double prob = 0;
         int delta = energy - newEnergy;
         if (delta / t < -30) {
@@ -161,7 +161,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
             s.saveChefTool();
             this->bestState = s;
             if (progress && !silent) {
-                e0::sumPrice(this->bestState);
+                sumPrice(this->bestState);
                 std::cout << " ";
             }
         }
@@ -230,6 +230,6 @@ void SARunner::print(States s, bool verbose) const {
         //         getPrice(*s.chef[i], *s.recipe[r++], true);
         //     }
         // }
-        this->getEnergyFunc(s, this->chefList, this->recipeList, true);
+        sumPrice(s, this->chefList, this->recipeList, true);
     }
 }

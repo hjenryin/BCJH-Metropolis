@@ -147,13 +147,13 @@ int main(int argc, char *argv[]) {
 
         log += 0x1;
         std::cout << "随机种子：" << result.seed << std::endl;
-        e0::sumPrice(*result.state, result.chefList, &result.recipeList, log,
+        sumPrice(*result.state, result.chefList, &result.recipeList, log,
                      true);
         std::cout << "**************\n总分: " << result.score
                   << "\n***************" << std::endl;
         if (!silent) {
             SARunner saRunnerPrint(result.chefList, &result.recipeList, false,
-                                   e::getTotalPrice, f::t_dist_fast);
+                                   f::t_dist_fast);
             saRunnerPrint.run(result.state, false, silent, "../out/recipe");
         }
         delete result.chefList;
@@ -170,13 +170,13 @@ Result run(const CList &chefList, RList &recipeList, int log, bool silent,
     CList *chefListPtr = new CList(chefList);
     *chefListPtr = chefList;
     srand(seed);
-    SARunner saRunner(chefListPtr, &recipeList, true, e::getTotalPrice,
+    SARunner saRunner(chefListPtr, &recipeList, true, 
                       f::t_dist_slow);
     // std::cout << log << std::endl;
     States *s = new States;
     *s = saRunner.run(NULL, true, silent);
     *s = perfectChef(*s, chefListPtr);
-    int score = e0::sumPrice(*s, chefListPtr, &recipeList, log, false);
+    int score = sumPrice(*s, chefListPtr, &recipeList, log, false);
     return Result{score, seed, chefListPtr, recipeList, s};
 }
 
