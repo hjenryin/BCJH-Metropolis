@@ -50,19 +50,19 @@ void toolEquipped(Chef *chef) {
 
     ///////////// 自定义厨师装备的厨具：
 
-    auto skill = &chef->skill; // 这句不用管，放着就好。
-    auto name = chef->name;
+    auto skill = chef->skill; // 这句不用管，放着就好。
+    auto name = *(chef->name);
     auto ability = &skill->ability;
     auto abilityBuff = &skill->abilityBuff;
     auto flavorBuff = &skill->flavorBuff;
     auto materialBuff = &skill->materialBuff;
 
-    if (chef->name == "达浪") {              // 金锄头
+    if (name == "达浪") {                    // 金锄头
         skill->ability.add(30);              // 全技法+30
         skill->materialBuff.vegetable += 15; // 蔬菜售价+15%
         chef->NoTool();                      // 不允许装备其他厨具
     }
-    if (chef->name == "宋书汐汐") {    // 幸福礼花炮
+    if (name == "宋书汐汐") {          // 幸福礼花炮
         skill->ability.stirfry += 150; // 炒技法+150
         skill->abilityBuff.bake += 25; // 烤售价+25%
         chef->NoTool();                // 不允许装备其他厨具

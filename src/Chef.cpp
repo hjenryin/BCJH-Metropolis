@@ -108,9 +108,13 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
     if (chef.isMember("chefId") && chef.isMember("name") &&
         chef.isMember("skill")) {
         // std::cout << "333" << std::endl;
+        this->name = new std::string();
+        this->skill = new Skill();
+        this->companyBuff = new Skill();
+        this->nextBuff = new Skill();
         this->id = chef["chefId"].asInt();
-        this->name = chef["name"].asString();
-        this->skill.ability = CookAbility(chef);
+        *this->name = chef["name"].asString();
+        this->skill->ability = CookAbility(chef);
         if (chef.isMember("tags") && chef["tags"].isArray()) {
             auto tags = chef["tags"];
             this->male = false;
@@ -118,11 +122,11 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
             for (auto tag : tags) {
                 if (tag.asInt() == 1) {
                     this->male = true;
-                    this->skill.ability.add(globalAbilityMale);
+                    this->skill->ability.add(globalAbilityMale);
                 }
                 if (tag.asInt() == 2) {
                     this->female = true;
-                    this->skill.ability.add(globalAbilityFemale);
+                    this->skill->ability.add(globalAbilityFemale);
                 }
             }
         }
@@ -130,7 +134,7 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
         std::cout << chef << std::endl;
         throw std::logic_error("Chef Json Error");
     }
-    this->skill.ability.add(globalAbilityBuff);
+    this->skill->ability.add(globalAbilityBuff);
     this->addSkill(chef["skill"].asInt());
     if (ultimateSkillId != -1) {
         this->addSkill(ultimateSkillId);
@@ -139,10 +143,10 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
 }
 
 void Chef::print() const {
-    std::cout << this->id << ": " << this->name << "\t"
+    std::cout << this->id << ": " << *this->name << "\t"
               << (this->male ? "M" : "") << (this->female ? "F" : "")
               << std::endl;
-    this->skill.print();
+    this->skill->print();
 }
 CookAbility::CookAbility(const Json::Value &v) {
     // std::cout << "Here" << std::endl;
@@ -248,26 +252,27 @@ void Skill::loadJson(const Json::Value &v) {
 void Chef::addSkill(int id) {
     auto skill = Skill::skillList[id];
     if (skill.type == Skill::SELF) {
-        this->skill += skill;
+        *this->skill += skill;
     } else if (skill.type == Skill::PARTIAL) {
-        this->companyBuff += skill;
+        *this->companyBuff += skill;
     } else if (skill.type == Skill::NEXT) {
-        this->nextBuff += skill;
+        *this->nextBuff += skill;
     }
 }
 
-int CookAbility::operator/(const Ability &a) const {
-    int grade = 5;
-    const int *thisptr = &this->stirfry;
-    const int *aptr = &a.stirfry;
-    for (int i = 0; i < 6; i++) {
-        if (aptr[i] != 0) {
-            grade =
-                grade < (thisptr[i] / aptr[i]) ? grade : (thisptr[i] / aptr[i]);
-        }
-    }
-    return grade;
-}
+// int CookAbility::operator/(const Ability &a) const {
+//     int grade = 5;
+//     const int *thisptr = &this->stirfry;
+//     const int *aptr = &a.stirfry;
+//     for (int i = 0; i < 6; i++) {
+//         if (aptr[i] != 0) {
+//             grade =
+//                 grade < (thisptr[i] / aptr[i]) ? grade : (thisptr[i] /
+//                 aptr[i]);
+//         }
+//     }
+//     return grade;
+// }
 int CookAbility::operator*(const AbilityBuff &a) const {
     int buff = 0;
     const int *thisptr = &this->stirfry;
@@ -280,45 +285,45 @@ int CookAbility::operator*(const AbilityBuff &a) const {
     return buff;
 }
 
-Chef Chef::addTool_modify_name(ToolEnum a) {
-    Chef newChef(*this);
-    newChef.tool = a;
-    switch (a) {
-    case STIRFRY:
-        newChef.skill.ability.stirfry += 100;
-        newChef.name += "-炒";
-        return newChef;
-    case BAKE:
-        newChef.skill.ability.bake += 100;
-        newChef.name += "-烤";
-        return newChef;
-    case STEAM:
-        newChef.skill.ability.steam += 100;
-        newChef.name += "-蒸";
-        return newChef;
-    case FRY:
-        newChef.skill.ability.fry += 100;
-        newChef.name += "-炸";
-        return newChef;
-    case BOIL:
-        newChef.skill.ability.boil += 100;
-        newChef.name += "-煮";
-        return newChef;
-    case KNIFE:
-        newChef.skill.ability.knife += 100;
-        newChef.name += "-切";
-        return newChef;
-    default:
-        std::cout << "Invalid Tool!" << std::endl;
-        throw 0;
-    }
-}
-bool Chef::isCapable(Recipe *recipe) {
-    if (this->skill.ability / recipe->cookAbility > 0) {
-        return true;
-    }
-    return false;
-}
+// Chef Chef::addTool_modify_name(ToolEnum a) {
+//     Chef newChef(*this);
+//     newChef.tool = a;
+//     switch (a) {
+//     case STIRFRY:
+//         newChef.skill.ability.stirfry += 100;
+//         newChef.name += "-炒";
+//         return newChef;
+//     case BAKE:
+//         newChef.skill.ability.bake += 100;
+//         newChef.name += "-烤";
+//         return newChef;
+//     case STEAM:
+//         newChef.skill.ability.steam += 100;
+//         newChef.name += "-蒸";
+//         return newChef;
+//     case FRY:
+//         newChef.skill.ability.fry += 100;
+//         newChef.name += "-炸";
+//         return newChef;
+//     case BOIL:
+//         newChef.skill.ability.boil += 100;
+//         newChef.name += "-煮";
+//         return newChef;
+//     case KNIFE:
+//         newChef.skill.ability.knife += 100;
+//         newChef.name += "-切";
+//         return newChef;
+//     default:
+//         std::cout << "Invalid Tool!" << std::endl;
+//         throw 0;
+//     }
+// }
+// bool Chef::isCapable(Recipe *recipe) {
+//     if (this->skill.ability / recipe->cookAbility > 0) {
+//         return true;
+//     }
+//     return false;
+// }
 // void Chef::loadRecipeCapable(std::vector<Recipe> &recipeList) {
 //     if (this->tool == NO_TOOL) {
 //         for (auto &recipe : recipeList) {
@@ -349,55 +354,6 @@ bool Chef::isCapable(Recipe *recipe) {
 void Chef::modifyTool(ToolEnum a) {
     if (this->tool == NO_TOOL)
         return;
-    if (this->tool == a)
-        return;
-
-    switch (this->tool) {
-    case STIRFRY:
-        this->skill.ability.stirfry -= 100;
-        break;
-    case BAKE:
-        this->skill.ability.bake -= 100;
-        break;
-    case STEAM:
-        this->skill.ability.steam -= 100;
-        break;
-    case FRY:
-        this->skill.ability.fry -= 100;
-        break;
-    case BOIL:
-        this->skill.ability.boil -= 100;
-        break;
-    case KNIFE:
-        this->skill.ability.knife -= 100;
-        break;
-    default:
-        // NOT_EQUIPPED
-        break;
-    }
-    switch (a) {
-    case STIRFRY:
-        this->skill.ability.stirfry += 100;
-        break;
-    case BAKE:
-        this->skill.ability.bake += 100;
-        break;
-    case STEAM:
-        this->skill.ability.steam += 100;
-        break;
-    case FRY:
-        this->skill.ability.fry += 100;
-        break;
-    case BOIL:
-        this->skill.ability.boil += 100;
-        break;
-    case KNIFE:
-        this->skill.ability.knife += 100;
-        break;
-    default:
-        // NOT_EQUIPPED
-        break;
-    }
     this->tool = a;
 }
 

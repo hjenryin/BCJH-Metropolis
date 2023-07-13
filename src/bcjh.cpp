@@ -169,13 +169,16 @@ Result run(const CList &chefList, RList &recipeList, int log, bool silent,
            int seed) {
     CList *chefListPtr = new CList(chefList);
     *chefListPtr = chefList;
+    for (auto &chef : *chefListPtr) {
+        chef.recipeLearned = new std::vector<Recipe *>;
+    }
     srand(seed);
     SARunner saRunner(chefListPtr, &recipeList, true, 
                       f::t_dist_slow);
     // std::cout << log << std::endl;
     States *s = new States;
     *s = saRunner.run(NULL, true, silent);
-    *s = perfectChef(*s, chefListPtr);
+    // *s = perfectChef(*s, chefListPtr);
     int score = sumPrice(*s, chefListPtr, &recipeList, log, false);
     return Result{score, seed, chefListPtr, recipeList, s};
 }

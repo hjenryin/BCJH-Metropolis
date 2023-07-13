@@ -10,21 +10,45 @@ Skill *States::getSkills() {
     if (!cacheValid) {
         cacheValid = true;
         for (int i = 0; i < NUM_CHEFS; i++) {
-            skillsCache[i] = chefs[i]->skill;
+            skillsCache[i] = *chefs[i].skill;
+            switch (chefs[i].getTool()) {
+            case STIRFRY:
+                skillsCache[i].ability.stirfry += 100;
+                break;
+            case BAKE:
+                skillsCache[i].ability.bake += 100;
+                break;
+            case STEAM:
+                skillsCache[i].ability.steam += 100;
+                break;
+            case FRY:
+                skillsCache[i].ability.fry += 100;
+                break;
+            case BOIL:
+                skillsCache[i].ability.boil += 100;
+                break;
+            case KNIFE:
+                skillsCache[i].ability.knife += 100;
+                break;
+            default:
+                // NOT_EQUIPPED
+                break;
+            }
         }
         for (int g = 0; g < NUM_GUESTS; g++) {
             for (int i = g * CHEFS_PER_GUEST; i < (g + 1) * CHEFS_PER_GUEST;
                  i++) {
                 for (int j = i; j < (g + 1) * CHEFS_PER_GUEST; j++) {
-                    skillsCache[j] += chefs[i]->companyBuff;
+                    skillsCache[j] += *chefs[i].companyBuff;
                 }
             }
             for (int i = g * CHEFS_PER_GUEST + 1; i < (g + 1) * CHEFS_PER_GUEST;
                  i++) {
-                skillsCache[i] += chefs[i - 1]->nextBuff;
+                skillsCache[i] += *chefs[i - 1].nextBuff;
             }
         }
     }
+
 #ifdef MEASURE_TIME
     clock_gettime(CLOCK_MONOTONIC, &end);
     getStatesSkillsTime +=
