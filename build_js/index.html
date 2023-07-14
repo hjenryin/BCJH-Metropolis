@@ -19,7 +19,7 @@ abc
         var progressPtr = Module._malloc(1)
         Module.HEAP8[progressPtr] = 0
         var result = Module.run(userData, ruleData, 3170000, 500, 1000, false, progressPtr)
-        // 参数为：userData, ruleData, targetScore, ITER_CHEF=5000, ITER_RECIPE=1000, allowTool=true, progressPtr.
+        // 参数为：userData, ruleData, targetScore, ITER_CHEF=5000, ITER_RECIPE=1000, allowTool=true, progressPtr=0.
         // 具体分值和加成在result.logs中。
         console.log(JSON.parse(result))
         console.log(JSON.parse(result).logs)
