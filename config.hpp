@@ -1,7 +1,8 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
-
+#ifndef EMSCRIPTEN
 #define NUM_GUESTS 2
+#endif
 #define DISH_PER_CHEF 3
 #define CHEFS_PER_GUEST 3
 #define NUM_CHEFS (NUM_GUESTS * CHEFS_PER_GUEST)

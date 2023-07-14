@@ -104,9 +104,8 @@ int sumPrice(const RuleInfo &rl, States s, int log, bool exactChefTool) {
             auto skills = s.getSkills();
             for (int i = 0; i < DISH_PER_CHEF * CHEFS_PER_GUEST; i++) {
                 if ((log & 0x10) && i % 3 == 0) {
-                    std::cout << "详细信息************" << std::endl;
+                    std::cout << "🧑‍🍳";
                     s[chefStart + i / 3]->print();
-                    std::cout << "************" << std::endl;
                 }
                 biCache =
                     getPrice(skills[chefStart + i / 3], s.recipe[dishStart + i],

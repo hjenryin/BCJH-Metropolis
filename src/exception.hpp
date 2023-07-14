@@ -23,7 +23,10 @@ class NoRecipeException : public std::exception {
 };
 class FileNotExistException : public std::exception {
   public:
-    virtual const char *what() const throw() { return "文件不存在。"; }
+    virtual const char *what() const throw() {
+        return "json文件缺失。如果在网页端，请确认已经上传了文件；如果在"
+               "本地，请确认已经下载了文件。";
+    }
     FileNotExistException() throw() {}
 };
 #define RANDOM_SEARCH_TIMEOUT 100

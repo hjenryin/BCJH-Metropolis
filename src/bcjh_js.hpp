@@ -37,14 +37,14 @@ struct Result {
     CList *chefList;
     RList recipeList;
     States state;
+    std::string logs;
 };
-Result run(const RuleInfo &, const CList &, RList &, int, bool, int);
 void calculator(CList &, RList &);
 
-// define a try-catch function wrapper
-template <typename F, typename... Args>
-auto try_catch(F f, std::string f_name, Args &&...args)
-    -> decltype(f(std::forward<Args>(args)...));
+// // define a try-catch function wrapper
+// template <typename F, typename... Args>
+// auto try_catch(F f, std::string f_name, Args &&...args)
+//     -> decltype(f(std::forward<Args>(args)...));
 
 class ResultJsonSerializable {
   public:
@@ -53,20 +53,22 @@ class ResultJsonSerializable {
     const CList *chefList;
     RList recipeList;
     const States state;
+    std::string logs;
     ResultJsonSerializable(int score, int seed, CList *chefList,
-                           RList recipeList, States state)
+                           RList recipeList, States state, std::string &logs)
         : score(score), seed(seed), chefList(chefList), recipeList(recipeList),
-          state(state) {}
+          state(state), logs(logs) {}
     ResultJsonSerializable(Result result)
         : score(result.score), seed(result.seed), chefList(result.chefList),
-          recipeList(result.recipeList), state(result.state) {}
+          recipeList(result.recipeList), state(result.state),
+          logs(result.logs) {}
     Json::String toJson() {
         Json::Value result;
         result["score"] = score;
         result["seed"] = seed;
         Json::Value chefsList(Json::arrayValue);
         for (int i = 0; i < NUM_CHEFS; i++) {
-            chefsList[i] = state[i]->name;
+            chefsList[i] = *state[i]->name;
         }
         result["chefs"] = chefsList;
         Json::Value recipesList(Json::arrayValue);
@@ -74,6 +76,7 @@ class ResultJsonSerializable {
             recipesList[i] = state.recipe[i]->name;
         }
         result["recipes"] = recipesList;
+        result["logs"] = logs;
         return result.toStyledString();
     }
 };
@@ -87,8 +90,7 @@ std::string
 #endif
     runjs(const std::string &userDataIn, const std::string &ruleDataIn,
           int targetScore, int iterChef = ITER_CHEF,
-          int iterRecipe = ITER_RECIPE, bool allowTool = true,
-          bool verbose = false);
+          int iterRecipe = ITER_RECIPE, bool allowTool = true);
 Result run(const RuleInfo &rl, CList &chefList, RList &recipeList, int log,
            bool silent, int seed);
 #ifdef EMSCRIPTEN
