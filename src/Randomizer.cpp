@@ -2,29 +2,6 @@
 #include "functions.hpp"
 #include "SARunner.hpp"
 const double bestToolProb = 0.9;
-inline bool debugIntegrity(States &s) {
-#ifndef DEBUG_INTEGRITY
-    return true;
-#else
-    bool result = true;
-    if (!s.capable()) {
-        std::cout << "NOT CAPABLE" << std::endl;
-        result = false;
-    }
-    if (s.repeatedRecipe()) {
-        std::cout << "REPEATED RECIPE" << std::endl;
-        result = false;
-    }
-    if (s.repeatedChef()) {
-        std::cout << "REPEATED CHEF" << std::endl;
-        result = false;
-    }
-    if (result == false) {
-        return result;
-    }
-    return result;
-#endif
-}
 ToolEnum toolHeuristic(States &s, int chefId) {
     auto chef = s[chefId];
     Recipe **recipes = &s.recipe[chefId * DISH_PER_CHEF];
@@ -243,7 +220,7 @@ States ChefRandomizer::operator()(States s) {
     //     }
     // }
     debugIntegrity(s);
-    SARunner saRunner(c, r, false, f::t_dist_slow);
+    SARunner saRunner(rl, c, r, false, f::t_dist_slow);
 #ifdef MEASURE_TIME
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &finish);
     randomChefTime +=

@@ -10,6 +10,8 @@
 #include "Values.hpp"
 #include "Types.hpp"
 #include <vector>
+#include "../config.hpp"
+#include "utils/json.hpp"
 class Recipe;
 
 class Chef {
@@ -44,12 +46,22 @@ class Chef {
     static void setGlobalAbilityAll(int ability) {
         globalAbilityBuff.add(ability);
     }
-
+    static void initBuff(const Json::Value &usrBuff) {
+        // std::cout << usrBuff.toStyledString() << std::endl;
+        if (MODE == 2) {
+            coinBuffOn = false;
+        } else {
+            coinBuffOn = true;
+        }
+        setGlobalBuff(CookAbility(usrBuff));
+        setGlobalAbilityMale(getInt(usrBuff["Male"]));
+        setGlobalAbilityFemale(getInt(usrBuff["Female"]));
+        setGlobalAbilityAll(getInt(usrBuff["All"]));
+    }
     Chef(Json::Value &v, int ultimateSkillId);
     Chef() { id = -1; }
     void print() const;
     void modifyTool(ToolEnum);
-    void deletePointers();
     // void updateLearnedRecipe(const RecipesInfo rI) const {
     //     auto &recipesLearned = *this->recipesLearned;
     //     auto worst = recipesLearned.end();
@@ -74,8 +86,8 @@ class Chef {
     // }
 };
 typedef std::vector<Chef> CList;
-void loadChef(CList &chefList, const Json::Value &userData,
-              const Json::Value &gameData);
+void loadChef(CList &chefList, const Json::Value &gameData,
+              const Json::Value &usrData, bool allowTool = true);
 
 // void loadChefTools(CList &chefList, CList &newChefList);
 std::string getToolName(ToolEnum tool);

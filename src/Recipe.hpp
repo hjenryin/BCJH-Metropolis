@@ -84,6 +84,6 @@ class Recipe {
     static void initRarityBuff(const Json::Value &usrBuff);
 };
 typedef std::vector<Recipe> RList;
-void loadRecipe(RList &recipeList, const Json::Value &userData,
-                const Json::Value &gameData);
+void loadRecipe(RList &recipeList, const Json::Value &gameData,
+                const Json::Value &usrData);
 #endif

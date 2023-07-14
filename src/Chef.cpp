@@ -10,7 +10,7 @@
 #include "../toolEquipped.hpp"
 #include "exception.hpp"
 #include "loadToolEquipped.hpp"
-
+bool Chef::coinBuffOn = true;
 CookAbility Chef::globalAbilityBuff;
 int Chef::globalAbilityMale = 0;
 int Chef::globalAbilityFemale = 0;
@@ -32,20 +32,16 @@ void splitUltimateSkill(std::map<int, int> &ultimateSkills,
 }
 void loadUltimateSkills(std::map<int, int> &ultimateSkills,
                         const Json::Value &usrBuff) {
+    // std::cout << usrBuff.toStyledString() << std::endl;
     splitUltimateSkill(ultimateSkills, usrBuff["Partial"]["id"]);
     splitUltimateSkill(ultimateSkills, usrBuff["Self"]["id"]);
 }
-void loadChef(CList &chefList, const Json::Value &usrData,
-              const Json::Value &gameData) {
-    if (MODE == 2) {
-        Chef::coinBuffOn = false;
-    } else {
-        Chef::coinBuffOn = true;
-    }
+void loadChef(CList &chefList, const Json::Value &gameData,
+              const Json::Value &usrData, bool allowTool) {
 
-    initBuff(usrData["userUltimate"]);
-    const Json::Value chefs = gameData["chefs"];
-    Skill::loadJson(gameData["skills"]);
+    const Json::Value &chefs = gameData["chefs"];
+    // std::cout << usrData.toStyledString() << std::endl;
+    // std::cout << gameData.toStyledString() << std::endl;
     std::map<int, int> ultimateSkills;
     loadUltimateSkills(ultimateSkills, usrData["userUltimate"]);
 
@@ -70,6 +66,9 @@ void loadChef(CList &chefList, const Json::Value &usrData,
             }
         }
     }
+    for (auto &chef : chefList) {
+        chef.recipeLearned = new std::vector<Recipe *>();
+    }
 
 #ifdef _WIN32
     auto t = loadToolFile();
@@ -93,10 +92,15 @@ void loadChef(CList &chefList, const Json::Value &usrData,
                "ed.csv中没有这一项。默认“制作三火料理售价加成”均为0。"
             << std::endl;
     }
-#endif
-#ifdef __linux__
-    for (auto &chef : chefList) {
-        toolEquipped(&chef);
+#else
+    if (allowTool) {
+        for (auto &chef : chefList) {
+            chef.modifyTool(NOT_EQUIPPED);
+        }
+    } else {
+        for (auto &chef : chefList) {
+            chef.modifyTool(NO_TOOL);
+        }
     }
 #endif
 }
@@ -144,7 +148,7 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
 
 void Chef::print() const {
     std::cout << this->id << ": " << *this->name << "\t"
-              << (this->male ? "M" : "") << (this->female ? "F" : "")
+              << (this->male ? "♂️" : "") << (this->female ? "♀️" : "")
               << std::endl;
     this->skill->print();
 }
@@ -171,6 +175,7 @@ CookAbility::CookAbility(const Json::Value &v) {
         this->knife = getInt(v["Knife"]);
     } else {
         std::cout << "no" << std::endl;
+        // std::cout << v.toStyledString() << std::endl;
         throw std::logic_error("CookAbility: Invalid Json");
     }
 }
@@ -379,7 +384,7 @@ std::string getToolName(ToolEnum tool) {
         toolName = "切";
         break;
     case NO_TOOL:
-        toolName = "设定厨具";
+        toolName = "厨具禁止";
         break;
     default:
         toolName = "无厨具";

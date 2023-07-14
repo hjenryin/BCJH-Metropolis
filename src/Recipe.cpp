@@ -61,17 +61,17 @@ const struct MaterialList {
 
 void Recipe::print(const std::string &startLine) const {
     std::cout << this->id << ": " << this->name << "（原价" << this->price
-              << "）—— " << this->rarity << "火 * ";
+              << "）—— " << this->rarity << "🔥 *";
     auto rb = rarityBuff[this->rarity - 1];
     std::cout << rb.dishNum << ", +" << rb.dishBuff << "%" << std::endl;
     std::cout << startLine;
-    this->printFlavor("\t");
+    this->cookAbility.print("\t");
     this->materialCategories.print("\t");
-    this->cookAbility.print();
+    this->printFlavor("\t");
 }
-void loadRecipe(RList &recipeList, const Json::Value &usrData,
-                const Json::Value &gameData) {
-    Recipe::initRarityBuff(usrData["userUltimate"]);
+void loadRecipe(RList &recipeList, const Json::Value &gameData,
+                const Json::Value &usrData) {
+
     auto recipes = gameData["recipes"];
     auto recipeGot = usrData["repGot"];
     for (auto recipe : recipes) {

@@ -17,10 +17,23 @@ class MaterialCategoryBuff {
         this->fish += m.fish;
         this->creation += m.creation;
     }
-    void print() const {
-        std::cout << "MaterialCategoryBuff: Vegetable: " << this->vegetable
-                  << "; Meat: " << this->meat << "; Fish: " << this->fish
-                  << "; Creation: " << this->creation << std::endl;
+    bool print() const {
+        if (vegetable) {
+            std::cout << "菜" << vegetable << "% ";
+        }
+        if (meat) {
+            std::cout << "肉" << meat << "% ";
+        }
+        if (fish) {
+            std::cout << "鱼" << fish << "% ";
+        }
+        if (creation) {
+            std::cout << "面" << creation << "% ";
+        }
+        if ((vegetable || meat || fish || creation))
+            return true;
+        else
+            return false;
     }
 };
 
@@ -42,11 +55,29 @@ class FlavorBuff {
         this->spicy += f.spicy;
         this->tasty += f.tasty;
     }
-    void print() const {
-        std::cout << "FlavorBuff: Sweet: " << this->sweet
-                  << "; Salty: " << this->salty << "; Sour: " << this->sour
-                  << "; Bitter: " << this->bitter << "; Spicy: " << this->spicy
-                  << "; Tasty: " << this->tasty << std::endl;
+    bool print() const {
+        if (sweet) {
+            std::cout << "甜" << sweet << "% ";
+        }
+        if (salty) {
+            std::cout << "咸" << salty << "% ";
+        }
+        if (sour) {
+            std::cout << "酸" << sour << "% ";
+        }
+        if (bitter) {
+            std::cout << "苦" << bitter << "% ";
+        }
+        if (spicy) {
+            std::cout << "辣" << spicy << "% ";
+        }
+        if (tasty) {
+            std::cout << "鲜" << tasty << "% ";
+        }
+        if ((sweet || salty || sour || bitter || spicy || tasty))
+            return true;
+        else
+            return false;
     }
     int operator*(const FlavorEnum f) const {
         const int *ptr = &this->sweet;
@@ -160,7 +191,7 @@ class AbilityBuff : public Ability {
     AbilityBuff() {}
     AbilityBuff(int stirfry, int bake, int boil, int steam, int fry, int knife)
         : Ability(stirfry, bake, boil, steam, fry, knife) {}
-    void print() const { this->Ability::print("AbilityBuff: ", "\n", true); }
+    void print() const { this->Ability::print("加成: ", "\t", true); }
 };
 class CookAbility : public Ability {
 
@@ -170,7 +201,9 @@ class CookAbility : public Ability {
     CookAbility() : Ability() {}
     CookAbility(const Json::Value &v);
     // int operator/(const Ability &a) const;
-    void print() const { this->Ability::print("CookAbility: "); }
+    void print(std::string end = "") const {
+        this->Ability::print("技法: ", end);
+    }
     int operator*(const AbilityBuff &a) const;
 };
 class RarityBuff {
@@ -180,12 +213,16 @@ class RarityBuff {
     /*几火就是几，不用减一*/
     int &operator[](int i) { return data[i - 1]; }
     int operator[](int i) const { return data[i - 1]; }
-    void print() const {
-        std::cout << "RarityBuff: ";
-        for (int i = 0; i < 5; i++) {
-            std::cout << data[i] << "% ";
+    bool print() const {
+        if (data[0] || data[1] || data[2] || data[3] || data[4]) {
+            std::cout << "稀有度加成: ";
+            for (int i = 0; i < 5; i++) {
+                std::cout << data[i] << "% ";
+            }
+            return true;
+        } else {
+            return false;
         }
-        std::cout << std::endl;
     }
 };
 class Skill {
@@ -234,10 +271,14 @@ class Skill {
     void print() const {
         this->ability.print();
         this->abilityBuff.print();
-        this->flavorBuff.print();
-        this->materialBuff.print();
-        std::cout << "CoinBuff: " << this->coinBuff << "; ";
+        if (flavorBuff.print())
+            std::cout << "\t";
+        if (materialBuff.print())
+            std::cout << "\t";
+        if (coinBuff)
+            std::cout << "金币加成: " << this->coinBuff << "%; ";
         this->rarityBuff.print();
+        std::cout << std::endl;
     }
 };
 
