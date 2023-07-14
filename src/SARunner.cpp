@@ -175,6 +175,9 @@ States SARunner::run(States *s0, int8_t *progress, bool silent,
         }
         step++;
     }
+    if (progress) {
+        *progress = 100;
+    }
 #ifdef VIS_HISTORY
     if (progress && !silent) {
         std::fstream file;

@@ -70,14 +70,16 @@ std::string
     EMSCRIPTEN_KEEPALIVE
 #endif
     runjs(const std::string &userDataIn, const std::string &ruleDataIn,
-          int targetScore, int iterChef, int iterRecipe, bool allowTool) {
+          int targetScore, int iterChef, int iterRecipe, bool allowTool,
+          int progressAddr) {
     const int T_MAX_CHEF = targetScore / 100;
     const int T_MAX_RECIPE = targetScore / 400;
     SARunner::init(T_MAX_CHEF, T_MAX_RECIPE, iterChef, iterRecipe, targetScore);
-    // if (progress != NULL) {
-    //     *progress = '0';
-    // }
     int8_t *progress = NULL;
+    if (progressAddr != 0) {
+        progress = reinterpret_cast<int8_t *>(progressAddr);
+    }
+    // int8_t *progress = NULL;
     bool silent = false;
     int log = SILENT | VERBOSE;
     struct timespec ts;
@@ -120,33 +122,6 @@ std::string
     };
     std::cout << "读取文件成功。" << std::endl;
 
-    try {
-
-        // Skill::loadJson(gameData["skills"]);
-        // Recipe::initRarityBuff(userData["userUltimate"]);
-        // Chef::initBuff(userData["userUltimate"]);
-
-        // loadChef(chefList, gameData, userData);
-        // // for (auto chef = chefList.begin(); chef != chefList.end(); chef++)
-        // {
-        // //     chef->print();
-        // // }
-        // loadRecipe(recipeList, gameData, userData);
-        // loadBanquetRuleFromInput(rl, ruleDataJson, true);
-        std::cout << "读取文件成功。" << std::endl;
-    } catch (FileNotExistException &e) {
-        std::cout << "json文件缺失。如果在网页端，请确认已经上传了文件；如果在"
-                     "本地，请确认已经下载了文件。\n";
-        exit(1);
-    } catch (Json::RuntimeError &e) {
-        std::cout << "json文件格式不正确。如果文件内容是手动复制的，确认文件已"
-                     "经复制完整。\n";
-        exit(1);
-    } catch (Json::LogicError &e) {
-        std::cout << "json文件格式不正确。请确认文件来自白菜菊花而非图鉴网。\n";
-        exit(1);
-    }
-
     // for (auto chef = chefList.begin(); chef != chefList.end(); chef++) {
     //     chef->loadRecipeCapable(recipeList);
     // }
@@ -185,7 +160,7 @@ std::string
 
     auto resultStr = ResultJsonSerializable(result).toJson();
     for (auto &chef : chefList) {
-        delete chef.recipeLearned;
+        chef.deletePointers();
     }
     return resultStr;
 }

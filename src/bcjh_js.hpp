@@ -90,10 +90,13 @@ std::string
 #endif
     runjs(const std::string &userDataIn, const std::string &ruleDataIn,
           int targetScore, int iterChef = ITER_CHEF,
-          int iterRecipe = ITER_RECIPE, bool allowTool = true);
+          int iterRecipe = ITER_RECIPE, bool allowTool = true,
+          int progressAddr = 0);
 Result run(const RuleInfo &rl, CList &chefList, RList &recipeList, int log,
            bool silent, int seed, int8_t *progress);
 #ifdef EMSCRIPTEN
-EMSCRIPTEN_BINDINGS(module) { emscripten::function("run", &runjs); }
+EMSCRIPTEN_BINDINGS(module) {
+    emscripten::function("run", &runjs, allow_raw_pointers());
+}
 #endif
 #endif

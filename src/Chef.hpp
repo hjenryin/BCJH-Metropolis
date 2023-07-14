@@ -62,6 +62,13 @@ class Chef {
     Chef() { id = -1; }
     void print() const;
     void modifyTool(ToolEnum);
+    void deletePointers() {
+        delete this->name;
+        delete this->skill;
+        delete this->companyBuff;
+        delete this->nextBuff;
+        delete this->recipeLearned;
+    }
     // void updateLearnedRecipe(const RecipesInfo rI) const {
     //     auto &recipesLearned = *this->recipesLearned;
     //     auto worst = recipesLearned.end();

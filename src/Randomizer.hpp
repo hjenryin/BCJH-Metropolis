@@ -50,6 +50,7 @@ class RecipeRandomizer : public Randomizer {
     RecipeRandomizer(CList *c, RList *r, const RuleInfo *rl)
         : Randomizer(c, r, rl) {}
     States operator()(States s) override;
+    ~RecipeRandomizer() override {}
 
   private:
     bool randomRecipe(States &s) const;
@@ -61,6 +62,7 @@ class ChefRandomizer : public Randomizer {
     ChefRandomizer(CList *c, RList *r, const RuleInfo *rl, int targetScore)
         : Randomizer(c, r, rl), targetScore(targetScore) {}
     States operator()(States s) override;
+    ~ChefRandomizer() override {}
 
   private:
     bool randomChef(States &s) const;
