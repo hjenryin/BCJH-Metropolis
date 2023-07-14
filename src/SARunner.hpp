@@ -60,7 +60,7 @@ class SARunner {
         const RuleInfo *rl, CList *chefList, RList *recipeList,
         bool randomizeChef,
         f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative);
-    States run(States *s = NULL, bool progress = false, bool silent = false,
+    States run(States *s = NULL, int8_t *progress = NULL, bool silent = false,
                const char *fn = NULL);
 #ifdef VIS_HISTORY
     ~SARunner() { delete[] this->history; }

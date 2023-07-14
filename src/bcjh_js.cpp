@@ -74,7 +74,10 @@ std::string
     const int T_MAX_CHEF = targetScore / 100;
     const int T_MAX_RECIPE = targetScore / 400;
     SARunner::init(T_MAX_CHEF, T_MAX_RECIPE, iterChef, iterRecipe, targetScore);
-
+    // if (progress != NULL) {
+    //     *progress = '0';
+    // }
+    int8_t *progress = NULL;
     bool silent = false;
     int log = SILENT | VERBOSE;
     struct timespec ts;
@@ -151,7 +154,7 @@ std::string
     clock_t start, end;
     start = clock();
 
-    Result result = run(rl, chefList, recipeList, 0, true, seed);
+    Result result = run(rl, chefList, recipeList, 0, true, seed, progress);
     std::cout << "run finished" << std::endl;
     log += ORDINARY;
     // Redirects std::cout
@@ -188,14 +191,14 @@ std::string
 }
 
 Result run(const RuleInfo &rl, CList &chefList, RList &recipeList, int log,
-           bool silent, int seed) {
+           bool silent, int seed, int8_t *progress) {
     auto *chefListPtr = &chefList;
     // seed = -1676265360;
     srand(seed);
     // throw std::runtime_error("Not implemented");
     SARunner saRunner(&rl, chefListPtr, &recipeList, true, f::t_dist_slow);
     // std::cout << log << std::endl;
-    auto s = saRunner.run(NULL, true, silent);
+    auto s = saRunner.run(NULL, progress, silent);
     // *s = perfectChef(rl, *s, chefListPtr);
     int score = sumPrice(rl, s, log, false);
     debugIntegrity(s);

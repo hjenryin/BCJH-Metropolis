@@ -92,7 +92,7 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
 
     return s;
 }
-States SARunner::run(States *s0, bool progress, bool silent,
+States SARunner::run(States *s0, int8_t *progress, bool silent,
                      const char *filename) {
     States s;
     if (s0 == NULL) {
@@ -116,17 +116,13 @@ States SARunner::run(States *s0, bool progress, bool silent,
     this->bestEnergy = energy;
     int step = 0;
     double t = this->tMax;
-    // srand(time(NULL));
+    int progressPercent = 0;
     while (step < this->stepMax) {
         if (progress) {
-            if (silent) {
-                // if (step % 500 == 0) {
-                //     std::cout << "\r" << step << "/" << this->stepMax
-                //               << std::flush;
-                // }
-            } else {
-                std::cout << "\r" << step << "/" << this->stepMax << " - "
-                          << this->bestEnergy << std::flush;
+            int newProgressPercent = (int)(step * 100.0 / this->stepMax);
+            if (newProgressPercent > progressPercent) {
+                progressPercent = newProgressPercent;
+                *progress = progressPercent;
             }
         }
         States newS;
