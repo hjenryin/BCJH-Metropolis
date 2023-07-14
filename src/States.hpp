@@ -25,21 +25,43 @@ class States {
     }
     ToolEnum getTool(int i) { return chefs[i].getTool(); }
     void appendName(int i, const std::string &s) { *chefs[i].name += s; }
-    bool repeatedChef(const Chef *const chef, int except) const {
-        for (int i = 0; i < NUM_CHEFS; i++) {
-            if (except != i && chef->id == chefs[i].id) {
-                return true;
+    bool repeatedChef(const Chef *const chef = NULL, int except = -1) const {
+        if (chef != NULL) {
+            for (int i = 0; i < NUM_CHEFS; i++) {
+                if (except != i && chef->id == chefs[i].id) {
+                    return true;
+                }
             }
+            return false;
+        } else {
+            for (int i = 0; i < NUM_CHEFS; i++) {
+                for (int j = i + 1; j < NUM_CHEFS; j++) {
+                    if (chefs[i].id == chefs[j].id) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
-        return false;
     }
-    bool repeatedRecipe(Recipe *recipe, int except) {
-        for (int i = 0; i < NUM_CHEFS * DISH_PER_CHEF; i++) {
-            if (except != i && recipe == this->recipe[i]) {
-                return true;
+    bool repeatedRecipe(Recipe *recipe = NULL, int except = -1) {
+        if (recipe == NULL) {
+            for (int i = 0; i < NUM_CHEFS * DISH_PER_CHEF; i++) {
+                for (int j = i + 1; j < NUM_CHEFS * DISH_PER_CHEF; j++) {
+                    if (this->recipe[i] == this->recipe[j]) {
+                        return true;
+                    }
+                }
             }
+            return false;
+        } else {
+            for (int i = 0; i < NUM_CHEFS * DISH_PER_CHEF; i++) {
+                if (except != i && recipe == this->recipe[i]) {
+                    return true;
+                }
+            }
+            return false;
         }
-        return false;
     }
     bool capable() {
         auto skills = this->getSkills();

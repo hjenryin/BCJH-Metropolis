@@ -116,6 +116,7 @@ int main(int argc, char *argv[]) {
         if (!mp) {
             num_threads = 1;
         }
+        // num_threads = 1;
         std::cout << "启用" << num_threads
                   << "线程，建议期间不要离开窗口，否则可能影响速度。"
                   << std::endl;
@@ -165,7 +166,9 @@ int main(int argc, char *argv[]) {
     end = clock();
     std::cout << "用时：" << (double)(end - start) / CLOCKS_PER_SEC << "秒"
               << std::endl;
+#ifdef VIS_HISTORY
     std::cout << "均分：" << totalScore / num_threads << std::endl;
+#endif
 }
 Result run(const CList &chefList, RList &recipeList, int log, bool silent,
            int seed) {

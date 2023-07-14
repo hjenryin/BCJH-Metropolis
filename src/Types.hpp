@@ -66,6 +66,8 @@ class Ability {
         : stirfry(stirfry), bake(bake), boil(boil), steam(steam), fry(fry),
           knife(knife) {}
     Ability(ToolEnum t) {
+        if (t == NOT_EQUIPPED || t == NO_TOOL)
+            return;
         int *ptr = &this->stirfry;
         ptr[t - ABILITY_ENUM_START] = 100;
     }

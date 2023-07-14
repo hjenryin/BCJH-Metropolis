@@ -23,20 +23,6 @@ template <typename T> bool inArray(T **array, int size, T *value) {
     }
     return false;
 }
-inline bool hasRepeatedRecipe(Recipe **recipelist) {
-#ifndef DEBUG_REPEAT_CHEF
-    return false;
-#else
-    for (int i = 0; i < NUM_CHEFS * DISH_PER_CHEF; i++) {
-        for (int j = i + 1; j < NUM_CHEFS * DISH_PER_CHEF; j++) {
-            if (recipelist[i] == recipelist[j]) {
-                return true;
-            }
-        }
-    }
-    return false;
-#endif
-}
 
 int sumPrice(States s, CList *c = NULL, RList *r = NULL, int log = false,
              bool exactChefTool = false);

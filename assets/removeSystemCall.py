@@ -9,4 +9,6 @@ for f in fl:
             for line in lines:
                 if line.find("#define VIS_HISTORY")!=-1:
                     continue
+                if line.find("#define DEBUG_INTEGRITY")!=-1:
+                    continue
                 f2.write(line)
