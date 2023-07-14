@@ -51,9 +51,9 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
             Chef *randomChef;
             do {
                 randomChef = &chefList->at(rand() % chefList->size());
-                s.setChef(j, randomChef);
+                s.setChef(j, *randomChef);
                 count++;
-            } while (inArray(s.getChefs(), j, randomChef) &&
+            } while (s.repeatedChef(randomChef, j) &&
                      count < RANDOM_SEARCH_TIMEOUT);
             if (count >= RANDOM_SEARCH_TIMEOUT) {
 
@@ -63,7 +63,7 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
 
     } else {
         for (int i = 0; i < NUM_CHEFS; i++) {
-            s.setChef(i, chefs[i]);
+            s.setChef(i, *chefs[i]);
         }
     }
 
@@ -158,7 +158,6 @@ States SARunner::run(States *s0, bool progress, bool silent,
         }
         if (energy > this->bestEnergy) {
             this->bestEnergy = energy;
-            s.saveChefTool();
             this->bestState = s;
             if (progress && !silent) {
                 sumPrice(this->bestState);
@@ -214,8 +213,7 @@ void SARunner::print(States s, bool verbose) const {
     int r = 0;
     for (int i = 0; i < NUM_CHEFS; i++) {
 
-        std::cout << "Chef: " << s.getConstChef(i)->name << std::endl
-                  << "Recipe ";
+        std::cout << "Chef: " << *s[i]->name << std::endl << "Recipe ";
         for (int j = 0; j < DISH_PER_CHEF; j++) {
             std::cout << j << ": " << s.recipe[r++]->name;
         }

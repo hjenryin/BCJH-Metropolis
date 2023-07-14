@@ -25,17 +25,13 @@ class Chef {
     bool male;
     bool female;
     int id;
-    ToolEnum getTool() { return this->tool; }
+    Skill *skill;
+    Skill *companyBuff;
+    Skill *nextBuff;
+    ToolEnum getTool() const { return this->tool; }
     void NoTool() { this->tool = NO_TOOL; }
-    std::string name;
-    Skill skill;
-    Skill companyBuff;
-    Skill nextBuff;
-    // std::vector<Recipe *> recipeCapable;
-    std::vector<Recipe *> recipeLearned;
-
-    // void loadRecipeCapable(std::vector<Recipe> &recipeList);
-    bool isCapable(Recipe *r);
+    std::string *name;
+    std::vector<Recipe *> *recipeLearned;
 
     static void setGlobalBuff(CookAbility buff) { globalAbilityBuff = buff; }
     static void setGlobalAbilityMale(int ability) {
@@ -50,10 +46,32 @@ class Chef {
     }
 
     Chef(Json::Value &v, int ultimateSkillId);
-    Chef() {}
+    Chef() { id = -1; }
     void print() const;
     void modifyTool(ToolEnum);
-    Chef addTool_modify_name(ToolEnum);
+    void deletePointers();
+    // void updateLearnedRecipe(const RecipesInfo rI) const {
+    //     auto &recipesLearned = *this->recipesLearned;
+    //     auto worst = recipesLearned.end();
+    //     int worstPrice = rI.score;
+    //     int count = 0;
+    //     for (auto iter = recipesLearned.begin(); iter < recipesLearned.end();
+    //          iter++) {
+    //         if ((iter->full == rI.full) && (iter->score < worstPrice)) {
+    //             worst = iter;
+    //             worstPrice = iter->score;
+    //             count++;
+    //         } else if ((iter->full == rI.full) && (iter->score == rI.score))
+    //         {
+    //             return;
+    //         }
+    //     }
+    //     if (count < RECIPE_CACHE) {
+    //         recipesLearned.push_back(rI);
+    //     } else if (worst != recipesLearned.end()) {
+    //         *worst = rI;
+    //     }
+    // }
 };
 typedef std::vector<Chef> CList;
 void loadChef(CList &chefList, const Json::Value &userData,

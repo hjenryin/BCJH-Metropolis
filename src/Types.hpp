@@ -2,6 +2,7 @@
 #define TYPES_HPP
 #include <iostream>
 #include "include/json/json.h"
+#include "Values.hpp"
 
 class MaterialCategoryBuff {
   public:
@@ -54,21 +55,44 @@ class FlavorBuff {
 };
 class Ability {
   public:
-    int stirfry;
-    int bake;
-    int boil;
-    int steam;
-    int fry;
-    int knife;
+    int stirfry = 0;
+    int bake = 0;
+    int boil = 0;
+    int steam = 0;
+    int fry = 0;
+    int knife = 0;
     Ability() : stirfry(0), bake(0), boil(0), steam(0), fry(0), knife(0) {}
     Ability(int stirfry, int bake, int boil, int steam, int fry, int knife)
         : stirfry(stirfry), bake(bake), boil(boil), steam(steam), fry(fry),
           knife(knife) {}
+    Ability(ToolEnum t) {
+        if (t == NOT_EQUIPPED || t == NO_TOOL)
+            return;
+        int *ptr = &this->stirfry;
+        ptr[t - ABILITY_ENUM_START] = 100;
+    }
     void multiply(double a) {
         int *ptr = &this->stirfry;
         for (int i = 0; i < 6; i++) {
             ptr[i] = int(ptr[i] * a);
         }
+    }
+    int operator/(const Ability &a) const {
+        int grade = 5;
+        const int *thisptr = &this->stirfry;
+        const int *aptr = &a.stirfry;
+        for (int i = 0; i < 6; i++) {
+            if (aptr[i] != 0) {
+                grade = grade < (thisptr[i] / aptr[i]) ? grade
+                                                       : (thisptr[i] / aptr[i]);
+            }
+        }
+        return grade;
+    };
+    Ability operator+(ToolEnum t) const {
+        Ability tmp(t);
+        tmp.add(*this);
+        return tmp;
     }
     void add(const Ability &a) {
         int *thisptr = &this->stirfry;
@@ -145,7 +169,7 @@ class CookAbility : public Ability {
         : Ability(stirfry, bake, boil, steam, fry, knife) {}
     CookAbility() : Ability() {}
     CookAbility(const Json::Value &v);
-    int operator/(const Ability &a) const;
+    // int operator/(const Ability &a) const;
     void print() const { this->Ability::print("CookAbility: "); }
     int operator*(const AbilityBuff &a) const;
 };

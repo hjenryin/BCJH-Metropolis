@@ -108,14 +108,15 @@ int main(int argc, char *argv[]) {
     // Count time used
     clock_t start, end;
     start = clock();
-
+    int totalScore = 0;
+    int num_threads = std::thread::hardware_concurrency();
     if (!calculate) {
         Result result;
 
-        int num_threads = std::thread::hardware_concurrency();
         if (!mp) {
             num_threads = 1;
         }
+        // num_threads = 1;
         std::cout << "启用" << num_threads
                   << "线程，建议期间不要离开窗口，否则可能影响速度。"
                   << std::endl;
@@ -133,6 +134,7 @@ int main(int argc, char *argv[]) {
         int max_score = 0;
         for (auto &future : futures) {
             Result tmp = future.get();
+            totalScore += tmp.score;
             if (tmp.score > max_score) {
                 result = tmp;
                 max_score = result.score;
@@ -164,18 +166,24 @@ int main(int argc, char *argv[]) {
     end = clock();
     std::cout << "用时：" << (double)(end - start) / CLOCKS_PER_SEC << "秒"
               << std::endl;
+#ifdef VIS_HISTORY
+    std::cout << "均分：" << totalScore / num_threads << std::endl;
+#endif
 }
 Result run(const CList &chefList, RList &recipeList, int log, bool silent,
            int seed) {
     CList *chefListPtr = new CList(chefList);
     *chefListPtr = chefList;
+    for (auto &chef : *chefListPtr) {
+        chef.recipeLearned = new std::vector<Recipe *>;
+    }
     srand(seed);
     SARunner saRunner(chefListPtr, &recipeList, true, 
                       f::t_dist_slow);
     // std::cout << log << std::endl;
     States *s = new States;
     *s = saRunner.run(NULL, true, silent);
-    *s = perfectChef(*s, chefListPtr);
+    // *s = perfectChef(*s, chefListPtr);
     int score = sumPrice(*s, chefListPtr, &recipeList, log, false);
     return Result{score, seed, chefListPtr, recipeList, s};
 }

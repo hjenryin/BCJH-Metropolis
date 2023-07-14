@@ -2,23 +2,51 @@
 #include "functions.hpp"
 #include "SARunner.hpp"
 const double bestToolProb = 0.9;
+inline bool debugIntegrity(States &s) {
+#ifndef DEBUG_INTEGRITY
+    return true;
+#else
+    bool result = true;
+    if (!s.capable()) {
+        std::cout << "NOT CAPABLE" << std::endl;
+        result = false;
+    }
+    if (s.repeatedRecipe()) {
+        std::cout << "REPEATED RECIPE" << std::endl;
+        result = false;
+    }
+    if (s.repeatedChef()) {
+        std::cout << "REPEATED CHEF" << std::endl;
+        result = false;
+    }
+    if (result == false) {
+        return result;
+    }
+    return result;
+#endif
+}
 ToolEnum toolHeuristic(States &s, int chefId) {
-    auto chef = s.getChef(chefId);
+    auto chef = s[chefId];
     Recipe **recipes = &s.recipe[chefId * DISH_PER_CHEF];
     if (chef->getTool() == NO_TOOL)
         return NO_TOOL;
-    ToolEnum best = NOT_EQUIPPED;
-    chef->modifyTool(NOT_EQUIPPED);
+    ToolEnum best = s.getTool(chefId);
+    s.modifyTool(chefId, NOT_EQUIPPED);
     int max = 0;
     for (int i = 0; i < DISH_PER_CHEF; i++) {
-        max += chef->skill.ability / recipes[i]->cookAbility;
+        max += (chef->skill->ability + best) / recipes[i]->cookAbility;
     }
-    for (int i = ABILITY_ENUM_START; i < ABILITY_ENUM_END; i++) {
-        auto tool = (ToolEnum)i;
-        chef->modifyTool(tool);
+    for (int t = ABILITY_ENUM_START; t < ABILITY_ENUM_END; t++) {
+        auto tool = (ToolEnum)t;
+        s.modifyTool(chefId, tool);
+        if (!s.capable()) {
+            continue;
+        }
         int value = 0;
         for (int i = 0; i < DISH_PER_CHEF; i++) {
-            value += chef->skill.ability / recipes[i]->cookAbility;
+            auto skill = (chef->skill->ability + tool);
+            auto thisgrade = skill / recipes[i]->cookAbility;
+            value += thisgrade;
         }
         if (value > max) {
             max = value;
@@ -29,11 +57,12 @@ ToolEnum toolHeuristic(States &s, int chefId) {
 }
 
 bool ChefRandomizer::randomChef(States &s) const {
+    debugIntegrity(s);
     auto &chefList = this->c;
     int chefNum = rand() % NUM_CHEFS;
-    Chef *pChef = s.getChef(chefNum);
+    Chef pChef = s.getChef(chefNum);
     int count = 0;
-    auto learned = &(pChef->recipeLearned);
+    auto learned = pChef.recipeLearned;
     learned->clear();
     int dishNum = chefNum * DISH_PER_CHEF;
     int totalDishNum = NUM_CHEFS * DISH_PER_CHEF;
@@ -41,23 +70,24 @@ bool ChefRandomizer::randomChef(States &s) const {
         learned->push_back(s.recipe[dishNum + i]);
     }
     do {
-        pChef = &chefList->at(rand() % chefList->size());
+        pChef = chefList->at(rand() % chefList->size());
         count++;
-    } while (s.repeatChef(pChef, -1) && count < RANDOM_SEARCH_TIMEOUT);
+    } while (s.repeatedChef(&pChef, -1) && count < RANDOM_SEARCH_TIMEOUT);
     if (count >= RANDOM_SEARCH_TIMEOUT) {
         throw NoChefException();
     }
     s.setChef(chefNum, pChef);
-    if (pChef->recipeLearned.size() == DISH_PER_CHEF) {
+    if (pChef.recipeLearned->size() == DISH_PER_CHEF) {
         for (int i = 0; i < DISH_PER_CHEF; i++) {
-            s.recipe[dishNum + i] = pChef->recipeLearned[i];
+            s.recipe[dishNum + i] = (*pChef.recipeLearned)[i];
         }
     }
     bool changed = true;
     auto oldS = s;
-    oldS.saveChefTool();
-    Skill &skill = s.getSkills()[chefNum];
-    for (int i = dishNum; i < dishNum + DISH_PER_CHEF; i++) {
+    Skill *skills = s.getSkills();
+    int i = dishNum;
+    do {
+        auto skill = skills[i / DISH_PER_CHEF];
         if ((skill.ability / s.recipe[i]->cookAbility == 0) ||
             inArray(s.recipe, NUM_CHEFS * DISH_PER_CHEF, s.recipe[i])) {
             bool thisChanged = this->unrepeatedRandomRecipe(
@@ -65,22 +95,14 @@ bool ChefRandomizer::randomChef(States &s) const {
                 RANDOM_SEARCH_TIMEOUT * RANDOM_SEARCH_TIMEOUT);
             changed = changed && thisChanged;
         }
-    }
-    // std::cout << changed << std::endl;
+        i++;
+    } while (i % (DISH_PER_CHEF * CHEFS_PER_GUEST) != 0);
     if (changed) {
-        if (hasRepeatedRecipe(s.recipe)) {
-            std::cout << "randomChef T" << std::endl;
-            exit(1);
-        }
-
+        debugIntegrity(s);
         return true;
     } else {
         s = oldS;
-        s.loadChefTool();
-        if (hasRepeatedRecipe(s.recipe)) {
-            std::cout << "randomChef F" << std::endl;
-            exit(1);
-        }
+        debugIntegrity(s);
         return false;
     }
 }
@@ -92,12 +114,11 @@ bool Randomizer::swapRecipe(States &s) const {
         int recipeNum2 = rand() % (NUM_CHEFS * DISH_PER_CHEF);
         int chefNum1 = recipeNum1 / DISH_PER_CHEF;
         int chefNum2 = recipeNum2 / DISH_PER_CHEF;
-        const Chef *chef1 = s.getConstChef(chefNum1);
-        const Chef *chef2 = s.getConstChef(chefNum2);
+        const Chef *chef1 = s[chefNum1];
+        const Chef *chef2 = s[chefNum2];
         if (!toolChanged && random < bestToolProb) {
             toolChanged = true;
-            Chef *chef = s.getChef(chefNum1);
-            chef->modifyTool(toolHeuristic(s, chefNum1));
+            s.modifyTool(chefNum1, toolHeuristic(s, chefNum1));
         }
         if (chef1 == chef2) {
             swap(s.recipe[recipeNum1], s.recipe[recipeNum2]);
@@ -132,25 +153,17 @@ bool RecipeRandomizer::randomRecipe(States &s) const {
 }
 
 bool ChefRandomizer::swapChefTool(States &s) const {
-    s.saveChefTool();
     States saveS = s;
-    if (hasRepeatedRecipe(s.recipe)) {
-        std::cout << "swap orig" << std::endl;
-        // exit(1);
-    }
     int i;
     for (i = 0; i < RANDOM_SEARCH_TIMEOUT; i++) {
         s = saveS;
-        s.loadChefTool();
         int chefNum = rand() % NUM_CHEFS;
-        auto chef = s.getChef(chefNum);
-        int orig_tool = chef->getTool();
-
+        int orig_tool = s.getTool(chefNum);
         int tool;
         do {
             tool = rand() % 6 + ABILITY_ENUM_START;
         } while (tool == orig_tool);
-        chef->modifyTool((ToolEnum)tool);
+        s.modifyTool(chefNum, (ToolEnum)tool);
         auto &skill = s.getSkills()[chefNum];
         auto &ability = skill.ability;
         for (int i = chefNum * DISH_PER_CHEF;
@@ -158,10 +171,6 @@ bool ChefRandomizer::swapChefTool(States &s) const {
             if (ability / s.recipe[i]->cookAbility == 0) {
                 bool thisChanged = this->unrepeatedRandomRecipe(
                     skill, s.recipe, NUM_CHEFS * DISH_PER_CHEF, i);
-                if (hasRepeatedRecipe(s.recipe)) {
-                    std::cout << "swap in" << std::endl;
-                    // exit(1);
-                }
                 if (!thisChanged) {
                     break;
                 }
@@ -170,18 +179,8 @@ bool ChefRandomizer::swapChefTool(States &s) const {
     }
     if (i >= RANDOM_SEARCH_TIMEOUT) {
         s = saveS;
-        s.loadChefTool();
-        if (hasRepeatedRecipe(s.recipe)) {
-            std::cout << "swap false" << std::endl;
-            // exit(1);
-        }
         return false;
     } else {
-        s.saveChefTool();
-        if (hasRepeatedRecipe(s.recipe)) {
-            std::cout << "swap true" << std::endl;
-            // exit(1);
-        }
         return true;
     }
 }
@@ -190,23 +189,15 @@ States RecipeRandomizer::operator()(States s) {
     struct timespec start, finish;
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
 #endif
+    debugIntegrity(s);
     double r = (double)rand() / RAND_MAX;
     double p_randomRecipe = 1;
     if (MODE == 1)
         p_randomRecipe = 0.9;
     if (r > p_randomRecipe) {
-
         success += swapRecipe(s);
-        if (hasRepeatedRecipe(s.recipe)) {
-            std::cout << "Swap recipe" << std::endl;
-            exit(1);
-        }
     } else {
         success += randomRecipe(s);
-        if (hasRepeatedRecipe(s.recipe)) {
-            std::cout << "Random recipe" << std::endl;
-            exit(1);
-        }
     }
     calls++;
 
@@ -215,6 +206,7 @@ States RecipeRandomizer::operator()(States s) {
     randomRecipeTime +=
         finish.tv_sec - start.tv_sec + (finish.tv_nsec - start.tv_nsec) * 1e-9;
 #endif
+    debugIntegrity(s);
     return s;
 }
 /**
@@ -225,59 +217,32 @@ States ChefRandomizer::operator()(States s) {
     struct timespec start, finish;
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
 #endif
+    debugIntegrity(s);
     double random = (double)rand() / RAND_MAX;
     double p_randomChef = 0.9;
     int path;
     calls++;
     if (MODE == 1)
         p_randomChef = 0.85;
-    if (random < 0.1) {
+    if (random < 1 - p_randomChef) {
         path = 0;
         success += swapChefTool(s);
-        if (hasRepeatedRecipe(s.recipe)) {
-            std::cout << "SwapTool" << std::endl;
-            exit(1);
-        }
+
     } else if (random >= 1 - p_randomChef) {
         path = 1;
         success += randomChef(s);
-        if (hasRepeatedRecipe(s.recipe)) {
-            std::cout << "RandomChef" << std::endl;
-            exit(1);
-        }
-
-    } else { // swap Chef
-        success++;
-        path = 2;
-        int chefIndex1 = rand() % NUM_CHEFS;
-        int chefIndex2;
-        do {
-            chefIndex2 = rand() % NUM_CHEFS;
-        } while (chefIndex1 == chefIndex2);
-        auto chef1 = s.getChef(chefIndex1);
-        auto chef2 = s.getChef(chefIndex2);
-        s.setChef(chefIndex1, chef1);
-        s.setChef(chefIndex2, chef2);
-        for (int i = 0; i < DISH_PER_CHEF; i++) {
-            swap(s.recipe[chefIndex1 * DISH_PER_CHEF + i],
-                 s.recipe[chefIndex2 * DISH_PER_CHEF + i]);
-        }
-        if (hasRepeatedRecipe(s.recipe)) {
-            std::cout << "SwapChef" << std::endl;
-            exit(1);
-        }
     }
     // for (int i = 0; i < NUM_CHEFS; i++) {
     //     for (int j = 0; j < DISH_PER_CHEF; j++) {
     //         if (i == j)
     //             continue;
-    //         if (s.getConstChef(i) == s.getConstChef(j)) {
+    //         if (s[i] == s[j]) {
     //             std::cout << path << std::endl;
     //             exit(1);
     //         }
     //     }
     // }
-
+    debugIntegrity(s);
     SARunner saRunner(c, r, false, f::t_dist_slow);
 #ifdef MEASURE_TIME
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &finish);
@@ -299,16 +264,9 @@ bool Randomizer::unrepeatedRandomRecipe(Skill &skill, Recipe **recipes,
         ((skill.ability / r->cookAbility == 0) || inArray(recipes, size, r)) &&
         count < repeats);
     if (count >= repeats) {
-        if (hasRepeatedRecipe(recipes)) {
-            std::cout << "Unrepeated false" << std::endl;
-            // exit(1);
-        }
         return false;
     }
     recipes[index] = r;
-    if (hasRepeatedRecipe(recipes)) {
-        std::cout << "Unrepeated true" << std::endl;
-        // exit(1);
-    }
+
     return true;
 }

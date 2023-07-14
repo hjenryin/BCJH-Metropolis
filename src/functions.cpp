@@ -20,27 +20,27 @@ int getTotalPrice(States s, CList *chefList, RList *recipeList,
  */
 bool deductTool(States s, CList *chefList, RList *recipeList, int chefId,
                 int deduction) {
-    Chef chef(*s.getConstChef(chefId));
+    Chef chef(*s[chefId]);
     int tool = chef.getTool();
     int *cookAbility;
     switch (tool) {
     case STIRFRY:
-        cookAbility = &chef.skill.ability.stirfry;
+        cookAbility = &chef.skill->ability.stirfry;
         break;
     case BOIL:
-        cookAbility = &chef.skill.ability.boil;
+        cookAbility = &chef.skill->ability.boil;
         break;
     case FRY:
-        cookAbility = &chef.skill.ability.fry;
+        cookAbility = &chef.skill->ability.fry;
         break;
     case STEAM:
-        cookAbility = &chef.skill.ability.steam;
+        cookAbility = &chef.skill->ability.steam;
         break;
     case BAKE:
-        cookAbility = &chef.skill.ability.bake;
+        cookAbility = &chef.skill->ability.bake;
         break;
     case KNIFE:
-        cookAbility = &chef.skill.ability.knife;
+        cookAbility = &chef.skill->ability.knife;
         break;
     case NO_TOOL:
         return true;
@@ -51,7 +51,7 @@ bool deductTool(States s, CList *chefList, RList *recipeList, int chefId,
     *cookAbility -= deduction;
     int bestPrice = sumPrice(s, chefList, recipeList, false, false);
     States newState = s;
-    newState.setChef(chefId, &chef);
+    newState.setChef(chefId, chef);
     int newPrice = sumPrice(newState, chefList, recipeList, false, false);
     return newPrice == bestPrice;
 }
@@ -65,25 +65,24 @@ int sumPrice(States s, CList *chefList, RList *recipeList, int log,
                  bool exactChefTool) {
     if (exactChefTool) {
 
-        s.saveChefTool();
         assert(chefList != NULL && recipeList != NULL);
         // std::cout << "exactChefTool" << std::endl;
         for (int i = 0; i < NUM_CHEFS; i++) {
-            ToolEnum tool = s.getChef(i)->getTool();
+            ToolEnum tool = s.getTool(i);
             std::string toolName = getToolName(tool);
             toolName = "-" + toolName;
             if (deductTool(s, chefList, recipeList, i, 40)) {
                 if (deductTool(s, chefList, recipeList, i, 70)) {
                     if (deductTool(s, chefList, recipeList, i, 100)) {
-                        s.getChef(i)->name += toolName + "(0)";
+                        s.appendName(i, toolName + "(0)");
                     } else {
-                        s.getChef(i)->name += toolName + "(30)";
+                        s.appendName(i, toolName + "(30)");
                     }
                 } else {
-                    s.getChef(i)->name += toolName + "(60)";
+                    s.appendName(i, toolName + "(60)");
                 }
             } else {
-                s.getChef(i)->name += toolName + "(100)";
+                s.appendName(i, toolName + "(100)");
             }
         }
     }
@@ -115,7 +114,7 @@ int sumPrice(States s, CList *chefList, RList *recipeList, int log,
             for (int i = 0; i < DISH_PER_CHEF * CHEFS_PER_GUEST; i++) {
                 if ((log & 0x10) && i % 3 == 0) {
                     std::cout << "VERBOSE************" << std::endl;
-                    s.getConstChef(chefStart + i / 3)->print();
+                    s[chefStart + i / 3]->print();
                     std::cout << "************" << std::endl;
                 }
                 biCache =
@@ -126,8 +125,7 @@ int sumPrice(States s, CList *chefList, RList *recipeList, int log,
                 scoreCache += biCache.price;
                 fullCache += biCache.full;
                 if ((log & 0x1) && i % 3 == 2) {
-                    std::cout << "  厨师："
-                              << s.getConstChef(chefStart + i / 3)->name
+                    std::cout << "  厨师：" << *s[chefStart + i / 3]->name
                               << " -> " << fullCache << " / " << scoreCache
                               << std::endl;
                     scoreCache = 0;
@@ -170,13 +168,12 @@ int sumPrice(States s, CList *chefList, RList *recipeList, int log,
         for (int i = 0; i < NUM_CHEFS; i++) {
             if ((log & 0x10)) {
                 std::cout << "VERBOSE************" << std::endl;
-                s.getConstChef(i)->print();
+                s[i]->print();
                 std::cout << "************" << std::endl;
             }
             int scoreCache = 0;
             if (log & 0x1)
-                std::cout << "厨师：" << s.getConstChef(i)->name << std::endl
-                          << "菜谱：";
+                std::cout << "厨师：" << s[i]->name << std::endl << "菜谱：";
             auto skills = s.getSkills();
 
             for (int j = 0; j < DISH_PER_CHEF; j++) {
@@ -228,50 +225,44 @@ double f::one_over_n(int stepMax, int step, double tMax, double tMin) {
     return tMax / std::pow(step + 1, 0.1);
 }
 
-States perfectTool(States &s) {
+States perfectTool(States s) {
     for (int i = 0; i < NUM_CHEFS; i++) {
-        auto chef = s.getChef(i);
-        if (chef->getTool() == NO_TOOL)
+        if (s.getTool(i) == NO_TOOL)
             continue;
-        chef->modifyTool(NOT_EQUIPPED);
+        s.modifyTool(i, NOT_EQUIPPED);
         int max = sumPrice(s);
         ToolEnum bestTool = NOT_EQUIPPED;
         for (int j = ABILITY_ENUM_START; j < ABILITY_ENUM_END; j++) {
-            chef->modifyTool(ToolEnum(j));
+            s.modifyTool(i, ToolEnum(j));
             int temp = sumPrice(s);
             if (temp > max) {
                 max = temp;
                 bestTool = ToolEnum(j);
             }
         }
-        chef->modifyTool(bestTool);
+        s.modifyTool(i, bestTool);
     }
-    s.saveChefTool();
     return s;
 }
-States perfectChef(States &s, CList *c) {
+States perfectChef(States s, CList *c) {
     // perform a one-shot deviation from current state
     States newS = s;
     States bestS = s;
     int bestSscore = sumPrice(bestS);
-    bestS.saveChefTool();
     for (int i = 0; i < NUM_CHEFS; i++) {
-        for (auto &chef : *c) {
-            if (newS.repeatChef(&chef, i)) {
+        for (auto chef : *c) {
+            if (newS.repeatedChef(&chef, i)) {
                 continue;
             }
-
-            newS.setChef(i, &chef);
+            newS.setChef(i, chef);
             States pS = perfectTool(newS);
             int pSs = sumPrice(pS);
 
             if (pSs > bestSscore) {
                 bestS = pS;
                 bestSscore = pSs;
-                bestS.saveChefTool();
             }
         }
     }
-    bestS.loadChefTool();
     return bestS;
 }
