@@ -130,10 +130,10 @@ int banquetRuleDA_GENG_REN(BanquetStrictRule **strictRule,
         }
     }
     // 条件：神
-    // 效果：本道料理基础售价+300
+    // 效果：本道料理基础售价+200
     for (int i = d + 6; i < d + 9; i++) {
         if (skill[i / 3].ability / s.recipe[i]->cookAbility >= 4) {
-            lenientRule[i]->baseRule.directAdd += 300;
+            lenientRule[i]->baseRule.directAdd += 200;
             break;
         }
     }
