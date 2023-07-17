@@ -10,6 +10,9 @@
 #include <random>
 #include <fstream>
 #include "Randomizer.hpp"
+#ifdef EMSCRIPTEN
+#include <emscripten/bind.h>
+#endif
 
 struct History {
     States states;
@@ -60,8 +63,11 @@ class SARunner {
         const RuleInfo *rl, CList *chefList, RList *recipeList,
         bool randomizeChef,
         f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative);
-    States run(States *s = NULL, int8_t *progress = NULL, bool silent = false,
-               const char *fn = NULL);
+    States run(States *s = NULL,
+#ifdef EMSCRIPTEN
+               emscripten::val postProgress = emscripten::val::null(),
+#endif
+               bool silent = false, const char *fn = NULL);
 
     ~SARunner() {
         delete this->randomMoveFunc;

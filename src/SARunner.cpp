@@ -92,8 +92,11 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
 
     return s;
 }
-States SARunner::run(States *s0, int8_t *progress, bool silent,
-                     const char *filename) {
+States SARunner::run(States *s0,
+#ifdef EMSCRIPTEN
+                     emscripten::val postProgress,
+#endif
+                     bool silent, const char *filename) {
     States s;
     if (s0 == NULL) {
         try {
@@ -118,13 +121,20 @@ States SARunner::run(States *s0, int8_t *progress, bool silent,
     double t = this->tMax;
     int progressPercent = 0;
     while (step < this->stepMax) {
-        if (progress) {
+        // std::cout << "TEST" << std::endl;
+#ifdef EMSCRIPTEN
+        if (postProgress != emscripten::val::null()) {
             int newProgressPercent = (int)(step * 100.0 / this->stepMax);
             if (newProgressPercent > progressPercent) {
                 progressPercent = newProgressPercent;
-                *progress = progressPercent;
+                postProgress(progressPercent);
+                // std::cout << "DEBUG" << progressPercent << std::endl;
             }
         }
+        // else {
+        //     std::cout << "postProgress is null" << postProgress << std::endl;
+        // }
+#endif
         States newS;
         try {
             newS = (*randomMoveFunc)(s);
@@ -156,10 +166,6 @@ States SARunner::run(States *s0, int8_t *progress, bool silent,
         if (energy > this->bestEnergy) {
             this->bestEnergy = energy;
             this->bestState = s;
-            if (progress && !silent) {
-                sumPrice(*rl, this->bestState);
-                std::cout << " ";
-            }
         }
         t = coolingScheduleFunc(this->stepMax, step, this->tMax, this->tMin);
         if (t <= this->tMin) {
@@ -175,9 +181,12 @@ States SARunner::run(States *s0, int8_t *progress, bool silent,
         }
         step++;
     }
-    if (progress) {
-        *progress = 100;
+#ifdef EMSCRIPTEN
+    if (postProgress != emscripten::val::null()) {
+        postProgress(100);
+        // std::cout << "DEBUG" << 100 << std::endl;
     }
+#endif
 #ifdef VIS_HISTORY
     if (progress && !silent) {
         std::fstream file;
