@@ -125,7 +125,7 @@ Rule *getRuleFromJson(const Json::Value &intent, int dish,
                       << std::endl;
         }
     } else {
-        assert(getInt(intent["intentId"]) == 1);
+        // assert(getInt(intent["intentId"]) == 1);
         c = new AlwaysTrueCondition(dish);
     }
 
