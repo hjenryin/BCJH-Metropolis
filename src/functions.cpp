@@ -8,6 +8,7 @@
 
 extern double generateBanquetRuleTime, generateBanquetRuleTimeOut;
 extern double calculatePriceTime, calculatePriceTimeOut;
+std::string getGradeName(Skill &a, Recipe &b);
 
 int getTotalPrice(States s, CList *chefList, RList *recipeList,
                      bool verbose) {
@@ -63,6 +64,7 @@ bool deductTool(States s, CList *chefList, RList *recipeList, int chefId,
  */
 int sumPrice(States s, CList *chefList, RList *recipeList, int log,
                  bool exactChefTool) {
+    // exactChefTool=false;
     if (exactChefTool) {
 
         assert(chefList != NULL && recipeList != NULL);
@@ -71,19 +73,20 @@ int sumPrice(States s, CList *chefList, RList *recipeList, int log,
             ToolEnum tool = s.getTool(i);
             std::string toolName = getToolName(tool);
             toolName = "-" + toolName;
-            if (deductTool(s, chefList, recipeList, i, 40)) {
-                if (deductTool(s, chefList, recipeList, i, 70)) {
-                    if (deductTool(s, chefList, recipeList, i, 100)) {
-                        s.appendName(i, toolName + "(0)");
-                    } else {
-                        s.appendName(i, toolName + "(30)");
-                    }
-                } else {
-                    s.appendName(i, toolName + "(60)");
-                }
-            } else {
-                s.appendName(i, toolName + "(100)");
-            }
+            s.appendName(i, toolName);
+            // if (deductTool(s, chefList, recipeList, i, 40)) {
+            //     if (deductTool(s, chefList, recipeList, i, 70)) {
+            //         if (deductTool(s, chefList, recipeList, i, 100)) {
+            //             s.appendName(i, toolName + "(0)");
+            //         } else {
+            //             s.appendName(i, toolName + "(30)");
+            //         }
+            //     } else {
+            //         s.appendName(i, toolName + "(60)");
+            //     }
+            // } else {
+            //     s.appendName(i, toolName + "(100)");
+            // }
         }
     }
     if (MODE == 1) {
@@ -103,6 +106,7 @@ int sumPrice(States s, CList *chefList, RList *recipeList, int log,
         int ans = 0;
         int dishStart = 0;
         int chefStart = 0;
+        int scoreCacheList[DISH_PER_CHEF];
         for (int g = 0; g < NUM_GUESTS; g++) {
             dishStart = DISH_PER_CHEF * CHEFS_PER_GUEST * g;
             chefStart = CHEFS_PER_GUEST * g;
@@ -124,16 +128,32 @@ int sumPrice(States s, CList *chefList, RList *recipeList, int log,
                 totalScore += biCache.price;
                 scoreCache += biCache.price;
                 fullCache += biCache.full;
+                scoreCacheList[i % 3] = biCache.price;
                 if ((log & 0x1) && i % 3 == 2) {
                     std::cout << "  厨师：" << *s[chefStart + i / 3]->name
                               << " -> " << fullCache << " / " << scoreCache
                               << std::endl;
                     scoreCache = 0;
                     fullCache = 0;
-                    std::cout << "  菜谱：" << s.recipe[dishStart + i - 2]->name
-                              << "；" << s.recipe[dishStart + i - 1]->name
-                              << "；" << s.recipe[dishStart + i]->name
-                              << std::endl;
+                    std::cout << "    菜谱："
+                              << "["
+                              << getGradeName(skills[chefStart + i / 3],
+                                              *s.recipe[dishStart + i - 2])
+                              << "]" << s.recipe[dishStart + i - 2]->name << "("
+                              << scoreCacheList[0] << ")"
+                              << "；"
+                              << "["
+                              << getGradeName(skills[chefStart + i / 3],
+                                              *s.recipe[dishStart + i - 1])
+                              << "]" << s.recipe[dishStart + i - 1]->name << "("
+                              << scoreCacheList[1] << ")"
+                              << "；"
+                              << "["
+                              << getGradeName(skills[chefStart + i / 3],
+                                              *s.recipe[dishStart + i])
+                              << "]" << s.recipe[dishStart + i]->name << "("
+                              << scoreCacheList[2] << ")"
+                              << "；" << std::endl;
                 }
             }
             int guestScore;
@@ -265,4 +285,22 @@ States perfectChef(States s, CList *c) {
         }
     }
     return bestS;
+}
+std::string getGradeName(Skill &a, Recipe &b) {
+    int grade = a.ability / b.cookAbility;
+    switch (grade) {
+    case 1:
+        return "可";
+    case 2:
+        return "优";
+    case 3:
+        return "特";
+    case 4:
+        return "神";
+    case 5:
+        return "传";
+    default:
+
+        return "BUG";
+    }
 }

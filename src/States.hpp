@@ -13,6 +13,7 @@ class States {
   public:
     Recipe *recipe[DISH_PER_CHEF * NUM_CHEFS] = {0};
     Skill *getSkills();
+    Skill *getCookAbilities();
     const Chef getChef(int i) const { return chefs[i]; }
     const Chef *const operator[](int i) const { return &chefs[i]; }
     void setChef(int i, const Chef &chef) {
@@ -64,7 +65,7 @@ class States {
         }
     }
     bool capable() {
-        auto skills = this->getSkills();
+        auto skills = this->getCookAbilities();
         for (int i = 0; i < NUM_DISHES; i++) {
             if (skills[i / DISH_PER_CHEF].ability / this->recipe[i]->cookAbility ==
                 0) {

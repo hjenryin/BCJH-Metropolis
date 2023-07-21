@@ -71,7 +71,7 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
     RList *recipeList = this->randomMoveFunc->r;
 
     for (int j = 0; j < NUM_CHEFS; j++) {
-        auto &skill = s.getSkills()[j];
+        auto &skill = s.getCookAbilities()[j];
         for (int i = 0; i < DISH_PER_CHEF; i++) {
             int count = 0;
             Recipe *newRecipe;

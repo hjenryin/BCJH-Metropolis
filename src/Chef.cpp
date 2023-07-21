@@ -1,15 +1,15 @@
-#include "include/json/json.h"
 #include "Chef.hpp"
-#include <string>
+#include "../config.hpp"
+#include "../toolEquipped.hpp"
+#include "Calculator.hpp"
+#include "exception.hpp"
+#include "include/json/json.h"
+#include "loadToolEquipped.hpp"
+#include "utils/json.hpp"
 #include <fstream>
 #include <iostream>
 #include <map>
-#include "../config.hpp"
-#include "Calculator.hpp"
-#include "utils/json.hpp"
-#include "../toolEquipped.hpp"
-#include "exception.hpp"
-#include "loadToolEquipped.hpp"
+#include <string>
 
 CookAbility Chef::globalAbilityBuff;
 int Chef::globalAbilityMale = 0;
@@ -179,6 +179,7 @@ void Skill::loadJson(const Json::Value &v) {
         int id = skill["skillId"].asInt();
         skillList[id] = Skill();
         for (auto effect : skill["effect"]) {
+
             Skill skill;
             std::string condition = effect["condition"].asString();
             if (condition != "Global") {
@@ -192,19 +193,50 @@ void Skill::loadJson(const Json::Value &v) {
                 std::string type = effect["type"].asString();
                 int value = effect["value"].asInt();
                 if (type == "Gold_Gain") {
-                    skill.coinBuff = value;
+                    skill.pricePercentBuff = value;
                 } else if (type == "Stirfry") {
-                    skill.ability.stirfry = value;
+                    std::string cal = effect["cal"].asString();
+                    if (cal == "Abs")
+                        skill.ability.stirfry = value;
+                    else {
+                        skill.cookAbilityPercentBuff.stirfry = value;
+                    }
                 } else if (type == "Bake") {
-                    skill.ability.bake = value;
+                    std::string cal = effect["cal"].asString();
+                    if (cal == "Abs")
+                        skill.ability.bake = value;
+                    else {
+                        skill.cookAbilityPercentBuff.bake = value;
+                    }
                 } else if (type == "Boil") {
-                    skill.ability.boil = value;
+                    std::string cal = effect["cal"].asString();
+                    if (cal == "Abs")
+                        skill.ability.boil = value;
+                    else {
+                        skill.cookAbilityPercentBuff.boil = value;
+                    }
                 } else if (type == "Steam") {
-                    skill.ability.steam = value;
+                    std::string cal = effect["cal"].asString();
+                    if (cal == "Abs")
+                        skill.ability.steam = value;
+                    else {
+                        skill.cookAbilityPercentBuff.steam = value;
+                    }
+
                 } else if (type == "Fry") {
-                    skill.ability.fry = value;
+                    std::string cal = effect["cal"].asString();
+                    if (cal == "Abs")
+                        skill.ability.fry = value;
+                    else {
+                        skill.cookAbilityPercentBuff.fry = value;
+                    }
                 } else if (type == "Knife") {
-                    skill.ability.knife = value;
+                    std::string cal = effect["cal"].asString();
+                    if (cal == "Abs")
+                        skill.ability.knife = value;
+                    else {
+                        skill.cookAbilityPercentBuff.knife = value;
+                    }
                 } else if (type == "UseStirfry") {
                     skill.abilityBuff.stirfry = value;
                 } else if (type == "UseBake") {
@@ -237,14 +269,40 @@ void Skill::loadJson(const Json::Value &v) {
                     skill.materialBuff.fish = value;
                 } else if (type == "UseCreation") {
                     skill.materialBuff.creation = value;
-                } else if (type == "CookbookPrice") {
-                    auto effects = effect["conditionValueList"];
-                    for (auto &e : effects) {
-                        int rarity = getInt(e);
-                        skill.rarityBuff[rarity] = value;
+                } else if (type == "BasicPrice"){
+                    skill.baseAddBuff = value;
+                }
+                    BuffCondition *condition = NULL;
+                if (effect.isMember("conditionType")) {
+
+                    auto conditionType = effect["conditionType"].asString();
+                    int cvalue = 0;
+                    if (effect.isMember("conditionValue"))
+                        cvalue = getInt(effect["conditionValue"]);
+                    if (conditionType == "CookbookRarity") {
+                        for (auto &i : effect["conditionValueList"]) {
+                            skill.rarityBuff[getInt(i)] = value;
+                        }
+                    } else if (conditionType == "PerRank") {
+                        condition = new GradeBuffCondition(cvalue);
+                    } else if (conditionType == "ExcessCookbookNum") {
+                        int rarityUpperBound = Recipe::upperBound(cvalue);
+                        for (int i = 1; i <= rarityUpperBound; i++) {
+                            skill.rarityBuff[i] = value;
+                        }
+
+                    } else if (conditionType == "SameSkill") {
+                        condition = new ThreeSameCookAbilityBuffCondition();
+                    } else if (conditionType == "Rank") {
+                        skill.gradeBuff[cvalue] = value;
                     }
                 }
-                skillList[id] += skill;
+                if (condition == NULL) {
+                    skillList[id] += skill;
+                } else {
+                    skillList[id].conditionalEffects.push_back(
+                        new ConditionalBuff(condition, skill));
+                }
             }
         }
     }

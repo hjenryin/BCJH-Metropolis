@@ -38,11 +38,11 @@ void toolEquipped(Chef *chef);
 //   vegetable 菜类；meat 肉类；fish 鱼类；creation 面类
 
 // 关于金币获得：
-// 例：skill->coinBuff += 30; // 金币获得+30%
+// 例：skill->pricePercentBuff += 30; // 金币获得+30%
 
 void toolEquipped(Chef *chef) {
 
-    // return; // 以下为示例代码，可自行修改。完成后注释此行。
+    return; // 以下为示例代码，可自行修改。完成后注释此行。
 
     ///////////// 不希望任何厨师装备厨具：
 

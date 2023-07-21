@@ -90,8 +90,8 @@ int main(int argc, char *argv[]) {
     RList recipeList;
     try {
         std::cout << "正在读取文件..." << std::endl;
-        loadChef(chefList, usrData, gameData);
         loadRecipe(recipeList, usrData, gameData);
+        loadChef(chefList, usrData, gameData);
         std::cout << "读取文件成功。" << std::endl;
     } catch (Json::RuntimeError &e) {
         std::cout << "json文件格式不正确。如果文件内容是手动复制的，确认文件已"
@@ -116,7 +116,8 @@ int main(int argc, char *argv[]) {
         if (!mp) {
             num_threads = 1;
         }
-        // num_threads = 1;
+        num_threads = 1;
+        // seed = 1488355956;
         std::cout << "启用" << num_threads
                   << "线程，建议期间不要离开窗口，否则可能影响速度。"
                   << std::endl;
@@ -148,6 +149,7 @@ int main(int argc, char *argv[]) {
         std::cout << "\n最佳结果：" << std::endl;
 
         log += 0x1;
+        // log += 0x10;
         std::cout << "随机种子：" << result.seed << std::endl;
         sumPrice(*result.state, result.chefList, &result.recipeList, log,
                      true);
