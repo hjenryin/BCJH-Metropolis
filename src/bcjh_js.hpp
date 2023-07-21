@@ -91,14 +91,14 @@ std::string
     runjs(const std::string &userDataIn, const std::string &ruleDataIn,
           int targetScore, int iterChef = ITER_CHEF,
           int iterRecipe = ITER_RECIPE, bool allowTool = true
-#ifdef EMSCRIPTEN
+#ifdef EMSCRIPTEN_PROGRESS
           ,
           emscripten::val postProgress = emscripten::val::null()
 #endif
     );
 Result run(const RuleInfo &rl, CList &chefList, RList &recipeList, int log,
            bool silent, int seed
-#ifdef EMSCRIPTEN
+#ifdef EMSCRIPTEN_PROGRESS
            ,
            emscripten::val postProgress
 #endif

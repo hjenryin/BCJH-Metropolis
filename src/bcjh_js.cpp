@@ -71,7 +71,7 @@ std::string
 #endif
     runjs(const std::string &userDataIn, const std::string &ruleDataIn,
           int targetScore, int iterChef, int iterRecipe, bool allowTool
-#ifdef EMSCRIPTEN
+#ifdef EMSCRIPTEN_PROGRESS
           ,
           emscripten::val postProgress
 #endif
@@ -131,7 +131,7 @@ std::string
     start = clock();
 
     Result result = run(rl, chefList, recipeList, 0, true, seed
-#ifdef EMSCRIPTEN
+#ifdef EMSCRIPTEN_PROGRESS
                         ,
                         postProgress
 #endif
@@ -174,7 +174,7 @@ std::string
 
 Result run(const RuleInfo &rl, CList &chefList, RList &recipeList, int log,
            bool silent, int seed
-#ifdef EMSCRIPTEN
+#ifdef EMSCRIPTEN_PROGRESS
            ,
            emscripten::val postProgress
 #endif
@@ -187,7 +187,7 @@ Result run(const RuleInfo &rl, CList &chefList, RList &recipeList, int log,
     // std::cout << log << std::endl;
 
     auto s = saRunner.run(NULL,
-#ifdef EMSCRIPTEN
+#ifdef EMSCRIPTEN_PROGRESS
                           postProgress,
 #endif
                           silent);

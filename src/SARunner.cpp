@@ -93,7 +93,7 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
     return s;
 }
 States SARunner::run(States *s0,
-#ifdef EMSCRIPTEN
+#ifdef EMSCRIPTEN_PROGRESS
                      emscripten::val postProgress,
 #endif
                      bool silent, const char *filename) {
@@ -122,7 +122,7 @@ States SARunner::run(States *s0,
     int progressPercent = 0;
     while (step < this->stepMax) {
         // std::cout << "TEST" << std::endl;
-#ifdef EMSCRIPTEN
+#ifdef EMSCRIPTEN_PROGRESS
         if (postProgress != emscripten::val::null()) {
             int newProgressPercent = (int)(step * 100.0 / this->stepMax);
             if (newProgressPercent > progressPercent) {
@@ -181,7 +181,7 @@ States SARunner::run(States *s0,
         }
         step++;
     }
-#ifdef EMSCRIPTEN
+#ifdef EMSCRIPTEN_PROGRESS
     if (postProgress != emscripten::val::null()) {
         postProgress(100);
         // std::cout << "DEBUG" << 100 << std::endl;

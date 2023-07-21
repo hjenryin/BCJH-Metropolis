@@ -19,7 +19,7 @@ abc
         // 这里可以放postMessage之类的东西?
     }
     Module.onRuntimeInitialized = function () {
-        var result = Module.run(userData, ruleData, 3170000, 500, 10, false, progressCall)
+        var result = Module.run(userData, ruleData, 3170000, 500, 10, false)
         // 参数为：userData, ruleData, targetScore, ITER_CHEF=5000, ITER_RECIPE=1000, allowTool=true, func=null()
         // 每当进度条走过1%的时候，func就会被调用一次，参数为当前进度(0~100)。
         // 具体分值和加成在result.logs中。

@@ -64,7 +64,7 @@ class SARunner {
         bool randomizeChef,
         f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative);
     States run(States *s = NULL,
-#ifdef EMSCRIPTEN
+#ifdef EMSCRIPTEN_PROGRESS
                emscripten::val postProgress = emscripten::val::null(),
 #endif
                bool silent = false, const char *fn = NULL);
