@@ -3,9 +3,9 @@
 #include "Calculator.hpp"
 #include "States.hpp"
 int banquetRuleDA_GENG_REN(BanquetStrictRule **, BanquetLenientRule **,
-                           States &, Skill *, int);
+                           States &, const Skill *, int);
 int banquetRuleYU_GUI_REN(BanquetStrictRule **, BanquetLenientRule **, States &,
-                          Skill *, int);
+                          const Skill *, int);
 
 /**
  * @brief
@@ -15,8 +15,8 @@ int banquetRuleYU_GUI_REN(BanquetStrictRule **, BanquetLenientRule **, States &,
  * @param bestfull
  * @return void
  */
-void banquetRule(Skill *skills, BanquetRuleTogether *const &rule, States &s,
-                 int *bestfull) {
+void banquetRule(const Skill *skills, BanquetRuleTogether *const &rule,
+                 States &s, int *bestfull) {
     BanquetStrictRule
         *strictRule[NUM_CHEFS *
                     DISH_PER_CHEF]; // 下一阶段的规则，不受意图生效次数的影响
@@ -36,7 +36,7 @@ void banquetRule(Skill *skills, BanquetRuleTogether *const &rule, States &s,
 // 风云宴 打更人
 int banquetRuleDA_GENG_REN(BanquetStrictRule **strictRule,
                            BanquetLenientRule **lenientRule, States &s,
-                           Skill *skill, int rank) {
+                           const Skill *skill, int rank) {
     int d = rank * DISH_PER_CHEF * CHEFS_PER_GUEST;
 
     // 第1轮
@@ -152,7 +152,7 @@ int banquetRuleDA_GENG_REN(BanquetStrictRule **strictRule,
 // 风云宴 玉贵人2
 int banquetRuleYU_GUI_REN(BanquetStrictRule **strictRule,
                           BanquetLenientRule **lenientRule, States &s,
-                          Skill *skill, int rank) {
+                          const Skill *skill, int rank) {
     int d = rank * DISH_PER_CHEF * CHEFS_PER_GUEST;
 
     // 第1轮

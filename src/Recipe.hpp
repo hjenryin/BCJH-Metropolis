@@ -27,7 +27,7 @@ class Materials {
                   << (this->fish ? "鱼 " : "") << (this->creation ? "面 " : "")
                   << end;
     }
-    int operator*(MaterialCategoryBuff &buff) {
+    int operator*(const MaterialCategoryBuff &buff) {
         int sum = 0;
         if (this->vegetable) {
             sum += buff.vegetable;

@@ -297,6 +297,7 @@ class Skill {
         this->rarityBuff.print("RarityBuff");
         this->gradeBuff.print("GradeBuff");
     }
+    ~Skill() {} // conditionalEffects should be handled manually.
 };
 
 class Recipe;
@@ -307,6 +308,7 @@ class BuffCondition {
     const std::string name;
     BuffCondition(const std::string &name = "") : name(name) {}
     virtual int test(const Skill *s, Recipe **r) = 0;
+    virtual ~BuffCondition() {}
 };
 class GradeBuffCondition : public BuffCondition {
   public:
@@ -315,11 +317,13 @@ class GradeBuffCondition : public BuffCondition {
         : grade(grade),
           BuffCondition(std::string("等级做到") + (char)('0' + grade)) {}
     int test(const Skill *s, Recipe **r);
+    ~GradeBuffCondition() override {}
 };
 class ThreeSameCookAbilityBuffCondition : public BuffCondition {
   public:
     ThreeSameCookAbilityBuffCondition() : BuffCondition("三技法相同") {}
     int test(const Skill *s, Recipe **r);
+    ~ThreeSameCookAbilityBuffCondition() override {}
 };
 
 class ConditionalBuff {
@@ -329,6 +333,10 @@ class ConditionalBuff {
     ConditionalBuff(BuffCondition *conditionFunc, Skill skill)
         : conditionFunc(conditionFunc), skill(skill) {}
     ConditionalBuff() : conditionFunc(NULL), skill(Skill()) {}
+    ~ConditionalBuff() {
+        // if (conditionFunc != NULL) // wierd, shouldn't need this.
+        delete conditionFunc;
+    }
 };
 
 #endif

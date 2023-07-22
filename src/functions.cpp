@@ -8,12 +8,7 @@
 
 extern double generateBanquetRuleTime, generateBanquetRuleTimeOut;
 extern double calculatePriceTime, calculatePriceTimeOut;
-std::string getGradeName(Skill &a, Recipe &b);
-
-int getTotalPrice(States s, CList *chefList, RList *recipeList,
-                     bool verbose) {
-    return sumPrice(s, chefList, recipeList, verbose, false);
-}
+std::string getGradeName(const Skill &a, Recipe &b);
 
 /**
  * @warning this function involves a large copy constructor.
@@ -252,7 +247,7 @@ States perfectChef(States s, CList *c) {
     }
     return bestS;
 }
-std::string getGradeName(Skill &a, Recipe &b) {
+std::string getGradeName(const Skill &a, Recipe &b) {
     int grade = a.ability / b.cookAbility;
     switch (grade) {
     case 1:

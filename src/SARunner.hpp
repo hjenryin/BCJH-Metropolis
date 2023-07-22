@@ -61,8 +61,11 @@ class SARunner {
         f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative);
     States run(States *s = NULL, bool progress = false, bool silent = false,
                const char *fn = NULL);
+    ~SARunner() {
 #ifdef VIS_HISTORY
-    ~SARunner() { delete[] this->history; }
+        delete[] this->history;
 #endif
+        delete this->randomMoveFunc;
+    }
 };
 #endif

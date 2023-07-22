@@ -68,11 +68,13 @@ const Skill *States::getCookAbilities() {
     return cookAbilitiesCache;
 }
 
-Skill *States::getSkills() {
+const Skill *States::getSkills() {
 #ifdef MEASURE_TIME
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
 #endif
+    if (!chefHasStrangeSkills)
+        return getCookAbilities();
     Skill selfSkills[NUM_CHEFS];
     Skill companySkills[NUM_CHEFS];
     Skill nextSkills[NUM_CHEFS];

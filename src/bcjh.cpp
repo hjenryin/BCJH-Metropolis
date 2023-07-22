@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
         if (!mp) {
             num_threads = 1;
         }
-        num_threads = 1;
+        // num_threads = 1;
         // seed = 1488355956;
         std::cout << "启用" << num_threads
                   << "线程，建议期间不要离开窗口，否则可能影响速度。"
@@ -137,9 +137,12 @@ int main(int argc, char *argv[]) {
             Result tmp = future.get();
             totalScore += tmp.score;
             if (tmp.score > max_score) {
+                if (max_score != 0) {
+                    delete result.chefList;
+                    delete result.state;
+                }
                 result = tmp;
                 max_score = result.score;
-
             } else {
                 delete tmp.chefList;
                 delete tmp.state;
@@ -171,6 +174,16 @@ int main(int argc, char *argv[]) {
 #ifdef VIS_HISTORY
     std::cout << "均分：" << totalScore / num_threads << std::endl;
 #endif
+    for (auto &chef : chefList) {
+        chef.deletePointers();
+    }
+    for (auto iter = Skill::skillList.begin(); iter != Skill::skillList.end();
+         iter++) {
+        auto &s = iter->second;
+        for (auto &ce : s.conditionalEffects) {
+            delete ce;
+        }
+    }
 }
 Result run(const CList &chefList, RList &recipeList, int log, bool silent,
            int seed) {
@@ -187,6 +200,9 @@ Result run(const CList &chefList, RList &recipeList, int log, bool silent,
     *s = saRunner.run(NULL, true, silent);
     // *s = perfectChef(*s, chefListPtr);
     int score = sumPrice(*s, chefListPtr, &recipeList, log, false);
+    for (auto &chef : *chefListPtr) {
+        delete chef.recipeLearned;
+    }
     return Result{score, seed, chefListPtr, recipeList, s};
 }
 

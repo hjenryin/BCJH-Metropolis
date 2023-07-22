@@ -2,9 +2,7 @@
 #include "Chef.hpp"
 #include <cmath>
 
-int otherBuff(Skill &skill, Recipe &recipe, DishBuff &rb);
-
-int getPrice(Skill &skill, Recipe &recipe, ActivityBuff *activityBuff,
+int getPrice(const Skill &skill, Recipe &recipe, ActivityBuff *activityBuff,
              bool verbose) {
     // if (verbose)
     //     std::cout << chef.name << " " << recipe.name << std::endl;
@@ -85,7 +83,7 @@ int getPrice(Skill &skill, Recipe &recipe, ActivityBuff *activityBuff,
     return totalPrice;
 }
 
-BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
+BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
                      bool verbose) {
     // std::cout << chef.name << " " << recipe.name << std::endl;
     int grade = skill.ability / recipe->cookAbility;

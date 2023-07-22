@@ -100,6 +100,12 @@ void loadChef(CList &chefList, const Json::Value &usrData,
     }
 #endif
 }
+void Chef::deletePointers() {
+    delete this->name;
+    delete this->skill;
+    delete this->companyBuff;
+    delete this->nextBuff;
+}
 /**
  * Chef
  * @param ultimateSkillId: -1 means no ultimate skill

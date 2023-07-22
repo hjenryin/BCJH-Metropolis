@@ -6,20 +6,28 @@
 #include "../config.hpp"
 
 class States {
+    bool cookAbilitiesValid = false;
+    uint32_t chefHasStrangeSkills = 0;
     Skill cookAbilitiesCache[NUM_CHEFS];
     Skill skillsCache[NUM_CHEFS];
-    bool cookAbilitiesValid = false;
+
     Chef chefs[NUM_CHEFS];
 
   public:
     Recipe *recipe[DISH_PER_CHEF * NUM_CHEFS] = {0};
-    Skill *getSkills();
+    const Skill *getSkills();
     const Skill *getCookAbilities();
     Chef getChef(int i) const { return chefs[i]; }
     const Chef *const getChefPtr(int i) const { return &chefs[i]; }
     void setChef(int i, const Chef &chef) {
         chefs[i] = chef;
         cookAbilitiesValid = false;
+        size_t numStrangeSkills = chef.skill->conditionalEffects.size() +
+                                  chef.companyBuff->conditionalEffects.size() +
+                                  chef.nextBuff->conditionalEffects.size();
+        numStrangeSkills = numStrangeSkills > 0 ? 1 : 0;
+        chefHasStrangeSkills =
+            (chefHasStrangeSkills & ~(1 << i)) | (numStrangeSkills << i);
     }
     void modifyTool(int i, ToolEnum tool) {
         chefs[i].modifyTool(tool);
