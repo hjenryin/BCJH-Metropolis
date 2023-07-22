@@ -15,7 +15,8 @@ int banquetRuleYU_GUI_REN(BanquetStrictRule **, BanquetLenientRule **, States &,
  * @param bestfull
  * @return void
  */
-void banquetRule(BanquetRuleTogether *const &rule, States &s, int *bestfull) {
+void banquetRule(Skill *skills, BanquetRuleTogether *const &rule, States &s,
+                 int *bestfull) {
     BanquetStrictRule
         *strictRule[NUM_CHEFS *
                     DISH_PER_CHEF]; // 下一阶段的规则，不受意图生效次数的影响
@@ -25,9 +26,9 @@ void banquetRule(BanquetRuleTogether *const &rule, States &s, int *bestfull) {
         lenientRule[i] = &rule[i].lenientRule;
     }
 
-    auto skill = s.getSkills();
-    bestfull[0] = banquetRuleDA_GENG_REN(strictRule, lenientRule, s, skill, 0);
-    bestfull[1] = banquetRuleYU_GUI_REN(strictRule, lenientRule, s, skill, 1);
+    // auto skills = s.getSkills();
+    bestfull[0] = banquetRuleDA_GENG_REN(strictRule, lenientRule, s, skills, 0);
+    bestfull[1] = banquetRuleYU_GUI_REN(strictRule, lenientRule, s, skills, 1);
     return;
 }
 

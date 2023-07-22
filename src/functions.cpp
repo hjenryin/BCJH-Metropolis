@@ -21,7 +21,7 @@ int getTotalPrice(States s, CList *chefList, RList *recipeList,
  */
 bool deductTool(States s, CList *chefList, RList *recipeList, int chefId,
                 int deduction) {
-    Chef chef(*s[chefId]);
+    auto chef = s.getChef(chefId);
     int tool = chef.getTool();
     int *cookAbility;
     switch (tool) {
@@ -89,11 +89,12 @@ int sumPrice(States s, CList *chefList, RList *recipeList, int log,
             // }
         }
     }
-    if (MODE == 1) {
+    assert(MODE == 1);
+    BanquetRuleTogether rule[NUM_CHEFS * DISH_PER_CHEF];
+    int bestFull[NUM_GUESTS];
+    auto skills = s.getSkills();
 
-        BanquetRuleTogether rule[NUM_CHEFS * DISH_PER_CHEF];
-        int bestFull[NUM_GUESTS];
-        banquetRule(rule, s, bestFull);
+    banquetRule(skills, rule, s, bestFull);
 #ifdef MEASURE_TIME
         struct timespec start, finish;
         clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
@@ -114,11 +115,11 @@ int sumPrice(States s, CList *chefList, RList *recipeList, int log,
             totalFull = 0;
             scoreCache = 0;
             fullCache = 0;
-            auto skills = s.getSkills();
             for (int i = 0; i < DISH_PER_CHEF * CHEFS_PER_GUEST; i++) {
                 if ((log & 0x10) && i % 3 == 0) {
                     std::cout << "VERBOSE************" << std::endl;
-                    s[chefStart + i / 3]->print();
+                    s.getChefPtr(chefStart + i / 3)->print();
+                    skills[chefStart + i / 3].print();
                     std::cout << "************" << std::endl;
                 }
                 biCache =
@@ -130,7 +131,8 @@ int sumPrice(States s, CList *chefList, RList *recipeList, int log,
                 fullCache += biCache.full;
                 scoreCacheList[i % 3] = biCache.price;
                 if ((log & 0x1) && i % 3 == 2) {
-                    std::cout << "  厨师：" << *s[chefStart + i / 3]->name
+                    std::cout << "  厨师："
+                              << *s.getChefPtr(chefStart + i / 3)->name
                               << " -> " << fullCache << " / " << scoreCache
                               << std::endl;
                     scoreCache = 0;
@@ -177,42 +179,6 @@ int sumPrice(States s, CList *chefList, RList *recipeList, int log,
                            (finish.tv_nsec - start.tv_nsec) * 1e-9;
 #endif
         return ans;
-    } else if (MODE == 2 || MODE == 0) {
-        ActivityBuff activityBuff;
-        auto p = &activityBuff;
-        activityRule(p);
-        if (MODE == 0)
-            p = NULL;
-        int energy = 0;
-        int r = 0;
-        for (int i = 0; i < NUM_CHEFS; i++) {
-            if ((log & 0x10)) {
-                std::cout << "VERBOSE************" << std::endl;
-                s[i]->print();
-                std::cout << "************" << std::endl;
-            }
-            int scoreCache = 0;
-            if (log & 0x1)
-                std::cout << "厨师：" << s[i]->name << std::endl << "菜谱：";
-            auto skills = s.getSkills();
-
-            for (int j = 0; j < DISH_PER_CHEF; j++) {
-                if (log & 0x1)
-                    std::cout << s.recipe[r]->name << "；";
-                scoreCache +=
-                    getPrice(skills[i], *s.recipe[r++], p, (log & 0x10));
-            }
-            energy += scoreCache;
-            if (log & 0x1)
-                std::cout << " -> " << scoreCache << std::endl;
-        }
-        return energy;
-    } else {
-        std::cout
-            << "config.hpp中MODE设置错误。0为正常营业，1为宴会，2为限时任务"
-            << std::endl;
-        exit(1);
-    }
 }
 void swap(Recipe *&a, Recipe *&b) {
     Recipe *temp = a;

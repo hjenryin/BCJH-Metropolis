@@ -12,9 +12,10 @@
 // 这里输分数线，达标之后将停止搜索
 
 // #define VIS_HISTORY
-#define DEBUG_INTEGRITY
-#define ITER_CHEF 50   // 选择厨师时的迭代次数
-#define ITER_RECIPE 100 // 对于每一组厨师，选择菜谱时的迭代次数
+// #define DEBUG_INTEGRITY
+// #define MEASURE_TIME
+#define ITER_CHEF 5000   // 选择厨师时的迭代次数
+#define ITER_RECIPE 1000 // 对于每一组厨师，选择菜谱时的迭代次数
 
 #define AVOID_CHEF_1 true
 #define AVOID_CHEF_2 true

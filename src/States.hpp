@@ -6,23 +6,24 @@
 #include "../config.hpp"
 
 class States {
+    Skill cookAbilitiesCache[NUM_CHEFS];
     Skill skillsCache[NUM_CHEFS];
-    bool cacheValid = false;
+    bool cookAbilitiesValid = false;
     Chef chefs[NUM_CHEFS];
 
   public:
     Recipe *recipe[DISH_PER_CHEF * NUM_CHEFS] = {0};
     Skill *getSkills();
-    Skill *getCookAbilities();
-    const Chef getChef(int i) const { return chefs[i]; }
-    const Chef *const operator[](int i) const { return &chefs[i]; }
+    const Skill *getCookAbilities();
+    Chef getChef(int i) const { return chefs[i]; }
+    const Chef *const getChefPtr(int i) const { return &chefs[i]; }
     void setChef(int i, const Chef &chef) {
         chefs[i] = chef;
-        cacheValid = false;
+        cookAbilitiesValid = false;
     }
     void modifyTool(int i, ToolEnum tool) {
         chefs[i].modifyTool(tool);
-        cacheValid = false;
+        cookAbilitiesValid = false;
     }
     ToolEnum getTool(int i) { return chefs[i].getTool(); }
     void appendName(int i, const std::string &s) { *chefs[i].name += s; }

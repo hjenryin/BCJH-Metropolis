@@ -8,8 +8,8 @@ template <typename T> inline void copy(T *dst, const T *src, int n) {
     }
 }
 
-void applyCookAbilities(Skill *skillsResult, Skill *selfSkills,
-                        Skill *companyBuffs, Skill *nextBuffs, Chef *chefs) {
+void mergeSkills(Skill *skillsResult, Skill *selfSkills, Skill *companyBuffs,
+                 Skill *nextBuffs, Chef *chefs) {
     for (int i = 0; i < NUM_CHEFS; i++) {
         skillsResult[i] = selfSkills[i];
         skillsResult[i].ability.add(Ability(chefs[i].getTool()));
@@ -28,20 +28,20 @@ void applyCookAbilities(Skill *skillsResult, Skill *selfSkills,
     }
     // 技法先加减后乘除
     for (int i = 0; i < NUM_CHEFS; i++) {
-        CookAbility &a = skillsResult[i].cookAbilityPercentBuff;
-        a.bake = int(ceil(a.bake * (a.bake + 100) / 100.0));
-        a.boil = int(ceil(a.boil * (a.boil + 100) / 100.0));
-        a.steam = int(ceil(a.steam * (a.steam + 100) / 100.0));
-        a.stirfry = int(ceil(a.stirfry * (a.stirfry + 100) / 100.0));
-        a.knife = int(ceil(a.knife * (a.knife + 100) / 100.0));
-        a.fry = int(ceil(a.fry * (a.fry + 100) / 100.0));
+        CookAbility &b = skillsResult[i].cookAbilityPercentBuff;
+        CookAbility &r = skillsResult[i].ability;
+        int *rPtr = &r.stirfry;
+        int *bPtr = &b.stirfry;
+        for (int j = 0; j < 6; j++) {
+            rPtr[j] = int(ceil(rPtr[j] * (bPtr[j] + 100.0) / 100.0));
+        }
     }
 }
-void applyConditionBuff(Skill *cookAbilitySkill,
-                        const std::vector<ConditionalBuff *> &conditionalEffects,
-                        Skill *skillTarget, Recipe **recipe) {
+inline void
+applyConditionBuff(const Skill *const cookAbilitySkill,
+                   const std::vector<ConditionalBuff *> &conditionalEffects,
+                   Skill *skillTarget, Recipe **recipe) {
     // 条件技能
-
     for (auto &ce : conditionalEffects) {
         for (int i = ce->conditionFunc->test(cookAbilitySkill, recipe); i > 0;
              i--) {
@@ -49,7 +49,10 @@ void applyConditionBuff(Skill *cookAbilitySkill,
         }
     }
 }
-Skill *States::getCookAbilities() {
+const Skill *States::getCookAbilities() {
+    if (cookAbilitiesValid) {
+        return cookAbilitiesCache;
+    }
     Skill selfSkills[NUM_CHEFS];
     Skill companySkills[NUM_CHEFS];
     Skill nextSkills[NUM_CHEFS];
@@ -58,11 +61,11 @@ Skill *States::getCookAbilities() {
         companySkills[i] = *chefs[i].companyBuff;
         nextSkills[i] = *chefs[i].nextBuff;
     }
-    cacheValid = true;
+    cookAbilitiesValid = true;
 
-    applyCookAbilities(skillsCache, selfSkills, companySkills, nextSkills,
-                       chefs);
-    return skillsCache;
+    mergeSkills(cookAbilitiesCache, selfSkills, companySkills, nextSkills,
+                chefs);
+    return cookAbilitiesCache;
 }
 
 Skill *States::getSkills() {
@@ -80,16 +83,17 @@ Skill *States::getSkills() {
     }
     auto skillsPreview = getCookAbilities();
     for (int i = 0; i < NUM_CHEFS; i++) {
-        applyConditionBuff(skillsPreview+i, chefs[i].skill->conditionalEffects,
-                           selfSkills + i, recipe + i * DISH_PER_CHEF);
-        applyConditionBuff(skillsPreview+i,
+        applyConditionBuff(skillsPreview + i,
+                           chefs[i].skill->conditionalEffects, selfSkills + i,
+                           recipe + i * DISH_PER_CHEF);
+        applyConditionBuff(skillsPreview + i,
                            chefs[i].companyBuff->conditionalEffects,
                            companySkills + i, recipe + i * DISH_PER_CHEF);
-        applyConditionBuff(skillsPreview+i, chefs[i].nextBuff->conditionalEffects,
+        applyConditionBuff(skillsPreview + i,
+                           chefs[i].nextBuff->conditionalEffects,
                            nextSkills + i, recipe + i * DISH_PER_CHEF);
     }
-    applyCookAbilities(skillsCache, selfSkills, companySkills, nextSkills,
-                           chefs);
+    mergeSkills(skillsCache, selfSkills, companySkills, nextSkills, chefs);
 
 #ifdef MEASURE_TIME
     clock_gettime(CLOCK_MONOTONIC, &end);

@@ -146,7 +146,7 @@ void Chef::print() const {
     std::cout << this->id << ": " << *this->name << "\t"
               << (this->male ? "M" : "") << (this->female ? "F" : "")
               << std::endl;
-    this->skill->print();
+    // this->skill->print();
 }
 CookAbility::CookAbility(const Json::Value &v) {
     // std::cout << "Here" << std::endl;

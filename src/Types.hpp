@@ -306,7 +306,7 @@ class BuffCondition {
   public:
     const std::string name;
     BuffCondition(const std::string &name = "") : name(name) {}
-    virtual int test(Skill *s, Recipe **r) = 0;
+    virtual int test(const Skill *s, Recipe **r) = 0;
 };
 class GradeBuffCondition : public BuffCondition {
   public:
@@ -314,12 +314,12 @@ class GradeBuffCondition : public BuffCondition {
     GradeBuffCondition(int grade)
         : grade(grade),
           BuffCondition(std::string("等级做到") + (char)('0' + grade)) {}
-    int test(Skill *s, Recipe **r);
+    int test(const Skill *s, Recipe **r);
 };
 class ThreeSameCookAbilityBuffCondition : public BuffCondition {
   public:
     ThreeSameCookAbilityBuffCondition() : BuffCondition("三技法相同") {}
-    int test(Skill *s, Recipe **r);
+    int test(const Skill *s, Recipe **r);
 };
 
 class ConditionalBuff {

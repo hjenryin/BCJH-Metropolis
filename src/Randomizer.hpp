@@ -15,7 +15,7 @@ class Randomizer {
 
   protected:
     bool swapRecipe(States &s) const;
-    bool unrepeatedRandomRecipe(Skill &skill, Recipe **rs, int size, int index,
+    bool unrepeatedRandomRecipe(const Skill &skill, Recipe **rs, int size, int index,
                                 int repeats = RANDOM_SEARCH_TIMEOUT) const;
 };
 class RecipeRandomizer : public Randomizer {
