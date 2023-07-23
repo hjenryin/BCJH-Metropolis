@@ -1,6 +1,6 @@
 #include "Calculator.hpp"
 #include "Chef.hpp"
-#include <cmath>
+#include "utils/math.hpp"
 
 int getPrice(const Skill &skill, Recipe &recipe, ActivityBuff *activityBuff,
              bool verbose) {
@@ -59,7 +59,7 @@ int getPrice(const Skill &skill, Recipe &recipe, ActivityBuff *activityBuff,
     // std::cout << buff << std::endl;
     double bonus = 1.0 + buff / 100.0;
     // std::cout << bonus << std::endl;
-    int singlePrice = (int)std::ceil(recipe.price * bonus);
+    int singlePrice = int_ceil(recipe.price * bonus);
     // std::cout << singlePrice << std::endl;
     int totalPrice = singlePrice * rb.dishNum;
     if (verbose) {
@@ -129,9 +129,9 @@ BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
                     (Chef::coinBuffOn ? skill.pricePercentBuff : 0);
     int buff = gradebuff + skillBuff + intentionAddBuff;
     int singlePrice =
-        (int)std::ceil((recipe->price + rule.baseRule.directAdd) *
-                       (1.0 + (intentionBaseBuff + abilityBaseBuff) / 100.0) *
-                       (1.0 + buff / 100.0));
+        int_ceil((recipe->price + rule.baseRule.directAdd) *
+                 (1.0 + (intentionBaseBuff + abilityBaseBuff) / 100.0) *
+                 (1.0 + buff / 100.0));
     // std::cout << singlePrice << std::endl;
     int totalPrice = singlePrice * rb.dishNum;
     int full;

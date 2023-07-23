@@ -5,6 +5,7 @@
 #include "activityRule.hpp"
 #include <cassert>
 #include "banquetRule.hpp"
+#include "utils/math.hpp"
 
 extern double generateBanquetRuleTime, generateBanquetRuleTimeOut;
 extern double calculatePriceTime, calculatePriceTimeOut;
@@ -157,11 +158,11 @@ int sumPrice(States s, CList *chefList, RList *recipeList, int log,
             int guestScore;
             switch (totalFull - bestFull[g]) {
             case 0:
-                guestScore = (int)std::ceil(totalScore * 1.3);
+                guestScore = int_ceil(totalScore * 1.3);
                 break;
             default:
                 int delta = std::abs(totalFull - bestFull[g]);
-                guestScore = (int)std::ceil(totalScore * (1 - 0.05 * delta));
+                guestScore = int_ceil(totalScore * (1 - 0.05 * delta));
             }
             ans += guestScore;
             if (log & 0x1)

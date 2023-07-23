@@ -1,5 +1,5 @@
 #include "States.hpp"
-#include <math.h>
+#include "utils/math.hpp"
 double getStatesSkillsTime = 0;
 
 template <typename T> inline void copy(T *dst, const T *src, int n) {
@@ -34,7 +34,7 @@ void mergeSkills(Skill *skillsResult, const Skill *selfSkills,
         int *rPtr = &r.stirfry;
         int *bPtr = &b.stirfry;
         for (int j = 0; j < 6; j++) {
-            rPtr[j] = int(ceil(rPtr[j] * (bPtr[j] + 100.0) / 100.0));
+            rPtr[j] = int_ceil(rPtr[j] * (bPtr[j] + 100.0) / 100.0);
         }
     }
 }

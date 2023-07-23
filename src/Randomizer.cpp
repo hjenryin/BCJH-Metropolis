@@ -184,7 +184,7 @@ bool ChefRandomizer::swapChefTool(States &s) const {
         return true;
     }
 }
-States RecipeRandomizer::operator()(States s) {
+void RecipeRandomizer::operator()(States &s) {
 #ifdef MEASURE_TIME
     struct timespec start, finish;
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
@@ -207,12 +207,11 @@ States RecipeRandomizer::operator()(States s) {
         finish.tv_sec - start.tv_sec + (finish.tv_nsec - start.tv_nsec) * 1e-9;
 #endif
     debugIntegrity(s);
-    return s;
 }
 /**
  * @todo swap chef may cause grade=0.
  */
-States ChefRandomizer::operator()(States s) {
+void ChefRandomizer::operator()(States &s) {
 #ifdef MEASURE_TIME
     struct timespec start, finish;
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
@@ -249,7 +248,7 @@ States ChefRandomizer::operator()(States s) {
     randomChefTime +=
         finish.tv_sec - start.tv_sec + (finish.tv_nsec - start.tv_nsec) * 1e-9;
 #endif
-    return saRunner.run(&s);
+    s = saRunner.run(&s);
 }
 bool Randomizer::unrepeatedRandomRecipe(const Skill &skill, Recipe **recipes,
                                         int size, int index,

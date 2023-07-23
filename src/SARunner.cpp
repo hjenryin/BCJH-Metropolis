@@ -127,9 +127,9 @@ States SARunner::run(States *s0, bool progress, bool silent,
                           << this->bestEnergy << std::flush;
             }
         }
-        States newS;
+        States newS=s;
         try {
-            newS = (*randomMoveFunc)(s);
+            (*randomMoveFunc)(newS);
 
         } catch (NoRecipeException &e) {
             std::cout << e.what() << std::endl;
@@ -144,16 +144,13 @@ States SARunner::run(States *s0, bool progress, bool silent,
             sumPrice(newS, this->chefList, this->recipeList, false);
         double prob = 0;
         int delta = energy - newEnergy;
-        if (delta / t < -30) {
+        if (delta / t < 0) {
             prob = 1.01;
         } else {
-            // prob = 1.0 / (1 + std::exp(delta / (3 * t + 0.0)));
             prob = std::exp(-delta / t);
         }
         if (prob > (double)rand() / RAND_MAX) {
             s = newS;
-            // print(s);
-            // std::cout << newEnergy << std::endl;
             energy = newEnergy;
         }
         if (energy > this->bestEnergy) {

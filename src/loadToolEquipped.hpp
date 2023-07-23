@@ -114,11 +114,14 @@ ToolFileType loadToolFile() {
     }
 }
 
-bool isFloat(string s) {
+/**
+ * @return true if s matches \d+ or \d+\.\d+
+ */
+bool isNonNegFloat(string s) {
     bool hasDot = false;
     if (s.size() == 0)
         return true;
-    if (s[0] != '-' && !(s[0] >= '0' && s[0] <= '9'))
+    if (!(s[0] >= '0' && s[0] <= '9'))
         return false;
     for (unsigned int i = 1; i < s.size(); i++) {
         if (s[i] == '.') {
@@ -131,16 +134,29 @@ bool isFloat(string s) {
         if (s[i] < '0' || s[i] > '9')
             return false;
     }
-    if (hasDot)
-        return true;
-    else {
-        throw runtime_error("Float");
-    }
+    return true;
 }
-double str2f(string s) {
-    if (isFloat(s))
-        return atof(s.c_str());
-    else
+int str2perc(string s) {
+    // For example, 1.5->50, 0.5->-50, 2->100
+    auto s_sctr = s.c_str();
+    if (isNonNegFloat(s)) {
+        int percent = 0;
+        if (s.size() == 0)
+            return percent;
+        percent += 100 * (s_sctr[0] - '1');
+        if (s.size() == 1)
+            return percent;
+        if (s_sctr[1] != '.') {
+            throw runtime_error("Float");
+        }
+        if (s.size() == 2)
+            return percent;
+        percent += 10 * (s_sctr[2] - '0');
+        if (s.size() == 3)
+            return percent;
+        percent += s_sctr[3] - '0';
+        return percent;
+    } else
         throw runtime_error("Float");
 }
 bool isInt(string s) {
@@ -183,45 +199,44 @@ CSVWarning loadToolFromFile(Chef *chef, ToolFileType t) {
         unsigned int j = 1;
         auto skill = chef->skill;
         auto ability = &skill->ability;
+        auto cookAbilityPercentBuff = &skill->cookAbilityPercentBuff;
         auto abilityBuff = &skill->abilityBuff;
         auto flavorBuff = &skill->flavorBuff;
         auto materialBuff = &skill->materialBuff;
         try {
             if (tool[j][0] == '*') {
-                ability->multiply(str2f(tool[j++].substr(1)));
+                cookAbilityPercentBuff->add(str2perc(tool[j++].substr(1)));
             } else {
                 ability->add(str2i(tool[j++]));
             }
             if (tool[j][0] == '*') {
-                ability->bake = int(ability->bake * str2f(tool[j++].substr(1)));
+                cookAbilityPercentBuff->bake += str2perc(tool[j++].substr(1));
             } else {
                 ability->bake += str2i(tool[j++]);
             }
             if (tool[j][0] == '*') {
-                ability->knife =
-                    int(ability->knife * str2f(tool[j++].substr(1)));
+                cookAbilityPercentBuff->knife += str2perc(tool[j++].substr(1));
             } else {
                 ability->knife += str2i(tool[j++]);
             }
             if (tool[j][0] == '*') {
-                ability->stirfry =
-                    int(ability->stirfry * str2f(tool[j++].substr(1)));
+                cookAbilityPercentBuff->stirfry +=
+                    str2perc(tool[j++].substr(1));
             } else {
                 ability->stirfry += str2i(tool[j++]);
             }
             if (tool[j][0] == '*') {
-                ability->fry = int(ability->fry * str2f(tool[j++].substr(1)));
+                cookAbilityPercentBuff->fry += str2perc(tool[j++].substr(1));
             } else {
                 ability->fry += str2i(tool[j++]);
             }
             if (tool[j][0] == '*') {
-                ability->steam =
-                    int(ability->steam * str2f(tool[j++].substr(1)));
+                cookAbilityPercentBuff->steam += str2perc(tool[j++].substr(1));
             } else {
                 ability->steam += str2i(tool[j++]);
             }
             if (tool[j][0] == '*') {
-                ability->boil = int(ability->boil * str2f(tool[j++].substr(1)));
+                cookAbilityPercentBuff->boil += str2perc(tool[j++].substr(1));
             } else {
                 ability->boil += str2i(tool[j++]);
             }

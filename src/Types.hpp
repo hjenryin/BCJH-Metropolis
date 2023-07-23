@@ -251,22 +251,7 @@ class Skill {
     int pricePercentBuff = 0;
     int baseAddBuff = 0;
     std::vector<ConditionalBuff *> conditionalEffects;
-    // Skill(CookAbility ability, AbilityBuff abilityBuff, FlavorBuff
-    // flavorBuff,
-    //       MaterialCategoryBuff materialBuff, DiscretizedBuff rarityBuff,
-    //       DiscretizedBuff gradeBuff, int coinBuff,
-    //       std::vector<ConditionalBuff *> conditionalEffects)
-    //     : ability(ability), abilityBuff(abilityBuff), flavorBuff(flavorBuff),
-    //       materialBuff(materialBuff), rarityBuff(rarityBuff),
-    //       gradeBuff(gradeBuff), pricePercentBuff(coinBuff),
-    //       conditionalEffects(conditionalEffects) {}
-    Skill() {
-        this->ability = CookAbility();
-        this->cookAbilityPercentBuff = CookAbility();
-        this->abilityBuff = AbilityBuff();
-        this->flavorBuff = FlavorBuff();
-        this->materialBuff = MaterialCategoryBuff();
-    }
+    Skill() = default;
     Skill getSkill(int id) { return skillList[id]; }
     static void loadJson(const Json::Value &v);
     void operator+=(const Skill &s) {

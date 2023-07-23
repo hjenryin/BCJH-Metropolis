@@ -10,7 +10,7 @@ class Randomizer {
     int calls;
     Randomizer(CList *c, RList *r) : c(c), r(r), success(0), calls(0) {}
     Randomizer() : success(0), calls(0) {}
-    virtual States operator()(States s) = 0;
+    virtual void operator()(States &s) = 0;
     virtual ~Randomizer() {}
 
   protected:
@@ -22,7 +22,7 @@ class RecipeRandomizer : public Randomizer {
 
   public:
     RecipeRandomizer(CList *c, RList *r) : Randomizer(c, r) {}
-    States operator()(States s) override;
+    void operator()(States &s) override;
 
   private:
     bool randomRecipe(States &s) const;
@@ -33,7 +33,7 @@ class ChefRandomizer : public Randomizer {
   public:
     ChefRandomizer(CList *c, RList *r, int targetScore)
         : Randomizer(c, r), targetScore(targetScore) {}
-    States operator()(States s) override;
+    void operator()(States &s) override;
 
   private:
     bool randomChef(States &s) const;
