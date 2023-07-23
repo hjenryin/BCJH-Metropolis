@@ -1,4 +1,4 @@
-name: Update Game Data
+name: Update Data
 
 on:
     workflow_dispatch:

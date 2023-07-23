@@ -63,7 +63,11 @@ int loadBanquetRule(RuleInfo &ruleInfo, const Json::Value &gameData,
     // find the rule in rulesGD with Id ruleID
     Json::Value ruleGD = rulesGD[0];
     if (print)
-        std::cout << "规则: " << ruleGD["title"].asString() << std::endl;
+        std::cout
+            << "请核对规则：\033[4m " << ruleGD["title"].asString()
+            << "\033[0m。若规则还是上周的，说明还没有更新，请过段时间再运行。"
+            << std::endl;
+
     auto &rulesTarget =
         ruleGD.isMember("Group") ? ruleGD["Group"] : ruleGD["group"];
     if (rulesTarget.size() == 0) {
@@ -72,20 +76,7 @@ int loadBanquetRule(RuleInfo &ruleInfo, const Json::Value &gameData,
     }
     return loadBanquetRuleFromJson(ruleInfo, rulesTarget, buffsGD, intentsGD);
 }
-int loadBanquetRuleFromInput(RuleInfo &ruleInfo, const Json::Value &ruleData,
-                             bool print) {
-    if (print)
-        std::cout << "规则: " << ruleData["title"].asString() << std::endl;
-    auto &rulesTarget =
-        ruleData.isMember("Group") ? ruleData["Group"] : ruleData["group"];
-    if (rulesTarget.size() == 0) {
-        std::cout << "规则为空。" << std::endl;
-        return false;
-    }
-    auto &buffs = ruleData["buffs"];
-    auto &intents = ruleData["intents"];
-    return loadBanquetRuleFromJson(ruleInfo, rulesTarget, buffs, intents);
-}
+
 Rule *getRuleFromJson(const Json::Value &intent, int dish,
                       const Json::Value &allIntents,
                       const Json::Value &allBuffs, int remainingDishes) {

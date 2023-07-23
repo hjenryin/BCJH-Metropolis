@@ -20,6 +20,7 @@
 #else
 #include <unistd.h>
 #endif
+#include "utils/ProgressBar.hpp"
 
 const int targetScore = 3170000;
 const int T_MAX_CHEF = targetScore / 100;
@@ -34,7 +35,7 @@ struct Result {
     RList recipeList;
     States *state;
 };
-Result run(const RuleInfo &, const CList &, RList &, int, bool, int);
+Result run(int, const RuleInfo &, const CList &, RList &, int, bool, int);
 void calculator(CList &, RList &);
 std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFile();
 
@@ -47,8 +48,6 @@ void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &calculate,
             silent = true;
         } else if (arg == "-v") {
             log += 0x10;
-        } else if (arg == "-c") {
-            calculate = true;
         } else if (arg == "-h") {
             std::cout << "-s: 无进度条" << std::endl;
             std::cout << "-v: 输出详细信息" << std::endl;
@@ -92,9 +91,9 @@ int main(int argc, char *argv[]) {
     RuleInfo rl;
     try {
         std::cout << "正在读取文件..." << std::endl;
+        loadBanquetRule(rl, ruleData, true);
         loadRecipe(recipeList, usrData, gameData);
         loadChef(chefList, usrData, gameData);
-        loadBanquetRule(rl, ruleData, true);
         std::cout << "读取文件成功。" << std::endl;
     } catch (Json::RuntimeError &e) {
         std::cout << "json文件格式不正确。如果文件内容是手动复制的，确认文件已"
@@ -113,7 +112,7 @@ int main(int argc, char *argv[]) {
     start = clock();
     int totalScore = 0;
     int num_threads = std::thread::hardware_concurrency();
-    if (!calculate) {
+
         Result result;
 
         if (!mp) {
@@ -121,6 +120,7 @@ int main(int argc, char *argv[]) {
         }
         // num_threads = 1;
         // seed = 1509184356;
+        MultiThreadProgressBar::getInstance(num_threads);
         std::cout << "启用" << num_threads
                   << "线程，建议期间不要离开窗口，否则可能影响速度。"
                   << std::endl;
@@ -130,11 +130,11 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < num_threads; i++) {
 
             futures.push_back(std::async(
-                std::launch::async, run, std::ref(rl), std::ref(chefList),
+                std::launch::async, run, i, std::ref(rl), std::ref(chefList),
                 std::ref(recipeList), 0, silent, seed++));
             silent = true;
         }
-        std::cout << "分数：";
+        // std::cout << "分数：";
         int max_score = 0;
         for (auto &future : futures) {
             Result tmp = future.get();
@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
                 delete tmp.chefList;
                 delete tmp.state;
             }
-            std::cout << tmp.score << " ";
+            // std::cout << tmp.score << " ";
         }
         std::cout << "\n最佳结果：" << std::endl;
 
@@ -169,9 +169,7 @@ int main(int argc, char *argv[]) {
         }
         delete result.chefList;
         delete result.state;
-    } else {
-        calculator(chefList, recipeList);
-    }
+
     end = clock();
     std::cout << "用时：" << (double)(end - start) / CLOCKS_PER_SEC << "秒"
               << std::endl;
@@ -189,18 +187,19 @@ int main(int argc, char *argv[]) {
         }
     }
 }
-Result run(const RuleInfo &rl, const CList &chefList, RList &recipeList,
-           int log, bool silent, int seed) {
+Result run(int threadId, const RuleInfo &rl, const CList &chefList,
+           RList &recipeList, int log, bool silent, int seed) {
     CList *chefListPtr = new CList(chefList);
     *chefListPtr = chefList;
     for (auto &chef : *chefListPtr) {
         chef.recipeLearned = new std::vector<Recipe *>;
     }
     srand(seed);
-    SARunner saRunner(&rl, chefListPtr, &recipeList, true, f::t_dist_slow);
+    SARunner saRunner(&rl, chefListPtr, &recipeList, true, f::t_dist_slow,
+                      threadId);
     // std::cout << log << std::endl;
     States *s = new States;
-    *s = saRunner.run(NULL, true, silent);
+    *s = saRunner.run(NULL, true, false);
     // *s = perfectChef(*s, chefListPtr);
     int score = sumPrice(rl, *s, log);
     for (auto &chef : *chefListPtr) {
@@ -209,31 +208,6 @@ Result run(const RuleInfo &rl, const CList &chefList, RList &recipeList,
     return Result{score, seed, chefListPtr, recipeList, s};
 }
 
-void calculator(CList &chefList, RList &recipeList) {
-    std::ifstream f;
-    f.open("../in/out.txt");
-    States s;
-    throw std::runtime_error("Not implemented");
-    // for (int i = 0; i < NUM_CHEFS; i++) {
-    //     int c, t;
-    //     f >> c >> t;
-    //     if (t == NO_TOOL) {
-    //         t = 0;
-    //     }
-    //     s.chef[i] = &chefList[c * 6 + t];
-    //     s.chef[i]->print();
-    // }
-    // for (int i = 0; i < NUM_CHEFS * DISH_PER_CHEF; i++) {
-    //     int r;
-    //     f >> r;
-    //     s.recipe[i] = &recipeList[r];
-    // }
-    // f.close();
-    // int score = e0::sumPrice(s, &chefList, &recipeList, false, true);
-    // SARunner saRunner(&chefList, &recipeList, ITER_CHEF, T_MAX_CHEF, 0);
-    // saRunner.print(s, true);
-    // std::cout << "\n\nScore: " << score << std::endl;
-}
 /**
  * @return userData, gameData
  */
@@ -270,8 +244,10 @@ std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFile() {
         getcwd(buf, 256);
 #endif
         std::cout << "当前工作目录：" << buf << std::endl;
-        std::cout << "json文件缺失。如果在网页端，请确认已经上传了文件；如果在"
-                     "本地，请确认已经下载了文件。\n";
+        std::cout
+            << "json文件有缺失。如果在网页端，请确认已经上传了文件；如果在"
+               "本地，请确认已经data.min.json、userData.json和ruleData."
+               "json三个文件已经在工作目录下。\n";
         exit(1);
     }
 

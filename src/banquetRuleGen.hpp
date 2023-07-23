@@ -302,6 +302,4 @@ void banquetRuleGenerated(BanquetRuleTogether *rule, States &s,
                           const RuleInfo &allRules);
 int loadBanquetRule(RuleInfo &, const Json::Value &gameData,
                     bool print = false);
-int loadBanquetRuleFromInput(RuleInfo &, const Json::Value &ruleData,
-                             bool print = false);
 #endif

@@ -3,6 +3,7 @@ echo 修改配置、了解更多请至https://github.com/hjenryin/BCJH-Metropolis/ 以便在线
 echo 有疑问请至https://github.com/hjenryin/BCJH-Metropolis/discussions/categories/q-a 提问
 echo 有任何想法可至https://github.com/hjenryin/BCJH-Metropolis/discussions/categories/general 讨论
 echo 现已更新汤圆、乌龙等奇奇怪怪的技能，如果发现有问题，欢迎到 https://github.com/hjenryin/BCJH-Metropolis/issues/new 提出~
+powershell -command curl -o ruleData.json https://bcjh.xyz/api/get_banquet_rule
 set "bcjhid="
 set /p bcjhid=如果需要重新下载用户配置，请输入白菜菊花id；否则直接回车：
 

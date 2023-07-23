@@ -13,12 +13,14 @@
 #include <limits.h>
 #include "Randomizer.hpp"
 #include "banquetRuleGen.hpp"
+#include "utils/ProgressBar.hpp"
 
 int SARunner::T_MAX_CHEF, SARunner::T_MAX_RECIPE, SARunner::iterChef,
     SARunner::iterRecipe, SARunner::targetScore;
 SARunner::SARunner(const RuleInfo *rl, CList *chefList, RList *recipeList,
-                   bool randomizeChef, f::CoolingSchedule coolingScheduleFunc)
-    : rl(rl), coolingScheduleFunc(coolingScheduleFunc) {
+                   bool randomizeChef, f::CoolingSchedule coolingScheduleFunc,
+                   int threadId)
+    : threadId(threadId), rl(rl), coolingScheduleFunc(coolingScheduleFunc) {
     if (randomizeChef) {
         this->randomMoveFunc =
             new ChefRandomizer(chefList, recipeList, rl, targetScore);
@@ -116,6 +118,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
     int step = 0;
     double t = this->tMax;
     // srand(time(NULL));
+    int progressSoFar = 0;
     while (step < this->stepMax) {
         if (progress) {
             if (silent) {
@@ -124,8 +127,12 @@ States SARunner::run(States *s0, bool progress, bool silent,
                 //               << std::flush;
                 // }
             } else {
-                std::cout << "\r" << step << "/" << this->stepMax << " - "
-                          << this->bestEnergy << std::flush;
+                if (step * 10 / stepMax > progressSoFar) {
+                    progressSoFar = step * 10 / stepMax;
+                    MultiThreadProgressBar::getInstance(0)->print(
+                        threadId, progressSoFar,
+                        "当前最高分数：" + std::to_string(this->bestEnergy));
+                }
             }
         }
         States newS=s;
