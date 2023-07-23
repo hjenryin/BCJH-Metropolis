@@ -8,8 +8,9 @@ template <typename T> inline void copy(T *dst, const T *src, int n) {
     }
 }
 
-void mergeSkills(Skill *skillsResult, Skill *selfSkills, Skill *companyBuffs,
-                 Skill *nextBuffs, Chef *chefs) {
+void mergeSkills(Skill *skillsResult, const Skill *selfSkills,
+                 const Skill *companyBuffs, const Skill *nextBuffs,
+                 Chef *chefs) {
     for (int i = 0; i < NUM_CHEFS; i++) {
         skillsResult[i] = selfSkills[i];
         skillsResult[i].ability.add(Ability(chefs[i].getTool()));
@@ -68,13 +69,20 @@ const Skill *States::getCookAbilities() {
     return cookAbilitiesCache;
 }
 
-const Skill *States::getSkills() {
+void States::getSkills(Skill *skills) {
 #ifdef MEASURE_TIME
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
 #endif
-    if (!chefHasStrangeSkills)
-        return getCookAbilities();
+    if (!chefHasStrangeSkills) {
+        copy<Skill>(skills, getCookAbilities(), NUM_CHEFS);
+#ifdef MEASURE_TIME
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        getStatesSkillsTime +=
+            (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) * 1e-9;
+#endif
+        return;
+    }
     Skill selfSkills[NUM_CHEFS];
     Skill companySkills[NUM_CHEFS];
     Skill nextSkills[NUM_CHEFS];
@@ -95,12 +103,12 @@ const Skill *States::getSkills() {
                            chefs[i].nextBuff->conditionalEffects,
                            nextSkills + i, recipe + i * DISH_PER_CHEF);
     }
-    mergeSkills(skillsCache, selfSkills, companySkills, nextSkills, chefs);
+    mergeSkills(skills, selfSkills, companySkills, nextSkills, chefs);
 
 #ifdef MEASURE_TIME
     clock_gettime(CLOCK_MONOTONIC, &end);
     getStatesSkillsTime +=
         (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) * 1e-9;
 #endif
-    return skillsCache;
+    return;
 };

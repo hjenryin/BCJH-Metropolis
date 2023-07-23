@@ -7,15 +7,14 @@
 
 class States {
     bool cookAbilitiesValid = false;
-    uint32_t chefHasStrangeSkills = 0;
+    uint32_t chefHasStrangeSkills = 0; // Each bit represents a chef
     Skill cookAbilitiesCache[NUM_CHEFS];
-    Skill skillsCache[NUM_CHEFS];
-
+    // Skill skillsCache[NUM_CHEFS];
     Chef chefs[NUM_CHEFS];
 
   public:
     Recipe *recipe[DISH_PER_CHEF * NUM_CHEFS] = {0};
-    const Skill *getSkills();
+    void getSkills(Skill *skills);
     const Skill *getCookAbilities();
     Chef getChef(int i) const { return chefs[i]; }
     const Chef *const getChefPtr(int i) const { return &chefs[i]; }
@@ -25,9 +24,9 @@ class States {
         size_t numStrangeSkills = chef.skill->conditionalEffects.size() +
                                   chef.companyBuff->conditionalEffects.size() +
                                   chef.nextBuff->conditionalEffects.size();
-        numStrangeSkills = numStrangeSkills > 0 ? 1 : 0;
+        int32_t strangeSkill = numStrangeSkills > 0 ? 1 : 0;
         chefHasStrangeSkills =
-            (chefHasStrangeSkills & ~(1 << i)) | (numStrangeSkills << i);
+            (chefHasStrangeSkills & ~(1 << i)) | (strangeSkill << i);
     }
     void modifyTool(int i, ToolEnum tool) {
         chefs[i].modifyTool(tool);

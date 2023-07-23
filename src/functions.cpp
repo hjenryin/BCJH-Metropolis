@@ -87,7 +87,8 @@ int sumPrice(States s, CList *chefList, RList *recipeList, int log,
     assert(MODE == 1);
     BanquetRuleTogether rule[NUM_CHEFS * DISH_PER_CHEF];
     int bestFull[NUM_GUESTS];
-    auto skills = s.getSkills();
+    Skill skills[NUM_CHEFS];
+    s.getSkills(skills);
 
     banquetRule(skills, rule, s, bestFull);
 #ifdef MEASURE_TIME
