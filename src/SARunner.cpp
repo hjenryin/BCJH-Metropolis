@@ -17,8 +17,7 @@ int SARunner::T_MAX_CHEF, SARunner::T_MAX_RECIPE, SARunner::iterChef,
     SARunner::iterRecipe, SARunner::targetScore;
 SARunner::SARunner(CList *chefList, RList *recipeList, bool randomizeChef,
                    f::CoolingSchedule coolingScheduleFunc)
-    : chefList(chefList), recipeList(recipeList),
-      coolingScheduleFunc(coolingScheduleFunc){
+    : coolingScheduleFunc(coolingScheduleFunc) {
     if (randomizeChef) {
         this->randomMoveFunc =
             new ChefRandomizer(chefList, recipeList, targetScore);
@@ -36,8 +35,9 @@ SARunner::SARunner(CList *chefList, RList *recipeList, bool randomizeChef,
 #endif
 }
 
-States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
+States SARunner::generateStates(Chef *chefs[NUM_CHEFS]) {
     States s;
+    CList *chefList = this->randomMoveFunc->c;
 
     // std::cout << chefs << std::endl;
     // std::cout << chefList->size() << " " << chefRecipePairs->size()
@@ -97,7 +97,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
     States s;
     if (s0 == NULL) {
         try {
-            s = generateStates(this->chefList, NULL);
+            s = generateStates(NULL);
         } catch (NoChefException &e) {
             std::cout << e.what() << std::endl;
             exit(1);
@@ -108,7 +108,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
     } else {
         s = *s0;
     }
-    int energy = sumPrice(s, this->chefList, this->recipeList, false);
+    int energy = sumPrice(s, false);
     // std::cout << "Initial energy: " << energy << std::endl;
     this->bestState = s;
     this->bestEnergy = energy;
@@ -140,8 +140,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
         }
         // std::cin >> step;
         // print(newS);
-        int newEnergy =
-            sumPrice(newS, this->chefList, this->recipeList, false);
+        int newEnergy = sumPrice(newS, false);
         double prob = 0;
         int delta = energy - newEnergy;
         if (delta / t < 0) {
@@ -225,6 +224,6 @@ void SARunner::print(States s, bool verbose) const {
         //         getPrice(*s.chef[i], *s.recipe[r++], true);
         //     }
         // }
-        sumPrice(s, this->chefList, this->recipeList, true);
+        sumPrice(s, true);
     }
 }

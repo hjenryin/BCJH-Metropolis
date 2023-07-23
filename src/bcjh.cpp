@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
             num_threads = 1;
         }
         // num_threads = 1;
-        // seed = 1488355956;
+        // seed = 1509184356;
         std::cout << "启用" << num_threads
                   << "线程，建议期间不要离开窗口，否则可能影响速度。"
                   << std::endl;
@@ -153,9 +153,10 @@ int main(int argc, char *argv[]) {
 
         log += 0x1;
         // log += 0x10;
+
         std::cout << "随机种子：" << result.seed << std::endl;
-        sumPrice(*result.state, result.chefList, &result.recipeList, log,
-                     true);
+        exactChefTool(*result.state);
+        sumPrice(*result.state, log);
         std::cout << "**************\n总分: " << result.score
                   << "\n***************" << std::endl;
         if (!silent) {
@@ -199,7 +200,7 @@ Result run(const CList &chefList, RList &recipeList, int log, bool silent,
     States *s = new States;
     *s = saRunner.run(NULL, true, silent);
     // *s = perfectChef(*s, chefListPtr);
-    int score = sumPrice(*s, chefListPtr, &recipeList, log, false);
+    int score = sumPrice(*s, log);
     for (auto &chef : *chefListPtr) {
         delete chef.recipeLearned;
     }

@@ -23,15 +23,13 @@ class SARunner {
     int stepMax;
     int tMax;
     int tMin;
-    CList *chefList;
-    RList *recipeList;
     static int targetScore;
 
     States bestState;
 #ifdef VIS_HISTORY
     History *history;
 #endif
-    States generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]);
+    States generateStates(Chef *chefs[NUM_CHEFS]);
     static int T_MAX_CHEF;
     static int T_MAX_RECIPE;
     static int iterChef;

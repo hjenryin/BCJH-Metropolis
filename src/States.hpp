@@ -13,9 +13,12 @@ class States {
     Chef chefs[NUM_CHEFS];
 
   public:
+    enum FLAG_getCookAbilities { FORCE_UPDATE = -2, DEFAULT = -1 };
     Recipe *recipe[DISH_PER_CHEF * NUM_CHEFS] = {0};
-    void getSkills(Skill *skills);
-    const Skill *getCookAbilities();
+    void getSkills(Skill *skills, int chefIdForTool = DEFAULT,
+                   int toolValue = 100);
+    const Skill *getCookAbilities(int chefIdForTool = DEFAULT,
+                                  int toolValue = 100);
     Chef getChef(int i) const { return chefs[i]; }
     const Chef *const getChefPtr(int i) const { return &chefs[i]; }
     void setChef(int i, const Chef &chef) {

@@ -66,11 +66,11 @@ class Ability {
     Ability(int stirfry, int bake, int boil, int steam, int fry, int knife)
         : stirfry(stirfry), bake(bake), boil(boil), steam(steam), fry(fry),
           knife(knife) {}
-    Ability(ToolEnum t) {
+    Ability(ToolEnum t, int value = 100) {
         if (t == NOT_EQUIPPED || t == NO_TOOL)
             return;
         int *ptr = &this->stirfry;
-        ptr[t - ABILITY_ENUM_START] = 100;
+        ptr[t - ABILITY_ENUM_START] = value;
     }
     void multiply(double a) {
         int *ptr = &this->stirfry;

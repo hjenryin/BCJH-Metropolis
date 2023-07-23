@@ -11,46 +11,29 @@ extern double generateBanquetRuleTime, generateBanquetRuleTimeOut;
 extern double calculatePriceTime, calculatePriceTimeOut;
 std::string getGradeName(const Skill &a, Recipe &b);
 
-/**
- * @warning this function involves a large copy constructor.
- * @return whether after deduction, the price is still the same
- */
-bool deductTool(States s, CList *chefList, RList *recipeList, int chefId,
-                int deduction) {
-    auto chef = s.getChef(chefId);
-    int tool = chef.getTool();
-    int *cookAbility;
-    switch (tool) {
-    case STIRFRY:
-        cookAbility = &chef.skill->ability.stirfry;
-        break;
-    case BOIL:
-        cookAbility = &chef.skill->ability.boil;
-        break;
-    case FRY:
-        cookAbility = &chef.skill->ability.fry;
-        break;
-    case STEAM:
-        cookAbility = &chef.skill->ability.steam;
-        break;
-    case BAKE:
-        cookAbility = &chef.skill->ability.bake;
-        break;
-    case KNIFE:
-        cookAbility = &chef.skill->ability.knife;
-        break;
-    case NO_TOOL:
-        return true;
-    default:
-        // std::cout << "Not using a tool" << std::endl;
-        return true;
+void exactChefTool(States &s) {
+    for (int i = 0; i < NUM_CHEFS; i++) {
+        ToolEnum tool = s.getTool(i);
+        if (tool == NO_TOOL)
+            s.appendName(i, "-设定厨具");
+        std::string toolName = getToolName(tool);
+        toolName = "-" + toolName;
+        int score100 = sumPrice(s, 0, i, 100);
+        int score60 = sumPrice(s, 0, 60, i);
+        int score30 = sumPrice(s, 0, 30, i);
+        int score0 = sumPrice(s, 0, 0, i);
+        if (score100 > score60) {
+            s.appendName(i, toolName + "(100)");
+            continue;
+        } else if (score60 > score30) {
+            s.appendName(i, toolName + "(60)");
+            continue;
+        } else if (score30 > score0) {
+            s.appendName(i, toolName + "(30)");
+            continue;
+        }
     }
-    *cookAbility -= deduction;
-    int bestPrice = sumPrice(s, chefList, recipeList, false, false);
-    States newState = s;
-    newState.setChef(chefId, chef);
-    int newPrice = sumPrice(newState, chefList, recipeList, false, false);
-    return newPrice == bestPrice;
+    s.getCookAbilities(States::FORCE_UPDATE);
 }
 /**
  * @brief
@@ -58,38 +41,12 @@ bool deductTool(States s, CList *chefList, RList *recipeList, int chefId,
  * should only be set true at the end of the function as it modifies the name of
  * the chefs.
  */
-int sumPrice(States s, CList *chefList, RList *recipeList, int log,
-                 bool exactChefTool) {
-    // exactChefTool=false;
-    if (exactChefTool) {
-
-        assert(chefList != NULL && recipeList != NULL);
-        // std::cout << "exactChefTool" << std::endl;
-        for (int i = 0; i < NUM_CHEFS; i++) {
-            ToolEnum tool = s.getTool(i);
-            std::string toolName = getToolName(tool);
-            toolName = "-" + toolName;
-            s.appendName(i, toolName);
-            // if (deductTool(s, chefList, recipeList, i, 40)) {
-            //     if (deductTool(s, chefList, recipeList, i, 70)) {
-            //         if (deductTool(s, chefList, recipeList, i, 100)) {
-            //             s.appendName(i, toolName + "(0)");
-            //         } else {
-            //             s.appendName(i, toolName + "(30)");
-            //         }
-            //     } else {
-            //         s.appendName(i, toolName + "(60)");
-            //     }
-            // } else {
-            //     s.appendName(i, toolName + "(100)");
-            // }
-        }
-    }
+int sumPrice(States s, int log, int toolValue, int chefIdForTool) {
     assert(MODE == 1);
     BanquetRuleTogether rule[NUM_CHEFS * DISH_PER_CHEF];
     int bestFull[NUM_GUESTS];
     Skill skills[NUM_CHEFS];
-    s.getSkills(skills);
+    s.getSkills(skills, chefIdForTool, toolValue);
 
     banquetRule(skills, rule, s, bestFull);
 #ifdef MEASURE_TIME

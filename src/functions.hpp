@@ -24,9 +24,9 @@ template <typename T> bool inArray(T **array, int size, T *value) {
     return false;
 }
 
-int sumPrice(States s, CList *c = NULL, RList *r = NULL, int log = false,
-             bool exactChefTool = false);
-
+int sumPrice(States s, int log = false, int toolValue = 100,
+             int chefIdForTool = -1);
+void exactChefTool(States &s);
 namespace f {
 typedef double (*CoolingSchedule)(int, int, double, double);
 double exponential_multiplicative(int stepMax, int step, double tMax,

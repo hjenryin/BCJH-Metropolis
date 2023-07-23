@@ -3,8 +3,8 @@
 #include "Calculator.hpp"
 #include "States.hpp"
 
-int banquetRuleYU_GUI_REN(BanquetStrictRule **, BanquetLenientRule **, States &,
-                          const Skill *, int);
+int banquetRuleLI_TIE_GUAI(BanquetStrictRule **, BanquetLenientRule **,
+                           States &, const Skill *, int);
 int banquetRuleHU_XI_MEI(BanquetStrictRule **, BanquetLenientRule **, States &,
                          const Skill *, int);
 
@@ -33,9 +33,9 @@ void banquetRule(const Skill *skills, BanquetRuleTogether *const &rule,
     return;
 }
 
-int banquetRuleYU_GUI_REN(BanquetStrictRule **strictRule,
-                          BanquetLenientRule **lenientRule, States &s,
-                          const Skill *skill, int rank) {
+int banquetRuleHU_XI_MEI(BanquetStrictRule **strictRule,
+                         BanquetLenientRule **lenientRule, States &s,
+                         const Skill *skill, int rank) {
     int d = rank * DISH_PER_CHEF * CHEFS_PER_GUEST;
     // 第1轮
     // 条件：三道炒：下阶段切技法料理售价+100%
@@ -153,11 +153,10 @@ int banquetRuleYU_GUI_REN(BanquetStrictRule **strictRule,
     }
     return 19;
 }
-// 本程序由generateRule.py生成
-// 风云宴 玉贵人2
-int banquetRuleHU_XI_MEI(BanquetStrictRule **strictRule,
-                         BanquetLenientRule **lenientRule, States &s,
-                         const Skill *skill, int rank) {
+
+int banquetRuleLI_TIE_GUAI(BanquetStrictRule **strictRule,
+                           BanquetLenientRule **lenientRule, States &s,
+                           const Skill *skill, int rank) {
     int d = rank * DISH_PER_CHEF * CHEFS_PER_GUEST;
 
     // 第1轮
