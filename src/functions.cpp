@@ -4,24 +4,24 @@
 #include "exception.hpp"
 #include "activityRule.hpp"
 #include <cassert>
-#include "banquetRule.hpp"
+#include "banquetRuleGen.hpp"
 #include "utils/math.hpp"
 
 extern double generateBanquetRuleTime, generateBanquetRuleTimeOut;
 extern double calculatePriceTime, calculatePriceTimeOut;
 std::string getGradeName(const Skill &a, Recipe &b);
 
-void exactChefTool(States &s) {
+void exactChefTool(const RuleInfo &rl, States &s) {
     for (int i = 0; i < NUM_CHEFS; i++) {
         ToolEnum tool = s.getTool(i);
         if (tool == NO_TOOL)
             s.appendName(i, "-设定厨具");
         std::string toolName = getToolName(tool);
         toolName = "-" + toolName;
-        int score100 = sumPrice(s, 0, i, 100);
-        int score60 = sumPrice(s, 0, 60, i);
-        int score30 = sumPrice(s, 0, 30, i);
-        int score0 = sumPrice(s, 0, 0, i);
+        int score100 = sumPrice(rl, s, 0, i, 100);
+        int score60 = sumPrice(rl, s, 0, 60, i);
+        int score30 = sumPrice(rl, s, 0, 30, i);
+        int score0 = sumPrice(rl, s, 0, 0, i);
         if (score100 > score60) {
             s.appendName(i, toolName + "(100)");
             continue;
@@ -41,14 +41,14 @@ void exactChefTool(States &s) {
  * should only be set true at the end of the function as it modifies the name of
  * the chefs.
  */
-int sumPrice(States s, int log, int toolValue, int chefIdForTool) {
+int sumPrice(const RuleInfo &rl, States s, int log, int toolValue,
+             int chefIdForTool) {
     assert(MODE == 1);
     BanquetRuleTogether rule[NUM_CHEFS * DISH_PER_CHEF];
-    int bestFull[NUM_GUESTS];
     Skill skills[NUM_CHEFS];
     s.getSkills(skills, chefIdForTool, toolValue);
 
-    banquetRule(skills, rule, s, bestFull);
+    banquetRuleGenerated(rule, s, rl);
 #ifdef MEASURE_TIME
         struct timespec start, finish;
         clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
@@ -113,18 +113,18 @@ int sumPrice(States s, int log, int toolValue, int chefIdForTool) {
                 }
             }
             int guestScore;
-            switch (totalFull - bestFull[g]) {
+            switch (totalFull - rl.bestFull[g]) {
             case 0:
                 guestScore = int_ceil(totalScore * 1.3);
                 break;
             default:
-                int delta = std::abs(totalFull - bestFull[g]);
+                int delta = std::abs(totalFull - rl.bestFull[g]);
                 guestScore = int_ceil(totalScore * (1 - 0.05 * delta));
             }
             ans += guestScore;
             if (log & 0x1)
                 std::cout << "第" << g + 1 << "位客人：" << totalFull << " / "
-                          << bestFull[g] << " -> " << guestScore << ""
+                          << rl.bestFull[g] << " -> " << guestScore << ""
                           << std::endl;
         }
 #ifdef MEASURE_TIME
@@ -165,47 +165,47 @@ double f::one_over_n(int stepMax, int step, double tMax, double tMin) {
     return tMax / std::pow(step + 1, 0.1);
 }
 
-States perfectTool(States s) {
-    for (int i = 0; i < NUM_CHEFS; i++) {
-        if (s.getTool(i) == NO_TOOL)
-            continue;
-        s.modifyTool(i, NOT_EQUIPPED);
-        int max = sumPrice(s);
-        ToolEnum bestTool = NOT_EQUIPPED;
-        for (int j = ABILITY_ENUM_START; j < ABILITY_ENUM_END; j++) {
-            s.modifyTool(i, ToolEnum(j));
-            int temp = sumPrice(s);
-            if (temp > max) {
-                max = temp;
-                bestTool = ToolEnum(j);
-            }
-        }
-        s.modifyTool(i, bestTool);
-    }
-    return s;
-}
-States perfectChef(States s, CList *c) {
-    // perform a one-shot deviation from current state
-    States newS = s;
-    States bestS = s;
-    int bestSscore = sumPrice(bestS);
-    for (int i = 0; i < NUM_CHEFS; i++) {
-        for (auto chef : *c) {
-            if (newS.repeatedChef(&chef, i)) {
-                continue;
-            }
-            newS.setChef(i, chef);
-            States pS = perfectTool(newS);
-            int pSs = sumPrice(pS);
+// States perfectTool(States s) {
+//     for (int i = 0; i < NUM_CHEFS; i++) {
+//         if (s.getTool(i) == NO_TOOL)
+//             continue;
+//         s.modifyTool(i, NOT_EQUIPPED);
+//         int max = sumPrice(s);
+//         ToolEnum bestTool = NOT_EQUIPPED;
+//         for (int j = ABILITY_ENUM_START; j < ABILITY_ENUM_END; j++) {
+//             s.modifyTool(i, ToolEnum(j));
+//             int temp = sumPrice(s);
+//             if (temp > max) {
+//                 max = temp;
+//                 bestTool = ToolEnum(j);
+//             }
+//         }
+//         s.modifyTool(i, bestTool);
+//     }
+//     return s;
+// }
+// States perfectChef(States s, CList *c) {
+//     // perform a one-shot deviation from current state
+//     States newS = s;
+//     States bestS = s;
+//     int bestSscore = sumPrice(bestS);
+//     for (int i = 0; i < NUM_CHEFS; i++) {
+//         for (auto chef : *c) {
+//             if (newS.repeatedChef(&chef, i)) {
+//                 continue;
+//             }
+//             newS.setChef(i, chef);
+//             States pS = perfectTool(newS);
+//             int pSs = sumPrice(pS);
 
-            if (pSs > bestSscore) {
-                bestS = pS;
-                bestSscore = pSs;
-            }
-        }
-    }
-    return bestS;
-}
+//             if (pSs > bestSscore) {
+//                 bestS = pS;
+//                 bestSscore = pSs;
+//             }
+//         }
+//     }
+//     return bestS;
+// }
 std::string getGradeName(const Skill &a, Recipe &b) {
     int grade = a.ability / b.cookAbility;
     switch (grade) {

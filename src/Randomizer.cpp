@@ -242,7 +242,7 @@ void ChefRandomizer::operator()(States &s) {
     //     }
     // }
     debugIntegrity(s);
-    SARunner saRunner(c, r, false, f::t_dist_slow);
+    SARunner saRunner(rl, c, r, false, f::t_dist_slow);
 #ifdef MEASURE_TIME
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &finish);
     randomChefTime +=

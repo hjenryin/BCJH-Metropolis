@@ -8,6 +8,7 @@
 #include "../src/Chef.hpp"
 #include "States.hpp"
 #include "exception.hpp"
+#include "banquetRuleGen.hpp"
 class SARunner;
 extern double randomRecipeTime;
 extern double randomChefTime;
@@ -24,9 +25,9 @@ template <typename T> bool inArray(T **array, int size, T *value) {
     return false;
 }
 
-int sumPrice(States s, int log = false, int toolValue = 100,
+int sumPrice(const RuleInfo &rl, States s, int log = false, int toolValue = 100,
              int chefIdForTool = -1);
-void exactChefTool(States &s);
+void exactChefTool(const RuleInfo &rl, States &s);
 namespace f {
 typedef double (*CoolingSchedule)(int, int, double, double);
 double exponential_multiplicative(int stepMax, int step, double tMax,
@@ -38,5 +39,5 @@ double linear_mul(int stepMax, int step, double tMax, double tMin);
 double zipf(int stepMax, int step, double tMax, double tMin);
 double one_over_n(int stepMax, int step, double tMax, double tMin);
 } // namespace f
-States perfectChef(States s, CList *c);
+// States perfectChef(States s, CList *c);
 #endif

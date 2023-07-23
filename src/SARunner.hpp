@@ -24,7 +24,7 @@ class SARunner {
     int tMax;
     int tMin;
     static int targetScore;
-
+    const RuleInfo *rl;
     States bestState;
 #ifdef VIS_HISTORY
     History *history;
@@ -55,7 +55,8 @@ class SARunner {
      * @param coolingScheduleFunc
      */
     SARunner(
-        CList *chefList, RList *recipeList, bool randomizeChef,
+        const RuleInfo *rl, CList *chefList, RList *recipeList,
+        bool randomizeChef,
         f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative);
     States run(States *s = NULL, bool progress = false, bool silent = false,
                const char *fn = NULL);

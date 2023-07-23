@@ -14,6 +14,7 @@
 #include "exception.hpp"
 #include <future>
 #include <vector>
+#include "banquetRuleGen.hpp"
 #ifdef _WIN32
 #include <direct.h>
 #else
@@ -33,9 +34,9 @@ struct Result {
     RList recipeList;
     States *state;
 };
-Result run(const CList &, RList &, int, bool, int);
+Result run(const RuleInfo &, const CList &, RList &, int, bool, int);
 void calculator(CList &, RList &);
-std::pair<Json::Value, Json::Value> loadJsonFile();
+std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFile();
 
 void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &calculate,
                bool &mp, int &seed) {
@@ -85,13 +86,15 @@ int main(int argc, char *argv[]) {
     bool calculate = false;
     bool mp = true;
     parseArgs(argc, argv, silent, log, calculate, mp, seed);
-    auto [usrData, gameData] = loadJsonFile();
+    auto [usrData, gameData, ruleData] = loadJsonFile();
     CList chefList;
     RList recipeList;
+    RuleInfo rl;
     try {
         std::cout << "正在读取文件..." << std::endl;
         loadRecipe(recipeList, usrData, gameData);
         loadChef(chefList, usrData, gameData);
+        loadBanquetRule(rl, ruleData, true);
         std::cout << "读取文件成功。" << std::endl;
     } catch (Json::RuntimeError &e) {
         std::cout << "json文件格式不正确。如果文件内容是手动复制的，确认文件已"
@@ -126,9 +129,9 @@ int main(int argc, char *argv[]) {
 
         for (int i = 0; i < num_threads; i++) {
 
-            futures.push_back(
-                std::async(std::launch::async, run, std::ref(chefList),
-                           std::ref(recipeList), 0, silent, seed++));
+            futures.push_back(std::async(
+                std::launch::async, run, std::ref(rl), std::ref(chefList),
+                std::ref(recipeList), 0, silent, seed++));
             silent = true;
         }
         std::cout << "分数：";
@@ -155,13 +158,13 @@ int main(int argc, char *argv[]) {
         // log += 0x10;
 
         std::cout << "随机种子：" << result.seed << std::endl;
-        exactChefTool(*result.state);
-        sumPrice(*result.state, log);
+        exactChefTool(rl, *result.state);
+        sumPrice(rl, *result.state, log);
         std::cout << "**************\n总分: " << result.score
                   << "\n***************" << std::endl;
         if (!silent) {
-            SARunner saRunnerPrint(result.chefList, &result.recipeList, false,
-                                   f::t_dist_fast);
+            SARunner saRunnerPrint(&rl, result.chefList, &result.recipeList,
+                                   false, f::t_dist_fast);
             saRunnerPrint.run(result.state, false, silent, "../out/recipe");
         }
         delete result.chefList;
@@ -186,21 +189,20 @@ int main(int argc, char *argv[]) {
         }
     }
 }
-Result run(const CList &chefList, RList &recipeList, int log, bool silent,
-           int seed) {
+Result run(const RuleInfo &rl, const CList &chefList, RList &recipeList,
+           int log, bool silent, int seed) {
     CList *chefListPtr = new CList(chefList);
     *chefListPtr = chefList;
     for (auto &chef : *chefListPtr) {
         chef.recipeLearned = new std::vector<Recipe *>;
     }
     srand(seed);
-    SARunner saRunner(chefListPtr, &recipeList, true, 
-                      f::t_dist_slow);
+    SARunner saRunner(&rl, chefListPtr, &recipeList, true, f::t_dist_slow);
     // std::cout << log << std::endl;
     States *s = new States;
     *s = saRunner.run(NULL, true, silent);
     // *s = perfectChef(*s, chefListPtr);
-    int score = sumPrice(*s, log);
+    int score = sumPrice(rl, *s, log);
     for (auto &chef : *chefListPtr) {
         delete chef.recipeLearned;
     }
@@ -235,46 +237,30 @@ void calculator(CList &chefList, RList &recipeList) {
 /**
  * @return userData, gameData
  */
-std::pair<Json::Value, Json::Value> loadJsonFile() {
+std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFile() {
     Json::Value usrData;
     Json::Value gameData;
+    Json::Value ruleData;
 
     auto dirs = {"./", "../data/", "../../data/"};
     // std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
     // std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
 
-    std::ifstream gameDataF;
-    for (const std::string &dir : dirs) {
-        gameDataF.open(dir + "/data.min.json", std::ifstream::binary);
-        if (gameDataF.good()) {
-            break;
+    std::ifstream gameDataF, usrDataF, ruleDataF;
+    std::map<std::string, std::ifstream &> files = {{"data.min", gameDataF},
+                                                    {"userData", usrDataF},
+                                                    {"ruleData", ruleDataF}};
+    for (auto &file : files) {
+        for (const std::string &dir : dirs) {
+            file.second.open(dir + file.first + ".json", std::ifstream::binary);
+            if (file.second.good()) {
+                break;
+            }
+            file.second.close();
         }
-        gameDataF.close();
-    }
-    if (!gameDataF.good()) {
-
-#ifdef _WIN32
-        char buf[256];
-        _getcwd(buf, 256);
-#else
-        char buf[256];
-        getcwd(buf, 256);
-#endif
-        std::cout << "当前工作目录：" << buf << std::endl;
-        std::cout << "json文件缺失。如果在网页端，请确认已经上传了文件；如果在"
-                     "本地，请确认已经下载了文件。\n";
-        exit(1);
     }
 
-    std::ifstream usrDataF;
-    for (const std::string &dir : dirs) {
-        usrDataF.open(dir + "/userData.json", std::ifstream::binary);
-        if (usrDataF.good()) {
-            break;
-        }
-        usrDataF.close();
-    }
-    if (!usrDataF.good()) {
+    if (!usrDataF.good() || !gameDataF.good() || !ruleDataF.good()) {
         // get current working dir
 #ifdef _WIN32
         char buf[256];
@@ -294,6 +280,8 @@ std::pair<Json::Value, Json::Value> loadJsonFile() {
         usrDataF.close();
         gameDataF >> gameData;
         gameDataF.close();
+        ruleDataF >> ruleData;
+        ruleDataF.close();
 
     } catch (Json::RuntimeError &e) {
 
@@ -305,5 +293,5 @@ std::pair<Json::Value, Json::Value> loadJsonFile() {
         std::cout << "json文件格式不正确。请确认文件来自白菜菊花而非图鉴网。\n";
         exit(1);
     }
-    return {std::move(usrData), std::move(gameData)};
+    return {std::move(usrData), std::move(gameData), std::move(ruleData)};
 }
