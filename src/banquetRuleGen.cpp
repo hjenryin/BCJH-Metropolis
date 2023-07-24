@@ -62,11 +62,13 @@ int loadBanquetRule(RuleInfo &ruleInfo, const Json::Value &gameData,
     auto &rulesGD = gameData["rules"];
     // find the rule in rulesGD with Id ruleID
     Json::Value ruleGD = rulesGD[0];
-    if (print)
+    if (print) {
+        auto ruleName = ruleGD["title"].asString();
+        std::cout << "请核对规则：\033[4m" << ruleName;
         std::cout
-            << "请核对规则：\033[4m " << ruleGD["title"].asString()
             << "\033[0m。若规则还是上周的，说明还没有更新，请过段时间再运行。"
             << std::endl;
+    }
 
     auto &rulesTarget =
         ruleGD.isMember("Group") ? ruleGD["Group"] : ruleGD["group"];

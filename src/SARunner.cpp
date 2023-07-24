@@ -130,7 +130,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
                 if (step * 10 / stepMax > progressSoFar) {
                     progressSoFar = step * 10 / stepMax;
                     MultiThreadProgressBar::getInstance(0)->print(
-                        threadId, progressSoFar,
+                        threadId, progressSoFar * 10,
                         "当前最高分数：" + std::to_string(this->bestEnergy));
                 }
             }
@@ -184,7 +184,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
     }
     if (progress && !silent) {
         MultiThreadProgressBar::getInstance(0)->print(
-            threadId, 10, "最高分数：" + std::to_string(this->bestEnergy));
+            threadId, 100, "最高分数：" + std::to_string(this->bestEnergy));
     }
 #ifdef VIS_HISTORY
     if (progress && !silent) {

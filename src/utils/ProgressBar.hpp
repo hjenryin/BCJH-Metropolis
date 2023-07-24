@@ -43,13 +43,13 @@ class MultiThreadProgressBar {
             printed = true;
             for (int i = 0; i < numThreads; i++) {
                 int p = progress[i];
-                if (p == 10) {
-                    std::cout << "\r线程" << i + 1 << "：OK! [";
+                if (p == 100) {
+                    std::cout << "\r线程" << i + 1 << "：完成 [";
                 } else {
-                    std::cout << "\r线程" << i + 1 << "：" << p << "0% [";
+                    std::cout << "\r线程" << i + 1 << "：" << p << "%  [";
                 }
                 for (int j = 0; j < 10; j++) {
-                    if (j < progress[i]) {
+                    if (j < progress[i] / 10) {
                         std::cout << "#";
                     } else {
                         std::cout << " ";
