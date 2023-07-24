@@ -24,8 +24,8 @@ class MultiThreadProgressBar {
   public:
     static MultiThreadProgressBar *getInstance(int numThreads) {
         if (instance == NULL) {
-            std::cout << "Progress bar initialized with " << numThreads
-                      << " threads." << std::endl;
+            // std::cout << "Progress bar initialized with " << numThreads
+            //   << " threads." << std::endl;
             instance = new MultiThreadProgressBar(numThreads);
         }
         return instance;
@@ -35,10 +35,6 @@ class MultiThreadProgressBar {
         progress[threadId] = threadProgress;
         word[threadId] = threadWord;
         if (mutex.try_lock()) {
-
-            // std::cout << threadId << " " << threadProgress << " " <<
-            // threadWord
-            //           << std::endl;
             if (printed) {
                 for (int i = 0; i < numThreads; i++) {
                     std::cout << previousLine;
@@ -46,10 +42,15 @@ class MultiThreadProgressBar {
             }
             printed = true;
             for (int i = 0; i < numThreads; i++) {
-                std::cout << "\r线程" << i + 1 << ": " << progress[i] << "0%[";
+                int p = progress[i];
+                if (p == 10) {
+                    std::cout << "\r线程" << i + 1 << "：OK! [";
+                } else {
+                    std::cout << "\r线程" << i + 1 << "：" << p << "0% [";
+                }
                 for (int j = 0; j < 10; j++) {
                     if (j < progress[i]) {
-                        std::cout << "█";
+                        std::cout << "#";
                     } else {
                         std::cout << " ";
                     }

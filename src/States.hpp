@@ -27,9 +27,8 @@ class States {
         size_t numStrangeSkills = chef.skill->conditionalEffects.size() +
                                   chef.companyBuff->conditionalEffects.size() +
                                   chef.nextBuff->conditionalEffects.size();
-        int32_t strangeSkill = numStrangeSkills > 0 ? 1 : 0;
         chefHasStrangeSkills =
-            (chefHasStrangeSkills & ~(1 << i)) | (strangeSkill << i);
+            (chefHasStrangeSkills & ~(1 << i)) | ((numStrangeSkills > 0) << i);
     }
     void modifyTool(int i, ToolEnum tool) {
         chefs[i].modifyTool(tool);

@@ -2,12 +2,6 @@
 
 ![](https://img.shields.io/github/downloads/hjenryin/BCJH-Metropolis/total) ![](https://img.shields.io/github/forks/hjenryin/BCJH-Metropolis) ![](https://img.shields.io/github/stars/hjenryin/BCJH-Metropolis)
 
-## 更新公告
-
-* 速度、效果大提升。在我个人的数据中，风云宴平均耗时10秒（搜到分数线就停止）。
-* 默认多线程。相同时间，运行一次，搜索8次（取决于电脑配置）。
-* 参数选择：`ITER_CHEF`可以设大一点，反正搜到就停止。`ITER_RECIPE`可以小一点（一两千），会自动学习比较好的菜谱。`TARGET_SCORE_APPROXIMATE` 需要准确输入希望达到的分数线（毕竟搜到就停）。
-
 ## 使用方法（本地编译）
 
 如果在windows平台，需要使用MSBuild编译，并将 `data/data.min.json` 改为ANSI编码。如有条件，强烈建议这种本地运行（运行可加速、可多次重复）。
@@ -16,6 +10,7 @@ _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**
 - 在 `./config.hpp` 中设置参数，方法参见[此文](https://github.com/hjenryin/BCJH-Metropolis/blob/main/assets/config.md)。
 - 在 `./data` 下保存 `data.min.json` （[由此下载](https://foodgame.github.io/data/data.min.json)）和白菜菊花个人数据 `userData.json`。
 - 编译、运行：
+
   - 在根目录新建 `build` 文件夹并 `cd` 至build
   - ```
     # linux
@@ -27,10 +22,8 @@ _**另外，诚挚希望有能力的朋友们帮忙实现在客户端运行！**
     msbuild /m
     ```
   - 使用 `./bcjh` (linux) 或 `./bcjh.exe` (windows) 运行。
-
 - 如果需要，在 `build/toolEquipped.csv` 配置已经戴上不愿碎掉的厨具。（配置方法参见[此处](https://github.com/hjenryin/BCJH-Metropolis#配置厨具)）（理论上应该放在 `data/toolEquipped.csv`，但不知为何识别不了。）
-
--   （可选）可视化：运行结束之后就可以在 `./out/history.png` 和 `./out/recipe.png` 看到自己厨师和最后一道菜的历史路径。如果结果不理想，可以调整 `./config.hpp` 中的参数，以及 `./src/functions.hpp .cpp` 中 `namespace f` 里的退火函数。
+- （可选）可视化：运行结束之后就可以在 `./out/history.png` 和 `./out/recipe.png` 看到自己厨师和最后一道菜的历史路径。如果结果不理想，可以调整 `./config.hpp` 中的参数，以及 `./src/functions.hpp .cpp` 中 `namespace f` 里的退火函数。
 
   ![样例](./out/history.png)
 - 最后在命令行就可以得到输出结果了！（注意顺序）（得到厨师-技法，表示对应新手池厨具，后面的括号如果是0表示不用装厨具）

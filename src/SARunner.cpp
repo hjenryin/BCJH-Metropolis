@@ -182,6 +182,10 @@ States SARunner::run(States *s0, bool progress, bool silent,
         }
         step++;
     }
+    if (progress && !silent) {
+        MultiThreadProgressBar::getInstance(0)->print(
+            threadId, 10, "最高分数：" + std::to_string(this->bestEnergy));
+    }
 #ifdef VIS_HISTORY
     if (progress && !silent) {
         std::fstream file;

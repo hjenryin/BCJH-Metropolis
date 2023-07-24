@@ -49,10 +49,12 @@ void loadChef(CList &chefList, const Json::Value &usrData,
     std::map<int, int> ultimateSkills;
     loadUltimateSkills(ultimateSkills, usrData["userUltimate"]);
 
+    size_t numChefRecorded = 0;
     auto chefGot = usrData["chefGot"];
     for (auto chef : chefs) {
         int id = chef["chefId"].asInt();
         if (chefGot[std::to_string(id)].asBool()) {
+            numChefRecorded++;
             if (AVOID_CHEF_1 && chef["rarity"].asInt() == 1) {
                 continue;
             }
@@ -69,6 +71,21 @@ void loadChef(CList &chefList, const Json::Value &usrData,
                 chefList.push_back(Chef(chef, -1));
             }
         }
+    }
+    size_t numChefsGot = 0;
+    for (auto &chef : chefGot) {
+        if (chef.asBool()) {
+            numChefsGot++;
+        }
+    }
+    int delta = numChefsGot - numChefRecorded;
+    if (delta > 0) {
+        std::cout << "\033[31m"
+                     "data.min.json已过期，缺了"
+                  << delta
+                  << "个已有厨师，建议重新下载bcjh.zip。"
+                     "\033[0m"
+                  << std::endl;
     }
 
 #ifdef _WIN32
