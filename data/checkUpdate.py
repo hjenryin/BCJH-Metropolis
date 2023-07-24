@@ -14,3 +14,18 @@ if ret == 0:
         os.system("mv data/data.new.json data/data.min.json")
 else:
     print("从图鉴网获取最新数据失败，将使用本地数据。")
+
+ret=os.system(
+    "wget --timeout=5 --tries=1 -O data/newRuleData.json https://bcjh.xyz/api/get_banquet_rule > /dev/null 2>&1"
+)
+if ret == 0:
+    print("从接口成功获取最新宴会数据。")
+    diff = os.system("diff -q data/ruleData.json data/newRuleData.json")
+    if diff == 0:
+        print("本地数据已是最新。")
+        os.system("rm data/newRuleData.json")
+    else:
+        print("本地数据不是最新，将更新。")
+        os.system("mv data/newRuleData.json data/ruleData.json")
+else:
+    print("宴会数据获取失败，将使用本地数据。")

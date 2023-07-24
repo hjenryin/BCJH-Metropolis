@@ -19,19 +19,18 @@ struct History {
 
 class SARunner {
     Randomizer *randomMoveFunc;
-    f::CoolingSchedule coolingScheduleFunc;
+    int threadId;
     int stepMax;
     int tMax;
     int tMin;
-    CList *chefList;
-    RList *recipeList;
     static int targetScore;
-
+    const RuleInfo *rl;
+    f::CoolingSchedule coolingScheduleFunc;
     States bestState;
 #ifdef VIS_HISTORY
     History *history;
 #endif
-    States generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]);
+    States generateStates(Chef *chefs[NUM_CHEFS]);
     static int T_MAX_CHEF;
     static int T_MAX_RECIPE;
     static int iterChef;
@@ -57,12 +56,17 @@ class SARunner {
      * @param coolingScheduleFunc
      */
     SARunner(
-        CList *chefList, RList *recipeList, bool randomizeChef,
-        f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative);
+        const RuleInfo *rl, CList *chefList, RList *recipeList,
+        bool randomizeChef,
+        f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative,
+        int threadId = -1);
     States run(States *s = NULL, bool progress = false, bool silent = false,
                const char *fn = NULL);
+    ~SARunner() {
 #ifdef VIS_HISTORY
-    ~SARunner() { delete[] this->history; }
+        delete[] this->history;
 #endif
+        delete this->randomMoveFunc;
+    }
 };
 #endif

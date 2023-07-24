@@ -16,8 +16,8 @@ class NoRecipeException : public std::exception {
   public:
     virtual const char *what() const throw() {
 
-        return "拥有的菜谱太少，得到的结果可能不理想，建议手动计算。";
-
+        return "拥有的菜谱太少或未填入修炼，导致某些厨师凑不齐三个菜，得到的结"
+               "果可能不理想，建议手动计算。";
     }
     NoRecipeException() throw() {}
 };

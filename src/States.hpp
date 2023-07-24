@@ -6,22 +6,33 @@
 #include "../config.hpp"
 
 class States {
-    Skill skillsCache[NUM_CHEFS];
-    bool cacheValid = false;
+    bool cookAbilitiesValid = false;
+    uint32_t chefHasStrangeSkills = 0; // Each bit represents a chef
+    Skill cookAbilitiesCache[NUM_CHEFS];
+    // Skill skillsCache[NUM_CHEFS];
     Chef chefs[NUM_CHEFS];
 
   public:
+    enum FLAG_getCookAbilities { FORCE_UPDATE = -2, DEFAULT = -1 };
     Recipe *recipe[DISH_PER_CHEF * NUM_CHEFS] = {0};
-    Skill *getSkills();
-    const Chef getChef(int i) const { return chefs[i]; }
-    const Chef *const operator[](int i) const { return &chefs[i]; }
+    void getSkills(Skill *skills, int chefIdForTool = DEFAULT,
+                   int toolValue = 100);
+    const Skill *getCookAbilities(int chefIdForTool = DEFAULT,
+                                  int toolValue = 100);
+    Chef getChef(int i) const { return chefs[i]; }
+    const Chef *const getChefPtr(int i) const { return &chefs[i]; }
     void setChef(int i, const Chef &chef) {
         chefs[i] = chef;
-        cacheValid = false;
+        cookAbilitiesValid = false;
+        size_t numStrangeSkills = chef.skill->conditionalEffects.size() +
+                                  chef.companyBuff->conditionalEffects.size() +
+                                  chef.nextBuff->conditionalEffects.size();
+        chefHasStrangeSkills =
+            (chefHasStrangeSkills & ~(1 << i)) | ((numStrangeSkills > 0) << i);
     }
     void modifyTool(int i, ToolEnum tool) {
         chefs[i].modifyTool(tool);
-        cacheValid = false;
+        cookAbilitiesValid = false;
     }
     ToolEnum getTool(int i) { return chefs[i].getTool(); }
     void appendName(int i, const std::string &s) { *chefs[i].name += s; }
@@ -64,7 +75,7 @@ class States {
         }
     }
     bool capable() {
-        auto skills = this->getSkills();
+        auto skills = this->getCookAbilities();
         for (int i = 0; i < NUM_DISHES; i++) {
             if (skills[i / DISH_PER_CHEF].ability / this->recipe[i]->cookAbility ==
                 0) {

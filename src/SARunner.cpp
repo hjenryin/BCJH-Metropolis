@@ -12,21 +12,23 @@
 // #include "activityRule.hpp"
 #include <limits.h>
 #include "Randomizer.hpp"
+#include "banquetRuleGen.hpp"
+#include "utils/ProgressBar.hpp"
 
 int SARunner::T_MAX_CHEF, SARunner::T_MAX_RECIPE, SARunner::iterChef,
     SARunner::iterRecipe, SARunner::targetScore;
-SARunner::SARunner(CList *chefList, RList *recipeList, bool randomizeChef,
-                   f::CoolingSchedule coolingScheduleFunc)
-    : chefList(chefList), recipeList(recipeList),
-      coolingScheduleFunc(coolingScheduleFunc){
+SARunner::SARunner(const RuleInfo *rl, CList *chefList, RList *recipeList,
+                   bool randomizeChef, f::CoolingSchedule coolingScheduleFunc,
+                   int threadId)
+    : threadId(threadId), rl(rl), coolingScheduleFunc(coolingScheduleFunc) {
     if (randomizeChef) {
         this->randomMoveFunc =
-            new ChefRandomizer(chefList, recipeList, targetScore);
+            new ChefRandomizer(chefList, recipeList, rl, targetScore);
         this->tMax = T_MAX_CHEF;
         this->tMin = T_MAX_CHEF / 10;
         this->stepMax = iterChef;
     } else {
-        this->randomMoveFunc = new RecipeRandomizer(chefList, recipeList);
+        this->randomMoveFunc = new RecipeRandomizer(chefList, recipeList, rl);
         this->tMax = T_MAX_RECIPE;
         this->tMin = T_MAX_RECIPE / 10;
         this->stepMax = iterRecipe;
@@ -36,8 +38,9 @@ SARunner::SARunner(CList *chefList, RList *recipeList, bool randomizeChef,
 #endif
 }
 
-States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
+States SARunner::generateStates(Chef *chefs[NUM_CHEFS]) {
     States s;
+    CList *chefList = this->randomMoveFunc->c;
 
     // std::cout << chefs << std::endl;
     // std::cout << chefList->size() << " " << chefRecipePairs->size()
@@ -71,7 +74,7 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
     RList *recipeList = this->randomMoveFunc->r;
 
     for (int j = 0; j < NUM_CHEFS; j++) {
-        auto &skill = s.getSkills()[j];
+        auto &skill = s.getCookAbilities()[j];
         for (int i = 0; i < DISH_PER_CHEF; i++) {
             int count = 0;
             Recipe *newRecipe;
@@ -97,7 +100,7 @@ States SARunner::run(States *s0, bool progress, bool silent,
     States s;
     if (s0 == NULL) {
         try {
-            s = generateStates(this->chefList, NULL);
+            s = generateStates(NULL);
         } catch (NoChefException &e) {
             std::cout << e.what() << std::endl;
             exit(1);
@@ -108,13 +111,14 @@ States SARunner::run(States *s0, bool progress, bool silent,
     } else {
         s = *s0;
     }
-    int energy = sumPrice(s, this->chefList, this->recipeList, false);
+    int energy = sumPrice(*rl, s, false);
     // std::cout << "Initial energy: " << energy << std::endl;
     this->bestState = s;
     this->bestEnergy = energy;
     int step = 0;
     double t = this->tMax;
     // srand(time(NULL));
+    int progressSoFar = 0;
     while (step < this->stepMax) {
         if (progress) {
             if (silent) {
@@ -123,13 +127,17 @@ States SARunner::run(States *s0, bool progress, bool silent,
                 //               << std::flush;
                 // }
             } else {
-                std::cout << "\r" << step << "/" << this->stepMax << " - "
-                          << this->bestEnergy << std::flush;
+                if (step * 10 / stepMax > progressSoFar) {
+                    progressSoFar = step * 10 / stepMax;
+                    MultiThreadProgressBar::getInstance(0)->print(
+                        threadId, progressSoFar * 10,
+                        "当前最高分数：" + std::to_string(this->bestEnergy));
+                }
             }
         }
-        States newS;
+        States newS=s;
         try {
-            newS = (*randomMoveFunc)(s);
+            (*randomMoveFunc)(newS);
 
         } catch (NoRecipeException &e) {
             std::cout << e.what() << std::endl;
@@ -140,27 +148,23 @@ States SARunner::run(States *s0, bool progress, bool silent,
         }
         // std::cin >> step;
         // print(newS);
-        int newEnergy =
-            sumPrice(newS, this->chefList, this->recipeList, false);
+        int newEnergy = sumPrice(*rl, newS, false);
         double prob = 0;
         int delta = energy - newEnergy;
-        if (delta / t < -30) {
+        if (delta / t < 0) {
             prob = 1.01;
         } else {
-            // prob = 1.0 / (1 + std::exp(delta / (3 * t + 0.0)));
             prob = std::exp(-delta / t);
         }
         if (prob > (double)rand() / RAND_MAX) {
             s = newS;
-            // print(s);
-            // std::cout << newEnergy << std::endl;
             energy = newEnergy;
         }
         if (energy > this->bestEnergy) {
             this->bestEnergy = energy;
             this->bestState = s;
             if (progress && !silent) {
-                sumPrice(this->bestState);
+                sumPrice(*rl, this->bestState);
                 std::cout << " ";
             }
         }
@@ -173,10 +177,14 @@ States SARunner::run(States *s0, bool progress, bool silent,
         this->history[step].t = t;
         this->history[step].states = s;
 #endif
-        if (energy >= this->targetScore) {
-            break;
-        }
+        // if (energy >= this->targetScore) {
+        //     break;
+        // }
         step++;
+    }
+    if (progress && !silent) {
+        MultiThreadProgressBar::getInstance(0)->print(
+            threadId, 100, "最高分数：" + std::to_string(this->bestEnergy));
     }
 #ifdef VIS_HISTORY
     if (progress && !silent) {
@@ -213,7 +221,7 @@ void SARunner::print(States s, bool verbose) const {
     int r = 0;
     for (int i = 0; i < NUM_CHEFS; i++) {
 
-        std::cout << "Chef: " << *s[i]->name << std::endl << "Recipe ";
+        std::cout << "Chef: " << *s.getChefPtr(i)->name << "\nRecipe ";
         for (int j = 0; j < DISH_PER_CHEF; j++) {
             std::cout << j << ": " << s.recipe[r++]->name;
         }
@@ -228,6 +236,6 @@ void SARunner::print(States s, bool verbose) const {
         //         getPrice(*s.chef[i], *s.recipe[r++], true);
         //     }
         // }
-        sumPrice(s, this->chefList, this->recipeList, true);
+        sumPrice(*rl, s, true);
     }
 }

@@ -1,8 +1,9 @@
 #ifndef TYPES_HPP
 #define TYPES_HPP
-#include <iostream>
-#include "include/json/json.h"
+#include "../config.hpp"
 #include "Values.hpp"
+#include "include/json/json.h"
+#include <iostream>
 
 class MaterialCategoryBuff {
   public:
@@ -65,11 +66,11 @@ class Ability {
     Ability(int stirfry, int bake, int boil, int steam, int fry, int knife)
         : stirfry(stirfry), bake(bake), boil(boil), steam(steam), fry(fry),
           knife(knife) {}
-    Ability(ToolEnum t) {
+    Ability(ToolEnum t, int value = 100) {
         if (t == NOT_EQUIPPED || t == NO_TOOL)
             return;
         int *ptr = &this->stirfry;
-        ptr[t - ABILITY_ENUM_START] = 100;
+        ptr[t - ABILITY_ENUM_START] = value;
     }
     void multiply(double a) {
         int *ptr = &this->stirfry;
@@ -77,6 +78,7 @@ class Ability {
             ptr[i] = int(ptr[i] * a);
         }
     }
+
     int operator/(const Ability &a) const {
         int grade = 5;
         const int *thisptr = &this->stirfry;
@@ -106,6 +108,29 @@ class Ability {
         for (int i = 0; i < 6; i++) {
             ptr[i] += a;
         }
+    }
+    Ability operator+(const Ability &a) const {
+        Ability tmp(a);
+        tmp.add(*this);
+        return tmp;
+    }
+    Ability operator&&(const Ability &a) const {
+        Ability tmp;
+        const int *thisptr = &this->stirfry;
+        const int *aptr = &a.stirfry;
+        int *tmpptr = &tmp.stirfry;
+        for (int i = 0; i < 6; i++) {
+            tmpptr[i] = thisptr[i] && aptr[i];
+        }
+        return tmp;
+    }
+    int operator!=(int a) const {
+        const int *ptr = &this->stirfry;
+        int count = 0;
+        for (int i = 0; i < 6; i++) {
+            count += (ptr[i] != a);
+        }
+        return count;
     }
     void print(std::string title, std::string end = "\n",
                bool percent = false) const {
@@ -157,10 +182,20 @@ class Ability {
 
 class AbilityBuff : public Ability {
   public:
+    int basic = 0;
     AbilityBuff() {}
     AbilityBuff(int stirfry, int bake, int boil, int steam, int fry, int knife)
         : Ability(stirfry, bake, boil, steam, fry, knife) {}
-    void print() const { this->Ability::print("AbilityBuff: ", "\n", true); }
+    void print() const {
+        this->Ability::print("AbilityBuff: ", "", true);
+        std::cout << " Basic: " << this->basic << std::endl;
+    }
+    void add(const AbilityBuff &a) {
+        this->Ability::add(a);
+        this->basic += a.basic;
+    }
+    void add(const Ability &a) { this->Ability::add(a); }
+    void add(int a) { this->Ability::add(a); }
 };
 class CookAbility : public Ability {
 
@@ -172,22 +207,32 @@ class CookAbility : public Ability {
     // int operator/(const Ability &a) const;
     void print() const { this->Ability::print("CookAbility: "); }
     int operator*(const AbilityBuff &a) const;
+    void add(const CookAbility &a) { this->Ability::add(a); }
+    void add(const Ability &a) { this->Ability::add(a); }
+    void add(int a) { this->Ability::add(a); }
 };
-class RarityBuff {
+class DiscretizedBuff {
     int data[5] = {0, 0, 0, 0, 0};
 
   public:
-    /*几火就是几，不用减一*/
+    /*几火/几级就是几，不用减一*/
     int &operator[](int i) { return data[i - 1]; }
     int operator[](int i) const { return data[i - 1]; }
-    void print() const {
-        std::cout << "RarityBuff: ";
+    void add(const DiscretizedBuff &r) {
+        for (int i = 0; i < 5; i++)
+            this->data[i] += r.data[i];
+    }
+    void print(const std::string &name) const {
+        std::cout << name << ": ";
         for (int i = 0; i < 5; i++) {
             std::cout << data[i] << "% ";
         }
         std::cout << std::endl;
     }
 };
+class BuffCondition;
+class ConditionalBuff;
+
 class Skill {
 
   public:
@@ -196,35 +241,32 @@ class Skill {
 
     static std::map<int, Skill> skillList;
     CookAbility ability;
+    CookAbility cookAbilityPercentBuff;
     AbilityBuff abilityBuff;
     FlavorBuff flavorBuff;
     MaterialCategoryBuff materialBuff;
-    RarityBuff rarityBuff;
-    int coinBuff;
-    Skill(CookAbility ability, AbilityBuff abilityBuff, FlavorBuff flavorBuff,
-          MaterialCategoryBuff materialBuff, RarityBuff rarityBuff,
-          int coinBuff)
-        : ability(ability), abilityBuff(abilityBuff), flavorBuff(flavorBuff),
-          materialBuff(materialBuff), coinBuff(coinBuff),
-          rarityBuff(rarityBuff) {}
-    Skill() {
-        this->ability = CookAbility();
-        this->abilityBuff = AbilityBuff();
-        this->flavorBuff = FlavorBuff();
-        this->materialBuff = MaterialCategoryBuff();
-        this->coinBuff = 0;
-    }
+    DiscretizedBuff rarityBuff;
+    DiscretizedBuff gradeBuff; // 几级就填当前那一级，比它高的不用填。
+
+    int pricePercentBuff = 0;
+    int baseAddBuff = 0;
+    std::vector<ConditionalBuff *> conditionalEffects;
+    Skill() = default;
     Skill getSkill(int id) { return skillList[id]; }
     static void loadJson(const Json::Value &v);
     void operator+=(const Skill &s) {
         this->ability.add(s.ability);
+        this->cookAbilityPercentBuff.add(s.cookAbilityPercentBuff);
         this->abilityBuff.add(s.abilityBuff);
         this->flavorBuff.add(s.flavorBuff);
         this->materialBuff.add(s.materialBuff);
-        this->coinBuff += s.coinBuff;
-        for (int i = 0; i < 5; i++) {
-            this->rarityBuff[i + 1] += s.rarityBuff[i + 1];
-        }
+        this->rarityBuff.add(s.rarityBuff);
+        this->gradeBuff.add(s.gradeBuff);
+        this->pricePercentBuff += s.pricePercentBuff;
+        this->baseAddBuff += s.baseAddBuff;
+        this->conditionalEffects.insert(this->conditionalEffects.end(),
+                                        s.conditionalEffects.begin(),
+                                        s.conditionalEffects.end());
     }
     Skill operator+(const Skill &s) {
         Skill tmp(*this);
@@ -236,8 +278,49 @@ class Skill {
         this->abilityBuff.print();
         this->flavorBuff.print();
         this->materialBuff.print();
-        std::cout << "CoinBuff: " << this->coinBuff << "; ";
-        this->rarityBuff.print();
+        std::cout << "CoinBuff: " << this->pricePercentBuff << "; ";
+        this->rarityBuff.print("RarityBuff");
+        this->gradeBuff.print("GradeBuff");
+    }
+    ~Skill() {} // conditionalEffects should be handled manually.
+};
+
+class Recipe;
+// Records nonconventional buffs
+class BuffCondition {
+
+  public:
+    const std::string name;
+    BuffCondition(const std::string &name = "") : name(name) {}
+    virtual int test(const Skill *s, Recipe **r) = 0;
+    virtual ~BuffCondition() {}
+};
+class GradeBuffCondition : public BuffCondition {
+  public:
+    int grade;
+    GradeBuffCondition(int grade)
+        : grade(grade),
+          BuffCondition(std::string("等级做到") + (char)('0' + grade)) {}
+    int test(const Skill *s, Recipe **r);
+    ~GradeBuffCondition() override {}
+};
+class ThreeSameCookAbilityBuffCondition : public BuffCondition {
+  public:
+    ThreeSameCookAbilityBuffCondition() : BuffCondition("三技法相同") {}
+    int test(const Skill *s, Recipe **r);
+    ~ThreeSameCookAbilityBuffCondition() override {}
+};
+
+class ConditionalBuff {
+  public:
+    BuffCondition *conditionFunc;
+    Skill skill;
+    ConditionalBuff(BuffCondition *conditionFunc, Skill skill)
+        : conditionFunc(conditionFunc), skill(skill) {}
+    ConditionalBuff() : conditionFunc(NULL), skill(Skill()) {}
+    ~ConditionalBuff() {
+        // if (conditionFunc != NULL) // wierd, shouldn't need this.
+        delete conditionFunc;
     }
 };
 

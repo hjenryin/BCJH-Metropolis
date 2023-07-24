@@ -74,11 +74,23 @@ void loadRecipe(RList &recipeList, const Json::Value &usrData,
     Recipe::initRarityBuff(usrData["userUltimate"]);
     auto recipes = gameData["recipes"];
     auto recipeGot = usrData["repGot"];
-    for (auto recipe : recipes) {
+    for (auto &recipe : recipes) {
         int id = recipe["recipeId"].asInt();
         if (recipeGot[std::to_string(id)].asBool()) {
             recipeList.push_back(Recipe(recipe));
         }
+    }
+    size_t numRecipesGot = 0;
+    for (auto &recipe : recipeGot) {
+        if (recipe.asBool()) {
+            numRecipesGot++;
+        }
+    }
+    if (recipeList.size() < numRecipesGot) {
+        std::cout << RED "data.min.json已过期，缺了"
+                  << recipeGot.size() - recipeList.size()
+                  << "个已有菜谱，建议重新下载bcjh.zip。" NO_FORMAT
+                  << std::endl;
     }
 }
 

@@ -27,7 +27,7 @@ class Materials {
                   << (this->fish ? "鱼 " : "") << (this->creation ? "面 " : "")
                   << end;
     }
-    int operator*(MaterialCategoryBuff &buff) {
+    int operator*(const MaterialCategoryBuff &buff) {
         int sum = 0;
         if (this->vegetable) {
             sum += buff.vegetable;
@@ -70,6 +70,22 @@ class Recipe {
 
   public:
     static DishBuff rarityBuff[5];
+    /**
+     * @return 小于等于返回值火数的都可以做到这么多份
+     */
+    static int upperBound(int dishNumTargetMin) {
+        if (rarityBuff[0].dishNum == 0) {
+            std::cout << "需要先load Recipes (init rarityBuff)再loadSkills"
+                      << std::endl;
+            exit(1);
+        }
+        for (int i = 0; i < 5; i++) {
+            if (dishNumTargetMin >= rarityBuff[i].dishNum) {
+                return i;
+            }
+        }
+        return 5;
+    }
     std::string name;
     int id;
     int rarity;

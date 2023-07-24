@@ -99,10 +99,10 @@ struct ActivityBuff {
     std::map<int, int> rarityBuff; // 几火就是几，不用减一
     std::map<FlavorEnum, int> flavorBuff;
 };
-int getPrice(Skill &, Recipe &recipe, ActivityBuff *p = NULL,
+int getPrice(const Skill &, Recipe &recipe, ActivityBuff *p = NULL,
              bool verbose = false);
 
-BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
+BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
                      bool verbose = false);
 
 #endif

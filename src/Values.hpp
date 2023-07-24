@@ -15,6 +15,11 @@ enum ToolEnum {
     KNIFE,
     TOOL_ENUM_END
 };
+enum LOG_LEVEL {
+    SILENT = 0,
+    ORDINARY = 0x1,
+    VERBOSE = 0x10,
+};
 const int ABILITY_ENUM_START = TOOL_ENUM_START + 2;
 const int ABILITY_ENUM_END = TOOL_ENUM_END;
 enum FlavorEnum {
@@ -28,6 +33,7 @@ enum FlavorEnum {
     TASTY,
     FLAVOR_ENUM_END
 };
+int getEnum(const std::string &s);
 
 enum ToolFileType {
     NO_FILE__NO_TOOL,
