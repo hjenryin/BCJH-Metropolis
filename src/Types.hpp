@@ -3,6 +3,7 @@
 #include <iostream>
 #include "include/json/json.h"
 #include "Values.hpp"
+#include "utils/Printer.hpp"
 
 class MaterialCategoryBuff {
   public:
@@ -17,23 +18,13 @@ class MaterialCategoryBuff {
         this->fish += m.fish;
         this->creation += m.creation;
     }
-    bool print() const {
-        if (vegetable) {
-            std::cout << "菜" << vegetable << "% ";
-        }
-        if (meat) {
-            std::cout << "肉" << meat << "% ";
-        }
-        if (fish) {
-            std::cout << "鱼" << fish << "% ";
-        }
-        if (creation) {
-            std::cout << "面" << creation << "% ";
-        }
-        if ((vegetable || meat || fish || creation))
-            return true;
-        else
-            return false;
+    std::vector<Printer> getPrinters() const {
+        std::vector<Printer> p;
+        p.push_back(Printer("菜", vegetable));
+        p.push_back(Printer("肉", meat));
+        p.push_back(Printer("鱼", fish));
+        p.push_back(Printer("面", creation));
+        return p;
     }
 };
 
@@ -55,29 +46,15 @@ class FlavorBuff {
         this->spicy += f.spicy;
         this->tasty += f.tasty;
     }
-    bool print() const {
-        if (sweet) {
-            std::cout << "甜" << sweet << "% ";
-        }
-        if (salty) {
-            std::cout << "咸" << salty << "% ";
-        }
-        if (sour) {
-            std::cout << "酸" << sour << "% ";
-        }
-        if (bitter) {
-            std::cout << "苦" << bitter << "% ";
-        }
-        if (spicy) {
-            std::cout << "辣" << spicy << "% ";
-        }
-        if (tasty) {
-            std::cout << "鲜" << tasty << "% ";
-        }
-        if ((sweet || salty || sour || bitter || spicy || tasty))
-            return true;
-        else
-            return false;
+    std::vector<Printer> getPrinters() const {
+        std::vector<Printer> p;
+        p.push_back(Printer("甜", sweet));
+        p.push_back(Printer("咸", salty));
+        p.push_back(Printer("酸", sour));
+        p.push_back(Printer("苦", bitter));
+        p.push_back(Printer("辣", spicy));
+        p.push_back(Printer("鲜", tasty));
+        return p;
     }
     int operator*(const FlavorEnum f) const {
         const int *ptr = &this->sweet;
@@ -138,28 +115,15 @@ class Ability {
             ptr[i] += a;
         }
     }
-    void print(std::string title, std::string end = "\n",
-               bool percent = false) const {
-        auto perstr = percent ? "%" : "";
-        std::cout
-            << title
-            << (this->stirfry
-                    ? "炒" + std::to_string(this->stirfry) + perstr + " "
-                    : "")
-            << (this->bake ? "烤" + std::to_string(this->bake) + perstr + " "
-                           : "")
-            << (this->boil ? "煮" + std::to_string(this->boil) + perstr + " "
-                           : "")
-            << (this->steam ? "蒸" + std::to_string(this->steam) + perstr + " "
-                            : "")
-            << (this->fry ? "炸" + std::to_string(this->fry) + perstr + " "
-                          : "")
-            << (this->knife ? "切" + std::to_string(this->knife) + perstr + " "
-                            : "");
-        if (!(this->stirfry || this->bake || this->boil || this->steam ||
-              this->fry || this->knife))
-            std::cout << "无";
-        std::cout << end;
+    std::vector<Printer> getPrinters(bool percent) const {
+        std::vector<Printer> p;
+        p.push_back(Printer("炒", stirfry, percent));
+        p.push_back(Printer("烤", bake, percent));
+        p.push_back(Printer("煮", boil, percent));
+        p.push_back(Printer("蒸", steam, percent));
+        p.push_back(Printer("炸", fry, percent));
+        p.push_back(Printer("切", knife, percent));
+        return p;
     }
     /* Knife, Stirfry, Bake, Boil, Steam, Fry */
     const int operator[](int name) {
@@ -191,7 +155,6 @@ class AbilityBuff : public Ability {
     AbilityBuff() {}
     AbilityBuff(int stirfry, int bake, int boil, int steam, int fry, int knife)
         : Ability(stirfry, bake, boil, steam, fry, knife) {}
-    void print() const { this->Ability::print("加成: ", "\t", true); }
 };
 class CookAbility : public Ability {
 
@@ -202,7 +165,10 @@ class CookAbility : public Ability {
     CookAbility(const Json::Value &v);
     // int operator/(const Ability &a) const;
     void print(std::string end = "") const {
-        this->Ability::print("技法: ", end);
+        Printer p("技法");
+        p.noValue();
+        p.add(Ability::getPrinters(false));
+        p.print("", " ", end.c_str());
     }
     int operator*(const AbilityBuff &a) const;
 };
@@ -270,13 +236,13 @@ class Skill {
     }
     void print() const {
         this->ability.print();
-        this->abilityBuff.print();
-        if (flavorBuff.print())
-            std::cout << "\t";
-        if (materialBuff.print())
-            std::cout << "\t";
-        if (coinBuff)
-            std::cout << "金币加成: " << this->coinBuff << "%; ";
+        Printer p("\n加成");
+        p.noValue();
+        p.add(abilityBuff.getPrinters(true));
+        p.add(flavorBuff.getPrinters());
+        p.add(materialBuff.getPrinters());
+        p.add("金币", this->coinBuff, true);
+        p.print("", " ", "\t");
         this->rarityBuff.print();
         std::cout << std::endl;
     }

@@ -43,9 +43,7 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
     // std::cout << chefList->size() << " " << chefRecipePairs->size()
     // << std::endl;
     if (chefs == NULL) {
-        if (chefList->size() == 0) {
-            throw NoChefException();
-        }
+
         for (int j = 0; j < NUM_CHEFS; j++) {
             int count = 0;
             Chef *randomChef;
@@ -56,8 +54,8 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
             } while (s.repeatedChef(randomChef, j) &&
                      count < RANDOM_SEARCH_TIMEOUT);
             if (count >= RANDOM_SEARCH_TIMEOUT) {
-
-                throw NoChefException();
+                std::cout << NoChefException().what() << std::endl;
+                exit(1);
             }
         }
 
@@ -83,13 +81,12 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
                      count < RANDOM_SEARCH_TIMEOUT * RANDOM_SEARCH_TIMEOUT);
             s.recipe[r] = newRecipe;
             if (count >= RANDOM_SEARCH_TIMEOUT * RANDOM_SEARCH_TIMEOUT) {
-                // std::cout << "generate State";
-                throw NoRecipeException();
+                std::cout << NoRecipeException().what() << std::endl;
+                exit(1);
             }
             r++;
         }
     }
-
     return s;
 }
 States SARunner::run(States *s0,
@@ -99,16 +96,7 @@ States SARunner::run(States *s0,
                      bool silent, const char *filename) {
     States s;
     if (s0 == NULL) {
-        try {
-            s = generateStates(this->chefList, NULL);
-            debugIntegrity(s);
-        } catch (NoChefException &e) {
-            std::cout << e.what() << std::endl;
-            exit(1);
-        } catch (NoRecipeException &e) {
-            std::cout << e.what() << std::endl;
-            exit(1);
-        }
+        s = generateStates(this->chefList, NULL);
     } else {
         s = *s0;
     }
@@ -136,16 +124,7 @@ States SARunner::run(States *s0,
         // }
 #endif
         States newS;
-        try {
-            newS = (*randomMoveFunc)(s);
-
-        } catch (NoRecipeException &e) {
-            std::cout << e.what() << std::endl;
-            break;
-        } catch (NoChefException &e) {
-            std::cout << e.what() << std::endl;
-            break;
-        }
+        newS = (*randomMoveFunc)(s);
         // std::cin >> step;
         // print(newS);
         int newEnergy = sumPrice(*rl, newS);

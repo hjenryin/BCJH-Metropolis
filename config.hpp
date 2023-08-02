@@ -1,5 +1,6 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
+
 #ifndef EMSCRIPTEN
 #define NUM_GUESTS 2
 #endif
@@ -14,6 +15,9 @@
 
 // #define VIS_HISTORY
 // #define DEBUG_INTEGRITY
+#ifdef EMSCRIPTEN
+#define EMSCRIPTEN_PROGRESS
+#endif
 #define ITER_CHEF 5000   // 选择厨师时的迭代次数
 #define ITER_RECIPE 1000 // 对于每一组厨师，选择菜谱时的迭代次数
 

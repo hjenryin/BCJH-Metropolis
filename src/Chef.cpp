@@ -36,7 +36,7 @@ void loadUltimateSkills(std::map<int, int> &ultimateSkills,
     splitUltimateSkill(ultimateSkills, usrBuff["Partial"]["id"]);
     splitUltimateSkill(ultimateSkills, usrBuff["Self"]["id"]);
 }
-void loadChef(CList &chefList, const Json::Value &gameData,
+void loadChef(CList &chefList, int chefRarity, const Json::Value &gameData,
               const Json::Value &usrData, bool allowTool) {
 
     const Json::Value &chefs = gameData["chefs"];
@@ -49,13 +49,7 @@ void loadChef(CList &chefList, const Json::Value &gameData,
     for (auto chef : chefs) {
         int id = chef["chefId"].asInt();
         if (chefGot[std::to_string(id)].asBool()) {
-            if (AVOID_CHEF_1 && chef["rarity"].asInt() == 1) {
-                continue;
-            }
-            if (AVOID_CHEF_2 && chef["rarity"].asInt() == 2) {
-                continue;
-            }
-            if (AVOID_CHEF_3 && chef["rarity"].asInt() == 3) {
+            if (chef["rarity"].asInt() != chefRarity) {
                 continue;
             }
 

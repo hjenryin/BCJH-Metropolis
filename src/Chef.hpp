@@ -93,8 +93,8 @@ class Chef {
     // }
 };
 typedef std::vector<Chef> CList;
-void loadChef(CList &chefList, const Json::Value &gameData,
-              const Json::Value &usrData, bool allowTool = true);
+void loadChef(CList &chefList, int chefRarity, const Json::Value &gameData,
+              const Json::Value &usrData, bool allowTool);
 
 // void loadChefTools(CList &chefList, CList &newChefList);
 std::string getToolName(ToolEnum tool);

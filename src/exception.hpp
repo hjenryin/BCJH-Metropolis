@@ -3,14 +3,18 @@
 #include <exception>
 
 class NoChefException : public std::exception {
+  private:
+    int numChef;
+
   public:
     virtual const char *what() const throw() {
+        if (numChef >= 0) {
+            std::cout << "拥有的厨师太少，当前拥有" << numChef << "个厨师。";
+        }
         return "拥有的厨师太少，请尝试关闭config.hpp中的AVOID_CHEF_1/2/"
-
                "3选项，如果仍出现此提示，得到的结果可能不理想，建议手动计算。";
-
     }
-    NoChefException() throw() {}
+    NoChefException(int numChef = -1) throw() : numChef(numChef) {}
 };
 class NoRecipeException : public std::exception {
   public:

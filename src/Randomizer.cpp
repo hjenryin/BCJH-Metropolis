@@ -51,7 +51,7 @@ bool ChefRandomizer::randomChef(States &s) const {
         count++;
     } while (s.repeatedChef(&pChef, -1) && count < RANDOM_SEARCH_TIMEOUT);
     if (count >= RANDOM_SEARCH_TIMEOUT) {
-        throw NoChefException();
+        return false;
     }
     s.setChef(chefNum, pChef);
     if (pChef.recipeLearned->size() == DISH_PER_CHEF) {

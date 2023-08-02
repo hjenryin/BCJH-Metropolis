@@ -79,8 +79,6 @@ std::string
     const int T_MAX_CHEF = targetScore / 100;
     const int T_MAX_RECIPE = targetScore / 400;
     SARunner::init(T_MAX_CHEF, T_MAX_RECIPE, iterChef, iterRecipe, targetScore);
-    int8_t *progress = NULL;
-    // int8_t *progress = NULL;
     bool silent = false;
     int log = SILENT | VERBOSE;
     struct timespec ts;
@@ -113,8 +111,18 @@ std::string
         Skill::loadJson(gameData["skills"]);
         Recipe::initRarityBuff(userData["userUltimate"]);
         Chef::initBuff(userData["userUltimate"]);
-        loadChef(chefList, gameData, userData, allowTool);
+        loadChef(chefList, 5, gameData, userData, allowTool);
+        int chefRarity = 4;
+        do {
+            loadChef(chefList, chefRarity, gameData, userData, allowTool);
+            chefRarity--;
+        } while (chefList.size() <= NUM_CHEFS && chefRarity >= 0);
         loadRecipe(recipeList, gameData, userData);
+        if (chefList.size() <= NUM_CHEFS) {
+
+            std::cout << NoChefException(chefList.size()).what() << std::endl;
+            exit(1);
+        }
     } catch (const Json::RuntimeError &e) {
         std::cout << "json文件格式不正确。如果文件内容是手动复制的，确认文件已"
                      "经复制完整。\n";

@@ -60,10 +60,10 @@ const struct MaterialList {
 } materialList;
 
 void Recipe::print(const std::string &startLine) const {
-    std::cout << this->id << ": " << this->name << "（原价" << this->price
-              << "）—— " << this->rarity << "🔥 *";
     auto rb = rarityBuff[this->rarity - 1];
-    std::cout << rb.dishNum << ", +" << rb.dishBuff << "%" << std::endl;
+    std::cout << this->name << "（原价" << this->price << "）"
+              << ", " << this->rarity << "🔥* " << rb.dishNum << std::endl;
+    // std::cout << "+" << rb.dishBuff << "%" ;
     std::cout << startLine;
     this->cookAbility.print("\t");
     this->materialCategories.print("\t");

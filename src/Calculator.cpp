@@ -1,7 +1,7 @@
 #include "Calculator.hpp"
 #include "Chef.hpp"
 #include <cmath>
-
+#include "utils/Printer.hpp"
 int getPrice(Skill &skill, Recipe &recipe, ActivityBuff *activityBuff,
              bool verbose) {
     // if (verbose)
@@ -150,24 +150,29 @@ BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
     }
     BanquetInfo b = {totalPrice, full};
     if (verbose) {
-        // chef->print();
+        Printer skillPrinter("技能", true);
+        skillPrinter.add("味道", skill.flavorBuff * recipe->flavor);
+        skillPrinter.add("技法", recipe->cookAbility * skill.abilityBuff);
+        skillPrinter.add("食材",
+                         recipe->materialCategories * skill.materialBuff);
+        skillPrinter.add("火数修炼", rb.dishBuff);
+        skillPrinter.add("金币", (Chef::coinBuffOn ? skill.coinBuff : 0));
+
+        Printer intentionPrinter("意图");
+        intentionPrinter.noValue();
+        intentionPrinter.add("基础售价", rule.baseRule.directAdd, false);
+        intentionPrinter.add("基础售价", intentionBaseBuff, true);
+        intentionPrinter.add("售价", intentionAddBuff, true);
+
         std::cout << "╭─> ";
         recipe->print("│ ");
         std::cout << "" << gradeName(grade) << " +" << gradebuff << "%"
                   << std::endl;
-        std::cout << "│ 技能: " << skillBuff << "% ( = 味道"
-                  << skill.flavorBuff * recipe->flavor << " + 技法"
-                  << recipe->cookAbility * skill.abilityBuff << " + 食材"
-                  << recipe->materialCategories * skill.materialBuff
-                  << " + 修炼" << rb.dishBuff << " + 金币"
-                  << (Chef::coinBuffOn ? skill.coinBuff : 0) << ")"
+        skillPrinter.print("│ ", " + ", "\n");
+        intentionPrinter.print("│ ", "; ", "\n");
+        std::cout << "│ 售价总计Buff: +" << buff << "%" << std::endl;
+        std::cout << "╰─> 饱腹度: " << full << "\t总价: " << totalPrice << "💰"
                   << std::endl;
-        std::cout << "│ 意图: (基础+" << rule.baseRule.directAdd << "，+"
-                  << intentionBaseBuff << "%；售价+" << intentionAddBuff
-                  << "%) " << std::endl;
-        std::cout << "│ 售价总计Buff: " << buff << "%" << std::endl;
-        std::cout << "╰─> 饱腹度: " << full << "😋\t总价: " << totalPrice
-                  << "💰" << std::endl;
     }
     return b;
 }
