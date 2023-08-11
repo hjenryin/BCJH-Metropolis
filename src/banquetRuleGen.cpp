@@ -125,7 +125,6 @@ Rule *getRuleFromJson(const Json::Value &intent, int dish,
                       << std::endl;
         }
     } else {
-        // assert(getInt(intent["intentId"]) == 1);
         c = new AlwaysTrueCondition(dish);
     }
 
@@ -149,12 +148,10 @@ Rule *getRuleFromJson(const Json::Value &intent, int dish,
         e = new NextRuleEffect(newRule);
 
     } else if (effectType == "CreateBuff") {
-        assert(conditionType == "Group");
         auto newIntent = getBuffById(allBuffs, effectValue);
         int lastRounds = getInt(newIntent["lastRounds"]);
         auto newRule = getRuleFromJson(newIntent, dish + DISH_PER_CHEF,
                                        allIntents, allBuffs, 1);
-
         e = new CreateRulesEffect(newRule, DISH_PER_CHEF * lastRounds, true);
     }
     return new SingleConditionRule(c, e);

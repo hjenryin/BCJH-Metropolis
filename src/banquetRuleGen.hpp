@@ -11,7 +11,7 @@ extern double generateBanquetRuleTime;
 class Effect {
   public:
     bool strict;
-    virtual void operator()(BanquetRuleTogether *brt, int i,
+    virtual void operator()(BanquetRuleTogether *brt, int dishNum,
                             States &s) const = 0;
 
     Effect(bool strict = false) : strict(strict) {}
