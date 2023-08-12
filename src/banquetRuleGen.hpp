@@ -134,7 +134,7 @@ class GroupCondition : public Condition {
             }
         }
 
-        return start + DISH_PER_CHEF;
+        return start;
     }
 };
 class RankCondition : public Condition {
@@ -186,21 +186,23 @@ class NextRuleEffect : public Effect {
     }
     ~NextRuleEffect() override { delete rule; }
 };
-class CreateRulesEffect : public Effect {
+class CreatePhaseRulesEffect : public Effect {
   public:
     Rule *rule;
     int len;
-    CreateRulesEffect(Rule *rule, int len, bool strict = false)
+    CreatePhaseRulesEffect(Rule *rule, int len, bool strict = false)
         : rule(rule), len(len) {
         for (int i = 0; i < len; i++)
             rule->effect->strict = strict;
     }
     void operator()(BanquetRuleTogether *brt, int i, States &s) const override {
+        // Starting from next phase.
+        i = (i / DISH_PER_CHEF + 1) * DISH_PER_CHEF;
         for (int j = 0; j < len; j++) {
             (*rule)(brt, s, i + j);
         }
     }
-    ~CreateRulesEffect() override { delete rule; }
+    ~CreatePhaseRulesEffect() override { delete rule; }
 };
 class FullAddEffect : public Effect {
   public:

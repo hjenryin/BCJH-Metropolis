@@ -1,0 +1,116 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: MSBuild
+
+on:
+  workflow_dispatch:
+    
+
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: ./build/bcjh.sln
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  BUILD_CONFIGURATION: Release
+  
+permissions:
+  contents: write
+
+jobs:
+  
+  # RemoveStaleRelease:
+  #   continue-on-error: true
+  #   runs-on: windows-latest
+
+  #   steps:
+  #   - uses: actions/checkout@v3
+    
+  #   - name: Set date env
+  #     run: Set-TimeZone -Id 'China Standard Time' && echo "DATE=$([datetime]::now.tostring("yyyy-MM-dd"))" >> $env:GITHUB_ENV 
+        
+  #   - uses: dev-drprasad/delete-tag-and-release@v1.0 # PRERELEASE is v1.0 and can also be used to test and give us feedback
+  #     with:
+  #       tag_name: ${{ env.DATE }} #(required) tag name to delete 
+  #       github_token: ${{ secrets.GITHUB_TOKEN }} # (required) a GitHub token with write access to the repo that needs to be modified
+  #       delete_release: true #(optional) default: true 
+      
+  buildRelease:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set date env
+      run: Set-TimeZone -Id 'China Standard Time' && echo "DATE=$([datetime]::now.tostring("yyyy-MM-dd"))" >> $env:GITHUB_ENV 
+    
+    - run: echo ${{ env.DATE }}
+
+    - name: Generate .bat prefix
+      run: mkdir release && echo @echo off > release\点此运行.bat && echo chcp 936 ^>NUL >> release\点此运行.bat && tzutil /s "China Standard Time" && echo echo 计算器更新时间：%date%, %time% >> release\点此运行.bat
+      shell: cmd
+
+    - name: Change encoding
+      run: mv data/data.min.json release && python assets/changeEncoding.py -p release/data.min.json && python assets/changeEncoding.py -p release\点此运行.bat
+
+    - name: Generate .bat file
+      run:  type assets\retrieveData.bat >> release\点此运行.bat
+      shell: cmd
+    
+    - name: Prepare zipping
+      run: cd src && python ../assets/removeSystemCall.py && cd .. &&  mv assets/厨具样例.csv release/厨具样例.csv
+
+    - name: cmake
+      run: cmake --no-warn-unused-cli -B ${{github.workspace}}/build -G "Visual Studio 17 2022" -T host=x86 -A win32
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.3.1
+
+    # - name: Restore NuGet packages
+    #   working-directory: ${{env.GITHUB_WORKSPACE}}
+    #   run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+      
+    - run: mv build/bcjh.exe release
+
+    - name: Zip Release
+      # You may pin to the exact commit or the version.
+      # uses: TheDoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464
+      uses: TheDoctor0/zip-release@0.7.1
+      with:
+        # Base path for archive files
+        path: release
+        filename: bcjh.zip
+        
+    # - uses: dev-drprasad/delete-tag-and-release@v1.0 # PRERELEASE is v1.0 and can also be used to test and give us feedback
+    #   with:
+    #     tag_name: ${{ env.DATE }} #(required) tag name to delete 
+    #     github_token: ${{ secrets.GITHUB_TOKEN }} # (required) a GitHub token with write access to the repo that needs to be modified
+    #     delete_release: true #(optional) default: true 
+
+
+    - name: Release Draft
+      uses: softprops/action-gh-release@v1
+      with:
+        files: bcjh.zip
+        tag_name: ${{ env.DATE }}
+        draft: true
+
+
+
+    # - uses: eregon/publish-release@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     release_id: ${{ steps.create_release.outputs.id }}
+       
