@@ -148,11 +148,13 @@ Rule *getRuleFromJson(const Json::Value &intent, int dish,
         e = new NextRuleEffect(newRule);
 
     } else if (effectType == "CreateBuff") {
+        // 下（两）阶段blahblah
         auto newIntent = getBuffById(allBuffs, effectValue);
         int lastRounds = getInt(newIntent["lastRounds"]);
         auto newRule = getRuleFromJson(newIntent, dish + DISH_PER_CHEF,
                                        allIntents, allBuffs, 1);
-        e = new CreateRulesEffect(newRule, DISH_PER_CHEF * lastRounds, true);
+        e = new CreatePhaseRulesEffect(newRule, DISH_PER_CHEF * lastRounds,
+                                       true);
     }
     return new SingleConditionRule(c, e);
 }
