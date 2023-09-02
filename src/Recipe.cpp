@@ -65,7 +65,7 @@ void Recipe::print(const std::string &startLine) const {
               << ", " << this->rarity << "🔥* " << rb.dishNum << std::endl;
     // std::cout << "+" << rb.dishBuff << "%" ;
     std::cout << startLine;
-    this->cookAbility.print("\t");
+    this->cookAbility.print();
     this->materialCategories.print("\t");
     this->printFlavor("\t");
 }
@@ -103,11 +103,6 @@ void Recipe::initRarityBuff(const Json::Value &usrBuff) {
     r[4].dishBuff = getInt(usrBuff["PriceBuff_5"]);
     for (int i = 0; i < 5; i++) {
         rarityBuff[i] = r[i];
-    }
-    if (MODE == 2) {
-        for (int i = 0; i < 5; i++) {
-            rarityBuff[i].dishNum = 1;
-        }
     }
 }
 void Recipe::getMaterials(Json::Value &materialsJson) {

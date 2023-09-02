@@ -48,11 +48,8 @@ class Chef {
     }
     static void initBuff(const Json::Value &usrBuff) {
         // std::cout << usrBuff.toStyledString() << std::endl;
-        if (MODE == 2) {
-            coinBuffOn = false;
-        } else {
-            coinBuffOn = true;
-        }
+        coinBuffOn = true;
+
         setGlobalBuff(CookAbility(usrBuff));
         setGlobalAbilityMale(getInt(usrBuff["Male"]));
         setGlobalAbilityFemale(getInt(usrBuff["Female"]));
@@ -94,7 +91,12 @@ class Chef {
 };
 typedef std::vector<Chef> CList;
 void loadChef(CList &chefList, int chefRarity, const Json::Value &gameData,
-              const Json::Value &usrData, bool allowTool);
+              const Json::Value &usrData
+#ifndef _WIN32
+              ,
+              bool allowTool
+#endif
+);
 
 // void loadChefTools(CList &chefList, CList &newChefList);
 std::string getToolName(ToolEnum tool);

@@ -23,6 +23,7 @@ struct History {
 class SARunner {
     Randomizer *randomMoveFunc;
     f::CoolingSchedule coolingScheduleFunc;
+    int threadId;
     int stepMax;
     int tMax;
     int tMin;
@@ -62,10 +63,14 @@ class SARunner {
     SARunner(
         const RuleInfo *rl, CList *chefList, RList *recipeList,
         bool randomizeChef,
-        f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative);
+        f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative,
+        int threadId = -1);
     States run(States *s = NULL,
 #ifdef EMSCRIPTEN_PROGRESS
                emscripten::val postProgress = emscripten::val::null(),
+#endif
+#ifndef EMSCRIPTEN
+               bool progress = false,
 #endif
                bool silent = false, const char *fn = NULL);
 

@@ -25,8 +25,9 @@ template <typename T> bool inArray(T **array, int size, T *value) {
     return false;
 }
 
-int sumPrice(const RuleInfo &rl, States s, int log = false,
-             bool exactChefTool = false);
+int sumPrice(const RuleInfo &rl, States s, int log = false, int toolValue = 100,
+             int chefIdForTool = -1);
+void exactChefTool(const RuleInfo &rl, States &s);
 
 namespace f {
 typedef double (*CoolingSchedule)(int, int, double, double);

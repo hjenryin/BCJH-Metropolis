@@ -2,84 +2,6 @@
 #include "Chef.hpp"
 #include <cmath>
 #include "utils/Printer.hpp"
-int getPrice(Skill &skill, Recipe &recipe, ActivityBuff *activityBuff,
-             bool verbose) {
-    // if (verbose)
-    //     std::cout << chef.name << " " << recipe.name << std::endl;
-    int grade = skill.ability / recipe.cookAbility;
-    // std::cout << grade << std::endl;
-    int gradebuff = 0;
-    switch (grade) {
-    case 0:
-        return 0;
-    case 1:
-        gradebuff = 0;
-        break;
-    case 2:
-        gradebuff = 10;
-        break;
-    case 3:
-        gradebuff = 30;
-        break;
-    case 4:
-        gradebuff = 50;
-        break;
-    default:
-        gradebuff = 100;
-    }
-    gradebuff += skill.rarityBuff[recipe.rarity];
-    int activityBuffValue = 0;
-    // std::cout << "activityBuff: " << activityBuff << std::endl;
-    if (activityBuff != nullptr) {
-        for (auto &i : activityBuff->materialBuff) {
-            if (recipe.materials.find(i.first) != recipe.materials.end()) {
-                activityBuffValue += i.second;
-            }
-        }
-        for (auto &i : activityBuff->rarityBuff) {
-            if (recipe.rarity == i.first) {
-                activityBuffValue += i.second;
-            }
-        }
-        for (auto &i : activityBuff->flavorBuff) {
-            if (recipe.flavor == i.first) {
-                activityBuffValue += i.second;
-            }
-        }
-    }
-    // std::cout << "activityBuff: " << activityBuff << std::endl;
-    auto rb = recipe.rarityBuff[recipe.rarity - 1];
-    int skillBuff = skill.flavorBuff * recipe.flavor +
-                    recipe.cookAbility * skill.abilityBuff +
-                    recipe.materialCategories * skill.materialBuff +
-                    rb.dishBuff;
-    int buff = gradebuff + skillBuff + (Chef::coinBuffOn ? skill.coinBuff : 0) +
-               activityBuffValue;
-    // std::cout << buff << std::endl;
-    double bonus = 1.0 + buff / 100.0;
-    // std::cout << bonus << std::endl;
-    int singlePrice = (int)std::ceil(recipe.price * bonus);
-    // std::cout << singlePrice << std::endl;
-    int totalPrice = singlePrice * rb.dishNum;
-    if (verbose) {
-        // chef.print();
-        recipe.print();
-        std::cout << "等级: " << grade << "，加成" << gradebuff << "%"
-                  << std::endl;
-        std::cout << "Skill: " << skillBuff
-                  << " (=" << skill.flavorBuff * recipe.flavor << " + "
-                  << recipe.cookAbility * skill.abilityBuff << " + "
-                  << recipe.materialCategories * skill.materialBuff << " + "
-                  << rb.dishBuff << ")"
-                  << " + 金币" << (Chef::coinBuffOn ? skill.coinBuff : 0) << ")"
-                  << std::endl;
-        if (activityBuff != NULL)
-            std::cout << "规则: " << activityBuffValue << std::endl;
-        std::cout << "Buff: " << buff << std::endl;
-        std::cout << "Price: " << totalPrice << std::endl;
-    }
-    return totalPrice;
-}
 std::string gradeName(int i) {
     switch (i) {
     case 1:
@@ -96,7 +18,7 @@ std::string gradeName(int i) {
         return "未知，是BUG，菜谱等级为" + std::to_string(i);
     }
 }
-BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
+BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
                      bool verbose) {
     // std::cout << chef.name << " " << recipe.name << std::endl;
     int grade = skill.ability / recipe->cookAbility;
@@ -135,7 +57,8 @@ BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
     int skillBuff = skill.flavorBuff * recipe->flavor +
                     recipe->cookAbility * skill.abilityBuff +
                     recipe->materialCategories * skill.materialBuff +
-                    rb.dishBuff + (Chef::coinBuffOn ? skill.coinBuff : 0);
+                    rb.dishBuff +
+                    (Chef::coinBuffOn ? skill.pricePercentBuff : 0);
     int buff = gradebuff + skillBuff + intentionAddBuff;
     int singlePrice = (int)std::ceil((recipe->price + rule.baseRule.directAdd) *
                                      (1.0 + intentionBaseBuff / 100.0) *
@@ -156,7 +79,8 @@ BanquetInfo getPrice(Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
         skillPrinter.add("食材",
                          recipe->materialCategories * skill.materialBuff);
         skillPrinter.add("火数修炼", rb.dishBuff);
-        skillPrinter.add("金币", (Chef::coinBuffOn ? skill.coinBuff : 0));
+        skillPrinter.add("金币",
+                         (Chef::coinBuffOn ? skill.pricePercentBuff : 0));
 
         Printer intentionPrinter("意图");
         intentionPrinter.noValue();

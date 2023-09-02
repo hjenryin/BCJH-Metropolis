@@ -144,7 +144,7 @@ class RankCondition : public Condition {
         : Condition(start, lasts), rank(rank) {}
     int operator()(States &s, int overrideDishStart = -1) const override {
         int start = overrideDishStart == -1 ? this->start : overrideDishStart;
-        auto skills = s.getSkills();
+        auto skills = s.getCookAbilities();
         auto &recipes = s.recipe;
         for (int i = start; i < start + lasts; i++) {
             auto &skill = skills[i / DISH_PER_CHEF];

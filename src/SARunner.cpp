@@ -12,12 +12,16 @@
 // #include "activityRule.hpp"
 #include <limits.h>
 #include "Randomizer.hpp"
+#ifndef EMSCRIPTEN
+#include "utils/ProgressBar.hpp"
+#endif
 
 int SARunner::T_MAX_CHEF, SARunner::T_MAX_RECIPE, SARunner::iterChef,
     SARunner::iterRecipe, SARunner::targetScore;
 SARunner::SARunner(const RuleInfo *rl, CList *chefList, RList *recipeList,
-                   bool randomizeChef, f::CoolingSchedule coolingScheduleFunc)
-    : rl(rl), chefList(chefList), recipeList(recipeList),
+                   bool randomizeChef,
+                   f::CoolingSchedule coolingScheduleFunc, int threadId)
+    : threadId(threadId), rl(rl), chefList(chefList), recipeList(recipeList),
       coolingScheduleFunc(coolingScheduleFunc) {
     if (randomizeChef) {
         this->randomMoveFunc =
@@ -69,7 +73,7 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
     RList *recipeList = this->randomMoveFunc->r;
 
     for (int j = 0; j < NUM_CHEFS; j++) {
-        auto &skill = s.getSkills()[j];
+        auto &skill = s.getCookAbilities()[j];
         for (int i = 0; i < DISH_PER_CHEF; i++) {
             int count = 0;
             Recipe *newRecipe;
@@ -92,6 +96,9 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
 States SARunner::run(States *s0,
 #ifdef EMSCRIPTEN_PROGRESS
                      emscripten::val postProgress,
+#endif
+#ifndef EMSCRIPTEN
+                     bool progress,
 #endif
                      bool silent, const char *filename) {
     States s;
@@ -122,6 +129,23 @@ States SARunner::run(States *s0,
         // else {
         //     std::cout << "postProgress is null" << postProgress << std::endl;
         // }
+#endif
+#ifndef EMSCRIPTEN
+
+        if (silent) {
+            // if (step % 500 == 0) {
+            //     std::cout << "\r" << step << "/" << this->stepMax
+            //               << std::flush;
+            // }
+        } else {
+            if (step * 10 / stepMax > progressPercent) {
+                progressPercent = step * 10 / stepMax;
+                MultiThreadProgressBar::getInstance(0)->print(
+                    threadId, progressPercent * 10,
+                    "当前最高分数：" + std::to_string(this->bestEnergy));
+            }
+        }
+
 #endif
         States newS;
         newS = (*randomMoveFunc)(s);
@@ -160,6 +184,12 @@ States SARunner::run(States *s0,
         }
         step++;
     }
+#ifndef EMSCRIPTEN
+    if (progress && !silent) {
+        MultiThreadProgressBar::getInstance(0)->print(
+            threadId, 100, "最高分数：" + std::to_string(this->bestEnergy));
+    }
+#endif
 #ifdef EMSCRIPTEN_PROGRESS
     if (postProgress != emscripten::val::null()) {
         postProgress(100);
@@ -201,7 +231,8 @@ void SARunner::print(States s, bool verbose) const {
     int r = 0;
     for (int i = 0; i < NUM_CHEFS; i++) {
 
-        std::cout << "Chef: " << *s[i]->name << std::endl << "Recipe ";
+        std::cout << "Chef: " << *s.getChefPtr(i)->name << std::endl
+                  << "Recipe ";
         for (int j = 0; j < DISH_PER_CHEF; j++) {
             std::cout << j << ": " << s.recipe[r++]->name;
         }

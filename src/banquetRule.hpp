@@ -25,7 +25,7 @@ void banquetRule(BanquetRuleTogether *const &rule, States &s, int *bestfull) {
         lenientRule[i] = &rule[i].lenientRule;
     }
 
-    auto skill = s.getSkills();
+    auto skill = s.getCookAbilities();
     bestfull[0] = banquetRuleDA_GENG_REN(strictRule, lenientRule, s, skill, 0);
     bestfull[1] = banquetRuleYU_GUI_REN(strictRule, lenientRule, s, skill, 1);
     return;

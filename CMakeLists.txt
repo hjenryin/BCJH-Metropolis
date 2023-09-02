@@ -42,6 +42,10 @@ file(GLOB src_list_cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
                       )
 if (CMAKE_SYSTEM_NAME MATCHES "Emscripten")
     list(REMOVE_ITEM src_list_cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_js_cpp.cpp)
+    list(REMOVE_ITEM src_list_cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_win.cpp)
+else()
+    list(REMOVE_ITEM src_list_cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_js_cpp.cpp)
+    list(REMOVE_ITEM src_list_cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_js.cpp)
 endif()
 
 # add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/include)	

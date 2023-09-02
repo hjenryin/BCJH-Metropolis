@@ -225,7 +225,7 @@ CSVWarning loadToolFromFile(Chef *chef, ToolFileType t) {
             } else {
                 ability->boil += str2i(tool[j++]);
             }
-            skill->coinBuff += str2i(tool[j++]);
+            skill->pricePercentBuff += str2i(tool[j++]);
             abilityBuff->bake += str2i(tool[j++]);
             abilityBuff->knife += str2i(tool[j++]);
             abilityBuff->stirfry += str2i(tool[j++]);

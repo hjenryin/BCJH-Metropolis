@@ -9,7 +9,6 @@
 #define NUM_CHEFS (NUM_GUESTS * CHEFS_PER_GUEST)
 #define NUM_DISHES (NUM_GUESTS * DISH_PER_CHEF)
 
-#define MODE 1 // 1:宴会模式; 2:限时任务
 #define TARGET_SCORE_APPROXIMATE 3170000
 // 这里输分数线，达标之后将停止搜索
 
@@ -28,6 +27,11 @@
 // ************************************************** //
 // ** 以下内容不建议修改，除非你清楚地知道这是什么意思 ** //
 // ************************************************** //
+
+#define NO_FORMAT "\033[0m"
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define UNDERLINE "\033[4m"
 
 #define T_MAX_CHEF_orig TARGET_SCORE_APPROXIMATE / 100 // 选择厨师时的初始温度
 #define T_MAX_RECIPE_orig                                                      \

@@ -2,8 +2,8 @@
 #include "functions.hpp"
 #include "SARunner.hpp"
 const double bestToolProb = 0.9;
-ToolEnum toolHeuristic(States &s, int chefId) {
-    auto chef = s[chefId];
+ToolEnum toolHeuristic(States s, int chefId) {
+    auto chef = s.getChefPtr(chefId);
     Recipe **recipes = &s.recipe[chefId * DISH_PER_CHEF];
     if (chef->getTool() == NO_TOOL)
         return NO_TOOL;
@@ -61,7 +61,7 @@ bool ChefRandomizer::randomChef(States &s) const {
     }
     bool changed = true;
     auto oldS = s;
-    Skill *skills = s.getSkills();
+    const Skill *skills = s.getCookAbilities();
     int i = dishNum;
     do {
         auto skill = skills[i / DISH_PER_CHEF];
@@ -91,8 +91,8 @@ bool Randomizer::swapRecipe(States &s) const {
         int recipeNum2 = rand() % (NUM_CHEFS * DISH_PER_CHEF);
         int chefNum1 = recipeNum1 / DISH_PER_CHEF;
         int chefNum2 = recipeNum2 / DISH_PER_CHEF;
-        const Chef *chef1 = s[chefNum1];
-        const Chef *chef2 = s[chefNum2];
+        const Chef *chef1 = s.getChefPtr(chefNum1);
+        const Chef *chef2 = s.getChefPtr(chefNum2);
         if (!toolChanged && random < bestToolProb) {
             toolChanged = true;
             s.modifyTool(chefNum1, toolHeuristic(s, chefNum1));
@@ -101,10 +101,10 @@ bool Randomizer::swapRecipe(States &s) const {
             swap(s.recipe[recipeNum1], s.recipe[recipeNum2]);
             return true;
         } else {
-            bool chef1CanCook = s.getSkills()[chefNum1].ability /
+            bool chef1CanCook = s.getCookAbilities()[chefNum1].ability /
                                     s.recipe[recipeNum2]->cookAbility >
                                 0;
-            bool chef2CanCook = s.getSkills()[chefNum2].ability /
+            bool chef2CanCook = s.getCookAbilities()[chefNum2].ability /
                                     s.recipe[recipeNum1]->cookAbility >
                                 0;
             if (chef1CanCook && chef2CanCook) {
@@ -119,7 +119,7 @@ bool Randomizer::swapRecipe(States &s) const {
 bool RecipeRandomizer::randomRecipe(States &s) const {
     for (int tries = 0; tries < RANDOM_SEARCH_TIMEOUT; tries++) {
         int recipeNum = rand() % (NUM_CHEFS * DISH_PER_CHEF);
-        Skill &skill = s.getSkills()[recipeNum / DISH_PER_CHEF];
+        const Skill &skill = s.getCookAbilities()[recipeNum / DISH_PER_CHEF];
         bool changed = this->unrepeatedRandomRecipe(
             skill, s.recipe, NUM_CHEFS * DISH_PER_CHEF, recipeNum);
         if (changed) {
@@ -141,7 +141,7 @@ bool ChefRandomizer::swapChefTool(States &s) const {
             tool = rand() % 6 + ABILITY_ENUM_START;
         } while (tool == orig_tool);
         s.modifyTool(chefNum, (ToolEnum)tool);
-        auto &skill = s.getSkills()[chefNum];
+        auto &skill = s.getCookAbilities()[chefNum];
         auto &ability = skill.ability;
         for (int i = chefNum * DISH_PER_CHEF;
              i < chefNum * DISH_PER_CHEF + DISH_PER_CHEF; i++) {
@@ -169,8 +169,7 @@ States RecipeRandomizer::operator()(States s) {
     debugIntegrity(s);
     double r = (double)rand() / RAND_MAX;
     double p_randomRecipe = 1;
-    if (MODE == 1)
-        p_randomRecipe = 0.9;
+    p_randomRecipe = 0.9;
     if (r > p_randomRecipe) {
         success += swapRecipe(s);
     } else {
@@ -199,8 +198,7 @@ States ChefRandomizer::operator()(States s) {
     double p_randomChef = 0.9;
     int path;
     calls++;
-    if (MODE == 1)
-        p_randomChef = 0.85;
+    p_randomChef = 0.85;
     if (random < 1 - p_randomChef) {
         path = 0;
         success += swapChefTool(s);
@@ -228,7 +226,7 @@ States ChefRandomizer::operator()(States s) {
 #endif
     return saRunner.run(&s);
 }
-bool Randomizer::unrepeatedRandomRecipe(Skill &skill, Recipe **recipes,
+bool Randomizer::unrepeatedRandomRecipe(const Skill &skill, Recipe **recipes,
                                         int size, int index,
                                         int repeats) const {
     int count = 0;
