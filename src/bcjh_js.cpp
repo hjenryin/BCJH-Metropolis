@@ -17,6 +17,7 @@
 #include <future>
 #include <vector>
 #include "bcjh_js.hpp"
+#include "run.hpp"
 #ifdef EMSCRIPTEN
 #include <emscripten/bind.h>
 using namespace emscripten;
@@ -82,10 +83,13 @@ std::string
     bool silent = false;
     int log = SILENT | VERBOSE;
     struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
     // std::cout << ts.tv_nsec << std::endl;
     // std::cout << ts.tv_sec << std::endl;
-    int seed = ts.tv_nsec + ts.tv_sec + (int)time(NULL);
+    int seed = (int)time(NULL);
+#ifdef EMSCRIPTEN
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    seed += ts.tv_nsec + ts.tv_sec;
+#endif
     // seed = 2115400760;
     std::stringstream userDataSs(userDataIn);
     std::stringstream ruleDataSs(ruleDataIn);
@@ -179,29 +183,4 @@ std::string
         chef.deletePointers();
     }
     return resultStr;
-}
-
-Result run(const RuleInfo &rl, CList &chefList, RList &recipeList, int log,
-           bool silent, int seed
-#ifdef EMSCRIPTEN_PROGRESS
-           ,
-           emscripten::val postProgress
-#endif
-) {
-    auto *chefListPtr = &chefList;
-    // seed = -1676265360;
-    srand(seed);
-    // throw std::runtime_error("Not implemented");
-    SARunner saRunner(&rl, chefListPtr, &recipeList, true, f::t_dist_slow);
-    // std::cout << log << std::endl;
-
-    auto s = saRunner.run(NULL,
-#ifdef EMSCRIPTEN_PROGRESS
-                          postProgress,
-#endif
-                          silent);
-    // *s = perfectChef(rl, *s, chefListPtr);
-    int score = sumPrice(rl, s, log, false);
-    debugIntegrity(s);
-    return Result{score, seed, chefListPtr, recipeList, s, ""};
 }

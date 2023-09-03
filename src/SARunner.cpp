@@ -18,9 +18,9 @@
 
 int SARunner::T_MAX_CHEF, SARunner::T_MAX_RECIPE, SARunner::iterChef,
     SARunner::iterRecipe, SARunner::targetScore;
-SARunner::SARunner(const RuleInfo *rl, CList *chefList, RList *recipeList,
-                   bool randomizeChef,
-                   f::CoolingSchedule coolingScheduleFunc, int threadId)
+SARunner::SARunner(const RuleInfo *rl, const CList *chefList, RList *recipeList,
+                   bool randomizeChef, f::CoolingSchedule coolingScheduleFunc,
+                   int threadId)
     : threadId(threadId), rl(rl), chefList(chefList), recipeList(recipeList),
       coolingScheduleFunc(coolingScheduleFunc) {
     if (randomizeChef) {
@@ -40,7 +40,7 @@ SARunner::SARunner(const RuleInfo *rl, CList *chefList, RList *recipeList,
 #endif
 }
 
-States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
+States SARunner::generateStates(const CList *chefList, Chef *chefs[NUM_CHEFS]) {
     States s;
 
     // std::cout << chefs << std::endl;
@@ -50,7 +50,7 @@ States SARunner::generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]) {
 
         for (int j = 0; j < NUM_CHEFS; j++) {
             int count = 0;
-            Chef *randomChef;
+            const Chef *randomChef;
             do {
                 randomChef = &chefList->at(rand() % chefList->size());
                 s.setChef(j, *randomChef);

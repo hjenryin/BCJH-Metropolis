@@ -28,12 +28,12 @@ inline bool debugIntegrity(States &s) {
 
 class Randomizer {
   public:
-    CList *c;
+    const CList *c;
     RList *r;
     const RuleInfo *rl;
     int success;
     int calls;
-    Randomizer(CList *c, RList *r, const RuleInfo *rl)
+    Randomizer(const CList *c, RList *r, const RuleInfo *rl)
         : c(c), r(r), rl(rl), success(0), calls(0) {}
     Randomizer() : success(0), calls(0) {}
     virtual States operator()(States s) = 0;
@@ -48,7 +48,7 @@ class Randomizer {
 class RecipeRandomizer : public Randomizer {
 
   public:
-    RecipeRandomizer(CList *c, RList *r, const RuleInfo *rl)
+    RecipeRandomizer(const CList *c, RList *r, const RuleInfo *rl)
         : Randomizer(c, r, rl) {}
     States operator()(States s) override;
     ~RecipeRandomizer() override {}
@@ -60,7 +60,8 @@ class ChefRandomizer : public Randomizer {
     int targetScore;
 
   public:
-    ChefRandomizer(CList *c, RList *r, const RuleInfo *rl, int targetScore)
+    ChefRandomizer(const CList *c, RList *r, const RuleInfo *rl,
+                   int targetScore)
         : Randomizer(c, r, rl), targetScore(targetScore) {}
     States operator()(States s) override;
     ~ChefRandomizer() override {}

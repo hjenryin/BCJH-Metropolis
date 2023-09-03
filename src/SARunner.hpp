@@ -27,7 +27,7 @@ class SARunner {
     int stepMax;
     int tMax;
     int tMin;
-    CList *chefList;
+    const CList *chefList;
     RList *recipeList;
     static int targetScore;
     const RuleInfo *rl;
@@ -35,7 +35,7 @@ class SARunner {
 #ifdef VIS_HISTORY
     History *history;
 #endif
-    States generateStates(CList *chefList, Chef *chefs[NUM_CHEFS]);
+    States generateStates(const CList *chefList, Chef *chefs[NUM_CHEFS]);
     static int T_MAX_CHEF;
     static int T_MAX_RECIPE;
     static int iterChef;
@@ -61,7 +61,7 @@ class SARunner {
      * @param coolingScheduleFunc
      */
     SARunner(
-        const RuleInfo *rl, CList *chefList, RList *recipeList,
+        const RuleInfo *rl, const CList *chefList, RList *recipeList,
         bool randomizeChef,
         f::CoolingSchedule coolingScheduleFunc = f::exponential_multiplicative,
         int threadId = -1);

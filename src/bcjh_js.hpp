@@ -31,14 +31,7 @@ extern double calculatePriceTime, calculatePriceTimeOut;
 #endif
 
 void initChefRecipePairs(CList &, RList &);
-struct Result {
-    int score;
-    int seed;
-    CList *chefList;
-    RList recipeList;
-    States state;
-    std::string logs;
-};
+
 void calculator(CList &, RList &);
 
 // // define a try-catch function wrapper
@@ -96,13 +89,6 @@ std::string
           emscripten::val postProgress = emscripten::val::null()
 #endif
     );
-Result run(const RuleInfo &rl, CList &chefList, RList &recipeList, int log,
-           bool silent, int seed
-#ifdef EMSCRIPTEN_PROGRESS
-           ,
-           emscripten::val postProgress
-#endif
-);
 
 #ifdef EMSCRIPTEN
 EMSCRIPTEN_BINDINGS(module) { emscripten::function("run", &runjs); };

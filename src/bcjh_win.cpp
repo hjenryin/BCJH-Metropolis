@@ -21,21 +21,14 @@
 #include <unistd.h>
 #endif
 #include "utils/ProgressBar.hpp"
+#include "run.hpp"
 
 const int targetScore = 3170000;
 const int T_MAX_CHEF = targetScore / 100;
 const int T_MAX_RECIPE = targetScore / 400;
 
 void initChefRecipePairs(CList &, RList &);
-struct Result {
-    int score;
-    int seed;
-    CList *chefList;
-    RList recipeList;
-    States *state;
-};
-Result run(int, const RuleInfo &, const CList &, RList &, int, bool, int);
-void calculator(CList &, RList &);
+
 std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFiles();
 
 void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &calculate,
@@ -115,8 +108,6 @@ int main(int argc, char *argv[]) {
     int totalScore = 0;
     int num_threads = std::thread::hardware_concurrency();
 
-    Result result;
-
     if (!mp) {
         num_threads = 1;
     }
@@ -130,25 +121,19 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i < num_threads; i++) {
 
-        futures.push_back(std::async(std::launch::async, run, i, std::ref(rl),
+        futures.push_back(std::async(std::launch::async, run, std::ref(rl),
                                      std::ref(chefList), std::ref(recipeList),
-                                     0, !silent, seed++));
+                                     0, !silent, seed++, i));
     }
     // std::cout << "分数：";
     int max_score = 0;
+    Result result;
     for (auto &future : futures) {
         Result tmp = future.get();
         totalScore += tmp.score;
         if (tmp.score > max_score) {
-            if (max_score != 0) {
-                delete result.chefList;
-                delete result.state;
-            }
             result = tmp;
             max_score = result.score;
-        } else {
-            delete tmp.chefList;
-            delete tmp.state;
         }
         // std::cout << tmp.score << " ";
     }
@@ -158,17 +143,10 @@ int main(int argc, char *argv[]) {
     // log += 0x10;
 
     std::cout << "随机种子：" << result.seed << std::endl;
-    exactChefTool(rl, *result.state);
-    sumPrice(rl, *result.state, log);
+    exactChefTool(rl, result.state);
+    sumPrice(rl, result.state, log);
     std::cout << "**************\n总分: " << result.score << "\n***************"
               << std::endl;
-    if (!silent) {
-        SARunner saRunnerPrint(&rl, result.chefList, &result.recipeList, false,
-                               f::t_dist_fast);
-        saRunnerPrint.run(result.state, false, silent, "../out/recipe");
-    }
-    delete result.chefList;
-    delete result.state;
 
     end = clock();
     std::cout << "用时：" << (double)(end - start) / CLOCKS_PER_SEC << "秒"
@@ -182,30 +160,7 @@ int main(int argc, char *argv[]) {
     for (auto iter = Skill::skillList.begin(); iter != Skill::skillList.end();
          iter++) {
         auto &s = iter->second;
-        for (auto &ce : s.conditionalEffects) {
-            delete ce;
-        }
     }
-}
-Result run(int threadId, const RuleInfo &rl, const CList &chefList,
-           RList &recipeList, int log, bool progress, int seed) {
-    CList *chefListPtr = new CList(chefList);
-
-    for (auto &chef : *chefListPtr) {
-        chef.recipeLearned = new std::vector<Recipe *>;
-    }
-    srand(seed);
-    SARunner saRunner(&rl, chefListPtr, &recipeList, true, f::t_dist_slow,
-                      threadId);
-    // std::cout << log << std::endl;
-    States *s = new States;
-    *s = saRunner.run(NULL, progress, false);
-    // *s = perfectChef(*s, chefListPtr);
-    int score = sumPrice(rl, *s, log);
-    for (auto &chef : *chefListPtr) {
-        delete chef.recipeLearned;
-    }
-    return Result{score, seed, chefListPtr, recipeList, s};
 }
 
 /**
