@@ -36,6 +36,7 @@ enum FlavorEnum {
 int getEnum(const std::string &s);
 
 enum ToolFileType {
+    NOT_LOADED,
     NO_FILE__NO_TOOL,
     EMPTY_FILE__NOT_EQUIPPED,
     CUSTOMIZE_TOOL

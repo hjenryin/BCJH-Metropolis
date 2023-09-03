@@ -26,7 +26,6 @@ const int targetScore = 3170000;
 const int T_MAX_CHEF = targetScore / 100;
 const int T_MAX_RECIPE = targetScore / 400;
 
-bool Chef::coinBuffOn = true;
 void initChefRecipePairs(CList &, RList &);
 struct Result {
     int score;
@@ -37,7 +36,7 @@ struct Result {
 };
 Result run(int, const RuleInfo &, const CList &, RList &, int, bool, int);
 void calculator(CList &, RList &);
-std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFile();
+std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFiles();
 
 void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &calculate,
                bool &mp, int &seed) {
@@ -81,26 +80,28 @@ int main(int argc, char *argv[]) {
     bool calculate = false;
     bool mp = true;
     parseArgs(argc, argv, silent, log, calculate, mp, seed);
-    auto [usrData, gameData, ruleData] = loadJsonFile();
+    auto [usrData, gameData, ruleData] = loadJsonFiles();
     CList chefList;
     RList recipeList;
     RuleInfo rl;
     try {
         std::cout << "正在读取文件..." << std::endl;
-        loadBanquetRule(rl, ruleData, true);
-        loadRecipe(recipeList, usrData, gameData);
-        loadChef(chefList, 5, gameData, usrData);
+        loadFirstBanquetRule(rl, ruleData, true);
+        Recipe::initRarityBuff(usrData["userUltimate"]);
+
+        recipeList = loadRecipe(gameData, usrData);
+        Chef::loadAppendChef(chefList, 5, gameData, usrData);
         int chefRarity = 4;
         do {
-            loadChef(chefList, chefRarity, gameData, usrData);
+            Chef::loadAppendChef(chefList, chefRarity, gameData, usrData);
             chefRarity--;
         } while (chefList.size() <= NUM_CHEFS && chefRarity >= 0);
         std::cout << "读取文件成功。" << std::endl;
-    } catch (Json::RuntimeError &e) {
+    } catch (Json::RuntimeError &) {
         std::cout << "json文件格式不正确。如果文件内容是手动复制的，确认文件已"
                      "经复制完整。\n";
         exit(1);
-    } catch (Json::LogicError &e) {
+    } catch (Json::LogicError &) {
         std::cout << "json文件格式不正确。请确认文件来自白菜菊花而非图鉴网。\n";
         exit(1);
     }
@@ -189,7 +190,7 @@ int main(int argc, char *argv[]) {
 Result run(int threadId, const RuleInfo &rl, const CList &chefList,
            RList &recipeList, int log, bool progress, int seed) {
     CList *chefListPtr = new CList(chefList);
-    *chefListPtr = chefList;
+
     for (auto &chef : *chefListPtr) {
         chef.recipeLearned = new std::vector<Recipe *>;
     }
@@ -210,7 +211,7 @@ Result run(int threadId, const RuleInfo &rl, const CList &chefList,
 /**
  * @return userData, gameData
  */
-std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFile() {
+std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFiles() {
     Json::Value usrData;
     Json::Value gameData;
     Json::Value ruleData;
@@ -257,7 +258,6 @@ std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFile() {
         gameDataF.close();
         ruleDataF >> ruleData;
         ruleDataF.close();
-
     } catch (Json::RuntimeError &e) {
 
         std::cout

@@ -140,7 +140,7 @@ States SARunner::run(States *s0,
         } else {
             if (step * 10 / stepMax > progressPercent) {
                 progressPercent = step * 10 / stepMax;
-                MultiThreadProgressBar::getInstance(0)->print(
+                MultiThreadProgressBar::getInstance()->print(
                     threadId, progressPercent * 10,
                     "当前最高分数：" + std::to_string(this->bestEnergy));
             }
@@ -186,7 +186,7 @@ States SARunner::run(States *s0,
     }
 #ifndef EMSCRIPTEN
     if (progress && !silent) {
-        MultiThreadProgressBar::getInstance(0)->print(
+        MultiThreadProgressBar::getInstance()->print(
             threadId, 100, "最高分数：" + std::to_string(this->bestEnergy));
     }
 #endif

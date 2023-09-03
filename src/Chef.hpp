@@ -13,7 +13,8 @@
 #include "../config.hpp"
 #include "utils/json.hpp"
 class Recipe;
-
+class Chef;
+typedef std::vector<Chef> CList;
 class Chef {
   private:
     static CookAbility globalAbilityBuff;
@@ -21,6 +22,7 @@ class Chef {
     static int globalAbilityFemale;
     void addSkill(int id);
     ToolEnum tool = NOT_EQUIPPED;
+    static ToolFileType toolFileType;
 
   public:
     static bool coinBuffOn;
@@ -55,6 +57,15 @@ class Chef {
         setGlobalAbilityFemale(getInt(usrBuff["Female"]));
         setGlobalAbilityAll(getInt(usrBuff["All"]));
     }
+    static void loadAppendChef(CList &chefList, int chefRarity,
+                               const Json::Value &gameData,
+                               const Json::Value &usrData
+#ifndef _WIN32
+                               ,
+                               bool allowTool
+#endif
+    );
+
     Chef(Json::Value &v, int ultimateSkillId);
     Chef() { id = -1; }
     void print() const;
@@ -89,16 +100,7 @@ class Chef {
     //     }
     // }
 };
-typedef std::vector<Chef> CList;
-void loadChef(CList &chefList, int chefRarity, const Json::Value &gameData,
-              const Json::Value &usrData
-#ifndef _WIN32
-              ,
-              bool allowTool
-#endif
-);
 
-// void loadChefTools(CList &chefList, CList &newChefList);
 std::string getToolName(ToolEnum tool);
 
 #endif

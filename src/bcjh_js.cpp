@@ -111,13 +111,14 @@ std::string
         Skill::loadJson(gameData["skills"]);
         Recipe::initRarityBuff(userData["userUltimate"]);
         Chef::initBuff(userData["userUltimate"]);
-        loadChef(chefList, 5, gameData, userData, allowTool);
+        Chef::loadAppendChef(chefList, 5, gameData, userData, allowTool);
         int chefRarity = 4;
         do {
-            loadChef(chefList, chefRarity, gameData, userData, allowTool);
+            Chef::loadAppendChef(chefList, chefRarity, gameData, userData,
+                                 allowTool);
             chefRarity--;
         } while (chefList.size() <= NUM_CHEFS && chefRarity >= 0);
-        loadRecipe(recipeList, gameData, userData);
+        recipeList = loadRecipe(gameData, userData);
         if (chefList.size() <= NUM_CHEFS) {
 
             std::cout << NoChefException(chefList.size()).what() << std::endl;

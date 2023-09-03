@@ -100,10 +100,12 @@ int sumPrice(const RuleInfo &rl, States s, int log, int toolValue,
         totalFull = 0;
         scoreCache = 0;
         fullCache = 0;
-        auto skills = s.getCookAbilities();
+
         for (int i = 0; i < DISH_PER_CHEF * CHEFS_PER_GUEST; i++) {
             if ((log & 0x10) && i % 3 == 0) {
+#ifdef EMSCRIPTEN
                 std::cout << "🧑‍🍳";
+#endif
                 s.getChefPtr(chefStart + i / 3)->print();
             }
             biCache =

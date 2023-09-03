@@ -22,8 +22,14 @@ class MultiThreadProgressBar {
     }
 
   public:
-    static MultiThreadProgressBar *getInstance(int numThreads) {
+    static MultiThreadProgressBar *getInstance(int numThreads = 0) {
         if (instance == NULL) {
+            if (numThreads == 0) {
+                std::cout << "Progress Bar has to be initialized with at least "
+                             "one thread"
+                          << std::endl;
+                exit(1);
+            }
             // std::cout << "Progress bar initialized with " << numThreads
             //   << " threads." << std::endl;
             instance = new MultiThreadProgressBar(numThreads);

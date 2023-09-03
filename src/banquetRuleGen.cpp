@@ -56,21 +56,20 @@ int loadBanquetRuleFromJson(RuleInfo &ruleInfo, const Json::Value &rulesTarget,
 /**
  * @todo Error handling.
  */
-int loadBanquetRule(RuleInfo &ruleInfo, const Json::Value &gameData, int ruleID,
-                    bool print) {
+int loadFirstBanquetRule(RuleInfo &ruleInfo, const Json::Value &gameData,
+                         bool print) {
     auto &buffsGD = gameData["buffs"];
     auto &intentsGD = gameData["intents"];
     auto &rulesGD = gameData["rules"];
     // find the rule in rulesGD with Id ruleID
-    Json::Value ruleGD;
-    for (auto &r : rulesGD) {
-        if (r["Id"].asInt() == ruleID) {
-            ruleGD = r;
-            break;
-        }
+    Json::Value ruleGD = rulesGD[0];
+    if (print) {
+        auto ruleName = ruleGD["title"].asString();
+        std::cout << "请核对规则：" << UNDERLINE << ruleName << NO_FORMAT
+                  << "。若规则还是上周的，说明还没有更新，请过段时间再运行。"
+                  << std::endl;
     }
-    if (print)
-        std::cout << "规则: " << ruleGD["Title"].asString() << std::endl;
+
     auto &rulesTarget =
         ruleGD.isMember("Group") ? ruleGD["Group"] : ruleGD["group"];
     if (rulesTarget.size() == 0) {
@@ -79,6 +78,7 @@ int loadBanquetRule(RuleInfo &ruleInfo, const Json::Value &gameData, int ruleID,
     }
     return loadBanquetRuleFromJson(ruleInfo, rulesTarget, buffsGD, intentsGD);
 }
+
 int loadBanquetRuleFromInput(RuleInfo &ruleInfo, const Json::Value &ruleData,
                              bool print) {
     if (print)

@@ -302,8 +302,15 @@ struct RuleInfo {
 };
 void banquetRuleGenerated(BanquetRuleTogether *rule, States &s,
                           const RuleInfo &allRules);
-int loadBanquetRule(RuleInfo &, const Json::Value &gameData, int ruleID,
-                    bool print = false);
+
+/**
+ * @brief Load the first Banquet Rule from json. This is used in linux or
+ * windows systems.
+ *
+ * @param ruleID If -1, use the first rule in the json file.
+ */
+int loadFirstBanquetRule(RuleInfo &, const Json::Value &gameData,
+                         bool print = false);
 int loadBanquetRuleFromInput(RuleInfo &, const Json::Value &ruleData,
                              bool print = false);
 #endif

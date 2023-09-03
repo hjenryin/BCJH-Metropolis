@@ -95,7 +95,7 @@ BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
         skillPrinter.print("│ ", " + ", "\n");
         intentionPrinter.print("│ ", "; ", "\n");
         std::cout << "│ 售价总计Buff: +" << buff << "%" << std::endl;
-        std::cout << "╰─> 饱腹度: " << full << "\t总价: " << totalPrice << "💰"
+        std::cout << "╰─> 饱腹度: " << full << "\t总价: " << totalPrice
                   << std::endl;
     }
     return b;

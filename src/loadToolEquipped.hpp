@@ -34,7 +34,7 @@ static ToolInfoBlock *tibptr;
 
 ToolFileType loadToolFile() {
 
-    auto dirs = {"./", "../data/", "../"};
+    auto dirs = {"./", "../data/", "../", "./data/"};
 
     auto fname = "toolEquipped.csv";
     ifstream toolFile;

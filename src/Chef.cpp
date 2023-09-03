@@ -14,6 +14,7 @@ bool Chef::coinBuffOn = true;
 CookAbility Chef::globalAbilityBuff;
 int Chef::globalAbilityMale = 0;
 int Chef::globalAbilityFemale = 0;
+ToolFileType Chef::toolFileType = NOT_LOADED;
 std::map<int, Skill> Skill::skillList;
 void initBuff(const Json::Value usrBuff) {
     Chef::setGlobalBuff(CookAbility(usrBuff));
@@ -36,11 +37,12 @@ void loadUltimateSkills(std::map<int, int> &ultimateSkills,
     splitUltimateSkill(ultimateSkills, usrBuff["Partial"]["id"]);
     splitUltimateSkill(ultimateSkills, usrBuff["Self"]["id"]);
 }
-void loadChef(CList &chefList, int chefRarity, const Json::Value &gameData,
-              const Json::Value &usrData
+void Chef::loadAppendChef(CList &chefList, int chefRarity,
+                          const Json::Value &gameData,
+                          const Json::Value &usrData
 #ifndef _WIN32
-              ,
-              bool allowTool
+                          ,
+                          bool allowTool
 #endif
 ) {
 
@@ -70,19 +72,23 @@ void loadChef(CList &chefList, int chefRarity, const Json::Value &gameData,
     }
 
 #ifdef _WIN32
-    auto t = loadToolFile();
-    if (t == EMPTY_FILE__NOT_EQUIPPED) {
-        std::cout << "toolEquipped.csv没有设定规则。允许所有厨师装备厨具。"
-                  << std::endl;
-    } else if (t == NO_FILE__NO_TOOL) {
-        std::cout << "未找到toolEquipped.csv文件。不会装配任何厨具。"
-                  << std::endl;
-    } else {
-        std::cout << "toolEquipped.csv文件已加载。" << std::endl;
+    bool firstTime;
+    if (toolFileType == NOT_LOADED) {
+        toolFileType = loadToolFile();
+
+        if (toolFileType == EMPTY_FILE__NOT_EQUIPPED) {
+            std::cout << "toolEquipped.csv没有设定规则。允许所有厨师装备厨具。"
+                      << std::endl;
+        } else if (toolFileType == NO_FILE__NO_TOOL) {
+            std::cout << "未找到toolEquipped.csv文件。不会装配任何厨具。"
+                      << std::endl;
+        } else {
+            std::cout << "toolEquipped.csv文件已加载。" << std::endl;
+        }
     }
     CSVWarning(w);
     for (auto &chef : chefList) {
-        w += loadToolFromFile(&chef, t);
+        w += loadToolFromFile(&chef, toolFileType);
     }
     if (w.missingRarity3) {
         std::cout
@@ -147,7 +153,7 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
 
 void Chef::print() const {
     std::cout << this->id << ": " << *this->name << "\t"
-              << (this->male ? "♂️" : "") << (this->female ? "♀️" : "")
+              << (this->male ? "男" : "") << (this->female ? "女" : "")
               << std::endl;
     this->skill->print();
 }
