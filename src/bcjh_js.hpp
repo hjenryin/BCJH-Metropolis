@@ -20,6 +20,7 @@
 #include <emscripten/bind.h>
 using namespace emscripten;
 #endif
+#include "run.hpp"
 
 #ifdef MEASURE_TIME
 extern double randomRecipeTime;
@@ -51,7 +52,7 @@ class ResultJsonSerializable {
                            RList recipeList, States state, std::string &logs)
         : score(score), seed(seed), chefList(chefList), recipeList(recipeList),
           state(state), logs(logs) {}
-    ResultJsonSerializable(Result result)
+    ResultJsonSerializable(Result &result)
         : score(result.score), seed(result.seed), chefList(result.chefList),
           recipeList(result.recipeList), state(result.state),
           logs(result.logs) {}

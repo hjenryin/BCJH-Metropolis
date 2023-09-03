@@ -1,3 +1,6 @@
+#ifndef SHARED_RUN_HPP
+#define SHARED_RUN_HPP
+
 #include <iostream>
 #include <string>
 #include "Chef.hpp"
@@ -52,3 +55,4 @@ Result run(const RuleInfo &rl, const CList &chefList, RList &recipeList,
     debugIntegrity(s);
     return Result{score, seed, chefListPtr, recipeList, s, ""};
 }
+#endif

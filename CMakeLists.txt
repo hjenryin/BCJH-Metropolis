@@ -40,13 +40,17 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src src)
 file(GLOB src_list_cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp 
                        ${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp
                       )
-if (CMAKE_SYSTEM_NAME MATCHES "Emscripten")
-    list(REMOVE_ITEM src_list_cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_js_cpp.cpp)
-    list(REMOVE_ITEM src_list_cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_win.cpp)
-else()
-    list(REMOVE_ITEM src_list_cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_js_cpp.cpp)
-    list(REMOVE_ITEM src_list_cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_js.cpp)
-endif()
+set(src_EMSCRIPTEN  ${src_list_cpp})
+list(REMOVE_ITEM src_EMSCRIPTEN ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_js_cpp.cpp)
+list(REMOVE_ITEM src_EMSCRIPTEN ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_win.cpp)
+
+set(src_WINDOWS  ${src_list_cpp})
+list(REMOVE_ITEM src_WINDOWS ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_js_cpp.cpp)
+list(REMOVE_ITEM src_WINDOWS ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_js.cpp)
+
+set(src_LINUX  ${src_list_cpp})
+list(REMOVE_ITEM src_LINUX ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_win.cpp)
+
 
 # add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/include)	
 # add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/utils)	
@@ -59,16 +63,17 @@ if (CMAKE_SYSTEM_NAME MATCHES "Emscripten")
     
     foreach(i 2 1 3)
         set(target_name ${PJNAME}_${i})
-        add_executable(${target_name} ${src_list_cpp})
+        add_executable(${target_name} ${src_EMSCRIPTEN})
         target_compile_definitions(${target_name} PRIVATE -DNUM_GUESTS=${i})
         set_target_properties(${target_name} PROPERTIES LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/data/data.min.json)
         set_target_properties(${target_name} PROPERTIES LINK_FLAGS "--preload-file ${CMAKE_CURRENT_SOURCE_DIR}/data/data.min.json@./data.min.json -lembind -sALLOW_MEMORY_GROWTH -sEXPORTED_RUNTIME_METHODS=run -O3")
     endforeach()
+elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
+    add_executable(${PJNAME} ${src_WINDOWS})
 else()
-    add_executable(${PJNAME} ${src_list_cpp})
+    add_executable(${PJNAME} ${src_LINUX})
+    set(target_WINDOWS ${PJNAME}_win)
+    add_executable(${target_WINDOWS} ${src_WINDOWS})
 endif()
 
-# target_link_libraries(bcjh jsoncpp)
-# target_link_libraries(bcjh jsonhelper)
-# -sNO_DISABLE_EXCEPTION_CATCHING
 
