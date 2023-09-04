@@ -43,13 +43,12 @@ class Chef {
     }
     static void setGlobalAbilityFemale(int ability) {
         globalAbilityFemale = ability;
-        // std::cout << "setGlobalAbilityFemale" << ability << std::endl;
-    }
+        }
     static void setGlobalAbilityAll(int ability) {
         globalAbilityBuff.add(ability);
     }
     static void initBuff(const Json::Value &usrBuff) {
-        // std::cout << usrBuff.toStyledString() << std::endl;
+
         coinBuffOn = true;
 
         setGlobalBuff(CookAbility(usrBuff));

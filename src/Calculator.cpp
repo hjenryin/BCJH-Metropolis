@@ -20,9 +20,7 @@ std::string gradeName(int i) {
 }
 BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
                      bool verbose) {
-    // std::cout << chef.name << " " << recipe.name << std::endl;
     int grade = skill.ability / recipe->cookAbility;
-    // std::cout << grade << std::endl;
     int gradebuff = 0;
     switch (grade) {
     case 0: {
@@ -64,7 +62,6 @@ BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
     int singlePrice =
         int_ceil((recipe->price + rule.baseRule.directAdd) *
                  (1.0 + intentionBaseBuff / 100.0) * (1.0 + buff / 100.0));
-    // std::cout << singlePrice << std::endl;
     int totalPrice = singlePrice * rb.dishNum;
     int full;
     if (rule.addRule.fullAdd) {

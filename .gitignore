@@ -8,7 +8,7 @@ vcpkg/
 out/
 in/in.txt
 in/out.txt
-toolEquipped.hpp
+toolEquipped.csv
 **/CMakeFiles/**
 cmake*
 CMake*

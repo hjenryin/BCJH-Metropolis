@@ -167,15 +167,7 @@ std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFiles() {
     }
 
     if (!usrDataF.good() || !gameDataF.good() || !ruleDataF.good()) {
-        // get current working dir
-        // #ifdef _WIN32
-        //         char buf[256];
-        //         _getcwd(buf, 256);
-        // #else
-        //         char buf[256];
-        //         getcwd(buf, 256);
-        // #endif
-        //         std::cout << "当前工作目录：" << buf << std::endl;
+
         std::cout
             << "json文件有缺失。如果在网页端，请确认已经上传了文件；如果在"
                "本地，请确认已经data.min.json、userData.json和ruleData."

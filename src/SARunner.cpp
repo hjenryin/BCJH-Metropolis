@@ -43,9 +43,7 @@ SARunner::SARunner(const RuleInfo *rl, const CList *chefList, RList *recipeList,
 States SARunner::generateStates(const CList *chefList, Chef *chefs[NUM_CHEFS]) {
     States s;
 
-    // std::cout << chefs << std::endl;
-    // std::cout << chefList->size() << " " << chefRecipePairs->size()
-    // << std::endl;
+        // << std::endl;
     if (chefs == NULL) {
 
         for (int j = 0; j < NUM_CHEFS; j++) {
@@ -109,26 +107,23 @@ States SARunner::run(States *s0,
     }
     debugIntegrity(s);
     int energy = sumPrice(*rl, s);
-    // std::cout << "Initial energy: " << energy << std::endl;
+
     this->bestState = s;
     this->bestEnergy = energy;
     int step = 0;
     double t = this->tMax;
     int progressPercent = 0;
     while (step < this->stepMax) {
-        // std::cout << "TEST" << std::endl;
+
 #ifdef EMSCRIPTEN_PROGRESS
         if (postProgress != emscripten::val::null()) {
             int newProgressPercent = (int)(step * 100.0 / this->stepMax);
             if (newProgressPercent > progressPercent) {
                 progressPercent = newProgressPercent;
                 postProgress(progressPercent);
-                // std::cout << "DEBUG" << progressPercent << std::endl;
             }
         }
-        // else {
-        //     std::cout << "postProgress is null" << postProgress << std::endl;
-        // }
+
 #endif
 #ifdef _WIN32
 
@@ -159,7 +154,7 @@ States SARunner::run(States *s0,
         if (prob > (double)rand() / RAND_MAX) {
             s = newS;
             // print(s);
-            // std::cout << newEnergy << std::endl;
+
             energy = newEnergy;
         }
         if (energy > this->bestEnergy) {
@@ -189,7 +184,6 @@ States SARunner::run(States *s0,
 #ifdef EMSCRIPTEN_PROGRESS
     if (postProgress != emscripten::val::null()) {
         postProgress(100);
-        // std::cout << "DEBUG" << 100 << std::endl;
     }
 #endif
 #ifdef VIS_HISTORY

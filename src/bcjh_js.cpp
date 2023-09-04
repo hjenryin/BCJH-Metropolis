@@ -45,7 +45,6 @@ std::pair<Json::Value, Json::Value> loadJson(std::stringstream &userDataSs) {
         if (!gameDataF.good())
             throw FileNotExistException();
     }
-    // std::cout << gameDataF.fail() << std::endl;
     gameDataF >> gameData;
     gameDataF.close();
 
@@ -71,8 +70,6 @@ std::string
     bool silent = false;
     int log = SILENT | VERBOSE;
     struct timespec ts;
-    // std::cout << ts.tv_nsec << std::endl;
-    // std::cout << ts.tv_sec << std::endl;
     int seed = (int)time(NULL);
 #ifdef EMSCRIPTEN
     clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -87,7 +84,6 @@ std::string
     RuleInfo rl;
     std::cout << "正在读取..." << std::endl;
     int num_guests = loadBanquetRuleFromInput(rl, ruleDataJson, true);
-    // std::cout << num_guests << std::endl;
     if (num_guests == -1) {
         std::cout << "读取规则失败。" << std::endl;
         exit(1);

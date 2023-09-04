@@ -1,3 +1,8 @@
+@REM *********************
+@REM ** 这一部分无需修改 **
+@REM *********************
+
+@REM When adding lines, remember to update the README file!
 @REM This file should be encoded in GB2312.
 echo 修改配置、了解更多请至https://github.com/hjenryin/BCJH-Metropolis/ 以便在线运行
 echo 有疑问请至https://github.com/hjenryin/BCJH-Metropolis/discussions/categories/q-a 提问
@@ -32,6 +37,18 @@ if not "%bcjhid%"=="" (
 )
 echo=
 echo=查看厨具修改教程，请参考 https://github.com/hjenryin/BCJH-Metropolis#配置厨具
-.\bcjh.exe
+
+
+@REM ******************************************************
+@REM ** 如有需要，可以在此修改-C，-R后的数字来更改迭代次数。 **
+@REM ******************************************************
+
+.\bcjh.exe -C 5000 -R 1000
+@REM -h 帮助
+
+
+@REM *********************
+@REM ** 这一部分无需修改 **
+@REM *********************
 echo 按任意键关闭
 pause >NUL

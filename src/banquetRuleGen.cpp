@@ -8,7 +8,6 @@ double banquetRuleTime = 0;
 double generateBanquetRuleTime = 0;
 double generateBanquetRuleTimeOut = 0;
 const Json::Value &getIntentById(const Json::Value &intentsGD, int intentId) {
-    // std::cout << intentsGD;
     for (auto &intent : intentsGD) {
         if (intent["intentId"].asInt() == intentId) {
             return intent;

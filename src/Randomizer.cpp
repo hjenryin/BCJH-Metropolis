@@ -207,16 +207,7 @@ States ChefRandomizer::operator()(States s) {
         path = 1;
         success += randomChef(s);
     }
-    // for (int i = 0; i < NUM_CHEFS; i++) {
-    //     for (int j = 0; j < DISH_PER_CHEF; j++) {
-    //         if (i == j)
-    //             continue;
-    //         if (s[i] == s[j]) {
-    //             std::cout << path << std::endl;
-    //             exit(1);
-    //         }
-    //     }
-    // }
+
     debugIntegrity(s);
     SARunner saRunner(rl, c, r, false, f::t_dist_slow);
 #ifdef MEASURE_TIME

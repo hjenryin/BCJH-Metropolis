@@ -181,7 +181,7 @@ double f::linear_mul(int stepMax, int step, double tMax, double tMin) {
 }
 double f::zipf(int stepMax, int step, double tMax, double tMin) {
     double t = tMin + (tMax - tMin) / std::pow(step + 1, 0.2);
-    // std::cout << t << std::endl;
+
     return t;
 }
 double f::one_over_n(int stepMax, int step, double tMax, double tMin) {

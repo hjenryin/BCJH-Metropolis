@@ -294,7 +294,6 @@ struct RuleInfo {
     std::vector<Rule *> rl;
     int bestFull[NUM_GUESTS];
     ~RuleInfo() {
-        // std::cout << "RuleInfo destructor called" << std::endl;
         for (auto &r : rl) {
             delete r;
         }

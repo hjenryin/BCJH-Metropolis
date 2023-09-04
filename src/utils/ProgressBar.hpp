@@ -30,8 +30,7 @@ class MultiThreadProgressBar {
                           << std::endl;
                 exit(1);
             }
-            // std::cout << "Progress bar initialized with " << numThreads
-            //   << " threads." << std::endl;
+
             instance = new MultiThreadProgressBar(numThreads);
         }
         return instance;

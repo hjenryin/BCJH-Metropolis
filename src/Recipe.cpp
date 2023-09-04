@@ -63,7 +63,6 @@ void Recipe::print(const std::string &startLine) const {
     auto rb = rarityBuff[this->rarity - 1];
     std::cout << this->name << "（原价" << this->price << "）"
               << ", " << this->rarity << "火 * " << rb.dishNum << std::endl;
-    // std::cout << "+" << rb.dishBuff << "%" ;
     std::cout << startLine;
     this->cookAbility.print();
     this->materialCategories.print("；");
@@ -72,7 +71,6 @@ void Recipe::print(const std::string &startLine) const {
 RList loadRecipe(const Json::Value &gameData, const Json::Value &usrData) {
     RList recipeList;
     auto recipes = gameData["recipes"];
-    std::cout << recipes.size() << std::endl;
     auto recipeGot = usrData["repGot"];
     for (auto recipe : recipes) {
         int id = recipe["recipeId"].asInt();

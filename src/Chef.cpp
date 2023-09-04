@@ -33,7 +33,7 @@ void splitUltimateSkill(std::map<int, int> &ultimateSkills,
 }
 void loadUltimateSkills(std::map<int, int> &ultimateSkills,
                         const Json::Value &usrBuff) {
-    // std::cout << usrBuff.toStyledString() << std::endl;
+
     splitUltimateSkill(ultimateSkills, usrBuff["Partial"]["id"]);
     splitUltimateSkill(ultimateSkills, usrBuff["Self"]["id"]);
 }
@@ -47,11 +47,10 @@ void Chef::loadAppendChef(CList &chefList, int chefRarity,
 ) {
 
     const Json::Value &chefs = gameData["chefs"];
-    // std::cout << usrData.toStyledString() << std::endl;
-    // std::cout << gameData.toStyledString() << std::endl;
+
     std::map<int, int> ultimateSkills;
     loadUltimateSkills(ultimateSkills, usrData["userUltimate"]);
-
+    CList newChefList;
     auto chefGot = usrData["chefGot"];
     for (auto chef : chefs) {
         int id = chef["chefId"].asInt();
@@ -61,16 +60,14 @@ void Chef::loadAppendChef(CList &chefList, int chefRarity,
             }
 
             if (ultimateSkills.find(id) != ultimateSkills.end()) {
-                chefList.push_back(Chef(chef, ultimateSkills[id]));
+                newChefList.push_back(Chef(chef, ultimateSkills[id]));
             } else {
-                chefList.push_back(Chef(chef, -1));
+                newChefList.push_back(Chef(chef, -1));
             }
         }
     }
 
-
 #ifdef _WIN32
-    bool firstTime;
     if (toolFileType == NOT_LOADED) {
         toolFileType = loadToolFile();
 
@@ -85,7 +82,8 @@ void Chef::loadAppendChef(CList &chefList, int chefRarity,
         }
     }
     CSVWarning(w);
-    for (auto &chef : chefList) {
+    for (auto &chef : newChefList) {
+
         w += loadToolFromFile(&chef, toolFileType);
     }
     if (w.missingRarity3) {
@@ -97,15 +95,16 @@ void Chef::loadAppendChef(CList &chefList, int chefRarity,
     }
 #else
     if (allowTool) {
-        for (auto &chef : chefList) {
+        for (auto &chef : newChefList) {
             chef.modifyTool(NOT_EQUIPPED);
         }
     } else {
-        for (auto &chef : chefList) {
+        for (auto &chef : newChefList) {
             chef.modifyTool(NO_TOOL);
         }
     }
 #endif
+    chefList.insert(chefList.end(), newChefList.begin(), newChefList.end());
 }
 /**
  * Chef
@@ -114,7 +113,7 @@ void Chef::loadAppendChef(CList &chefList, int chefRarity,
 Chef::Chef(Json::Value &chef, int ultimateSkillId) {
     if (chef.isMember("chefId") && chef.isMember("name") &&
         chef.isMember("skill")) {
-        // std::cout << "333" << std::endl;
+
         this->name = new std::string();
         this->skill = new Skill();
         this->companyBuff = new Skill();
@@ -156,10 +155,10 @@ void Chef::print() const {
     this->skill->print();
 }
 CookAbility::CookAbility(const Json::Value &v) {
-    // std::cout << "Here" << std::endl;
+
     if (v.isMember("stirfry") && v.isMember("bake") && v.isMember("boil") &&
         v.isMember("fry") && v.isMember("knife")) {
-        // std::cout << "yes1" << std::endl;
+
         this->stirfry = getInt(v["stirfry"]);
         this->bake = getInt(v["bake"]);
         this->boil = getInt(v["boil"]);
@@ -169,7 +168,7 @@ CookAbility::CookAbility(const Json::Value &v) {
 
     } else if (v.isMember("Stirfry") && v.isMember("Bake") &&
                v.isMember("Boil") && v.isMember("Fry") && v.isMember("Knife")) {
-        // std::cout << v << std::endl;
+
         this->stirfry = getInt(v["Stirfry"]);
         this->bake = getInt(v["Bake"]);
         this->boil = getInt(v["Boil"]);
@@ -178,7 +177,7 @@ CookAbility::CookAbility(const Json::Value &v) {
         this->knife = getInt(v["Knife"]);
     } else {
         std::cout << "no" << std::endl;
-        // std::cout << v.toStyledString() << std::endl;
+
         throw std::logic_error("CookAbility: Invalid Json");
     }
 }
