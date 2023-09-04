@@ -30,7 +30,7 @@ void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &mp,
     iterChef = 5000;
     iterRecipe = 1000;
     silent = false;
-    log = 0; // 0x0: 无输出 0x1: 正常输出 0x10: 详细输出
+    log = 0;
     seed = (int)(time(NULL) * 100);
     mp = true;
     int seed_orig = seed;
@@ -39,7 +39,7 @@ void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &mp,
         if (arg == "-s") {
             silent = true;
         } else if (arg == "-v") {
-            log += 0x10;
+            log += VERBOSE;
         } else if (arg == "-h") {
             std::cout << "-s: 无进度条，默认有进度条" << std::endl;
             std::cout << "-v: 输出详细信息，默认不输出" << std::endl;
@@ -112,8 +112,8 @@ int main(int argc, char *argv[]) {
     }
     std::cout << "\n最佳结果：" << std::endl;
 
-    log += 0x1;
-    // log += 0x10;
+    log += ORDINARY;
+    // log += VERBOSE;
 
     std::cout << "随机种子：" << result.seed << std::endl;
     exactChefTool(rl, result.state);
@@ -149,8 +149,6 @@ std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFiles() {
     Json::Value ruleData;
 
     auto dirs = {"./", "../data/", "../../data/"};
-    // std::ifstream gameDataF("../data/data.min.json", std::ifstream::binary);
-    // std::ifstream usrDataF("../data/userData.json", std::ifstream::binary);
 
     std::ifstream gameDataF, usrDataF, ruleDataF;
     std::map<std::string, std::ifstream &> files = {{"data.min", gameDataF},

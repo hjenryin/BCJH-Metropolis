@@ -284,8 +284,11 @@ class Skill {
         p.add(flavorBuff.getPrinters());
         p.add(materialBuff.getPrinters());
         p.add("金币", this->pricePercentBuff, true);
-        p.print("", " ", "\t");
-        this->rarityBuff.print("稀有度加成");
+        p.add("基础售价", this->baseAddBuff, true);
+        p.print("", "  ", "\t");
+        this->rarityBuff.print("菜品火数加成");
+        this->gradeBuff.print("菜品品级加成");
+
         std::cout << std::endl;
     }
     ~Skill() {} // conditionalEffects should be handled manually.

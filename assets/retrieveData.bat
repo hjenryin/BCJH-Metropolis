@@ -2,7 +2,7 @@
 @REM ** 这一部分无需修改 **
 @REM *********************
 
-@REM When adding lines, remember to update the README file!
+@REM When adding lines, remember to update the README file! Two additional lines need to be added.
 @REM This file should be encoded in GB2312.
 echo 修改配置、了解更多请至https://github.com/hjenryin/BCJH-Metropolis/ 以便在线运行
 echo 有疑问请至https://github.com/hjenryin/BCJH-Metropolis/discussions/categories/q-a 提问

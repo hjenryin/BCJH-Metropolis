@@ -47,21 +47,24 @@ BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
     default:
         gradebuff = 100;
     }
-    gradebuff += skill.rarityBuff[recipe->rarity];
-    auto rb = recipe->rarityBuff[recipe->rarity - 1];
-    r.lenientRule.merge(r.strictRule); // vscode报错不认友元，但是编译没问题
+    for (int i = 1; i <= grade; i++) {
+        gradebuff += skill.gradeBuff[i];
+    }
+    auto rb = Recipe::rarityBuff[recipe->rarity - 1];
+    r.lenientRule.merge(r.strictRule);
     BanquetLenientRule rule = r.lenientRule;
     int intentionAddBuff = rule.addRule.buff;
     int intentionBaseBuff = rule.baseRule.buff;
     int skillBuff = skill.flavorBuff * recipe->flavor +
                     recipe->cookAbility * skill.abilityBuff +
                     recipe->materialCategories * skill.materialBuff +
-                    rb.dishBuff +
+                    (rb.dishBuff + skill.rarityBuff[recipe->rarity]) +
                     (Chef::coinBuffOn ? skill.pricePercentBuff : 0);
     int buff = gradebuff + skillBuff + intentionAddBuff;
     int singlePrice =
         int_ceil((recipe->price + rule.baseRule.directAdd) *
-                 (1.0 + intentionBaseBuff / 100.0) * (1.0 + buff / 100.0));
+                 (1.0 + (intentionBaseBuff + skill.baseAddBuff) / 100.0) *
+                 (1.0 + buff / 100.0));
     int totalPrice = singlePrice * rb.dishNum;
     int full;
     if (rule.addRule.fullAdd) {
@@ -71,14 +74,24 @@ BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
     }
     BanquetInfo b = {totalPrice, full};
     if (verbose) {
-        Printer skillPrinter("技能", true);
-        skillPrinter.add("味道", skill.flavorBuff * recipe->flavor);
-        skillPrinter.add("技法", recipe->cookAbility * skill.abilityBuff);
-        skillPrinter.add("食材",
-                         recipe->materialCategories * skill.materialBuff);
-        skillPrinter.add("火数修炼", rb.dishBuff);
-        skillPrinter.add("金币",
-                         (Chef::coinBuffOn ? skill.pricePercentBuff : 0));
+        Printer skillPercentPrinter("售价", true);
+        skillPercentPrinter.add("味道", skill.flavorBuff * recipe->flavor);
+        skillPercentPrinter.add("技法",
+                                recipe->cookAbility * skill.abilityBuff);
+        skillPercentPrinter.add("食材", recipe->materialCategories *
+                                            skill.materialBuff);
+        skillPercentPrinter.add("火数修炼", rb.dishBuff);
+        skillPercentPrinter.add(
+            "金币", (Chef::coinBuffOn ? skill.pricePercentBuff : 0));
+
+        Printer skillBasePrinter("基础", true);
+        skillBasePrinter.noValue();
+        skillBasePrinter.add("", skill.baseAddBuff);
+
+        Printer skillPrinter("技能");
+        skillPrinter.noValue();
+        skillPrinter.add(skillBasePrinter);
+        skillPrinter.add(skillPercentPrinter);
 
         Printer intentionPrinter("意图");
         intentionPrinter.noValue();

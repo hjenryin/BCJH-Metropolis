@@ -103,7 +103,7 @@ int sumPrice(const RuleInfo &rl, States s, int log, int toolValue,
         fullCache = 0;
 
         for (int i = 0; i < DISH_PER_CHEF * CHEFS_PER_GUEST; i++) {
-            if ((log & 0x10) && (i % DISH_PER_CHEF == 0)) {
+            if ((log & VERBOSE) && (i % DISH_PER_CHEF == 0)) {
 #ifdef EMSCRIPTEN
                 std::cout << "🧑‍🍳";
 #endif
@@ -111,7 +111,7 @@ int sumPrice(const RuleInfo &rl, States s, int log, int toolValue,
             }
             biCache = getPrice(skills[chefStart + i / DISH_PER_CHEF],
                                s.recipe[dishStart + i], rule[dishStart + i],
-                               (log & 0x10));
+                               (log & VERBOSE));
             if (biCache.full > 500) {
 #ifdef MEASURE_TIME
                 clock_gettime(CLOCK_THREAD_CPUTIME_ID, &finish);
@@ -124,7 +124,7 @@ int sumPrice(const RuleInfo &rl, States s, int log, int toolValue,
             totalScore += biCache.price;
             scoreCache += biCache.price;
             fullCache += biCache.full;
-            if ((log & 0x1) && i % 3 == 2) {
+            if ((log & ORDINARY) && i % 3 == 2) {
                 std::cout << "  厨师："
                           << *s.getChefPtr(chefStart + i / 3)->name << " -> "
                           << fullCache << " / " << scoreCache << std::endl;
@@ -145,7 +145,7 @@ int sumPrice(const RuleInfo &rl, States s, int log, int toolValue,
             guestScore = (int)std::ceil(totalScore * (1 - 0.05 * delta));
         }
         ans += guestScore;
-        if (log & 0x1)
+        if (log & ORDINARY)
             std::cout << "第" << g + 1 << "位客人：" << totalFull << " / "
                       << rl.bestFull[g] << " -> " << guestScore << ""
                       << std::endl;
