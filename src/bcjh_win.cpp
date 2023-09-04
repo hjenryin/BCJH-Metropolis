@@ -182,13 +182,13 @@ std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFiles() {
         gameDataF.close();
         ruleDataF >> ruleData;
         ruleDataF.close();
-    } catch (Json::RuntimeError &e) {
+    } catch (Json::RuntimeError &) {
 
         std::cout
             << "json文件格式不正确。如果文件内容是手动复制的，确认文件已"
                "经复制完整。如果文件是从powershell下载的，请确认编码是utf-8\n";
         exit(1);
-    } catch (Json::LogicError &e) {
+    } catch (Json::LogicError &) {
         std::cout << "json文件格式不正确。请确认文件来自白菜菊花而非图鉴网。\n";
         exit(1);
     }

@@ -69,10 +69,10 @@ std::tuple<RList, CList> loadJson(const Json::Value &gameData,
             std::cout << NoChefException(chefList.size()).what() << std::endl;
             exit(1);
         }
-    } catch (const Json::RuntimeError &e) {
+    } catch (const Json::RuntimeError &) {
         std::cout << "json文件格式不正确。如果文件内容是手动复制的，确认文件已"
                      "经复制完整。\n";
-    } catch (const Json::LogicError &e) {
+    } catch (const Json::LogicError &) {
         std::cout << "json文件格式不正确。请确认文件来自白菜菊花而非图鉴网。\n";
     };
     std::cout << "读取文件成功。" << std::endl;

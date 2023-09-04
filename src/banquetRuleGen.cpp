@@ -32,7 +32,6 @@ int loadBanquetRuleFromJson(RuleInfo &ruleInfo, const Json::Value &rulesTarget,
                             const Json::Value &allBuffs,
                             const Json::Value &allIntents) {
     int d = 0;
-    int bestFull[NUM_GUESTS];
     int num_guest = 0;
     for (auto &guest : rulesTarget) {
         num_guest++;
