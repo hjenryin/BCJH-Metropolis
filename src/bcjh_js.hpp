@@ -31,30 +31,16 @@ extern double generateBanquetRuleTime, generateBanquetRuleTimeOut;
 extern double calculatePriceTime, calculatePriceTimeOut;
 #endif
 
-void initChefRecipePairs(CList &, RList &);
-
-void calculator(CList &, RList &);
-
-// // define a try-catch function wrapper
-// template <typename F, typename... Args>
-// auto try_catch(F f, std::string f_name, Args &&...args)
-//     -> decltype(f(std::forward<Args>(args)...));
-
 class ResultJsonSerializable {
   public:
     int score;
     int seed;
-    const CList *chefList;
-    RList recipeList;
     const States state;
     std::string logs;
-    ResultJsonSerializable(int score, int seed, CList *chefList,
-                           RList recipeList, States state, std::string &logs)
-        : score(score), seed(seed), chefList(chefList), recipeList(recipeList),
-          state(state), logs(logs) {}
+    ResultJsonSerializable(int score, int seed, States state, std::string &logs)
+        : score(score), seed(seed), state(state), logs(logs) {}
     ResultJsonSerializable(Result &result)
-        : score(result.score), seed(result.seed), chefList(result.chefList),
-          recipeList(result.recipeList), state(result.state),
+        : score(result.score), seed(result.seed), state(result.state),
           logs(result.logs) {}
     Json::String toJson() {
         Json::Value result;
@@ -62,7 +48,7 @@ class ResultJsonSerializable {
         result["seed"] = seed;
         Json::Value chefsList(Json::arrayValue);
         for (int i = 0; i < NUM_CHEFS; i++) {
-            chefsList[i] = state.getChefPtr(i)->name;
+            chefsList[i] = *state.getChefPtr(i)->name;
         }
         result["chefs"] = chefsList;
         Json::Value recipesList(Json::arrayValue);
@@ -83,8 +69,8 @@ std::string
     EMSCRIPTEN_KEEPALIVE
 #endif
     runjs(const std::string &userDataIn, const std::string &ruleDataIn,
-          int targetScore, int iterChef = ITER_CHEF,
-          int iterRecipe = ITER_RECIPE, bool allowTool = true
+          int targetScore, int iterChef = 5000, int iterRecipe = 1000,
+          bool allowTool = true
 #ifdef EMSCRIPTEN_PROGRESS
           ,
           emscripten::val postProgress = emscripten::val::null()

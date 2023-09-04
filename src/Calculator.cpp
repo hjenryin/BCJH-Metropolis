@@ -1,7 +1,7 @@
 #include "Calculator.hpp"
 #include "Chef.hpp"
-#include <cmath>
 #include "utils/Printer.hpp"
+#include "utils/math.hpp"
 std::string gradeName(int i) {
     switch (i) {
     case 1:
@@ -30,6 +30,7 @@ BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
             std::cout << "Grade 0" << std::endl;
         {
             BanquetInfo b = {0, 500};
+            // Need this when exacting chef tool.
             return b;
         }
     }
@@ -60,9 +61,9 @@ BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
                     rb.dishBuff +
                     (Chef::coinBuffOn ? skill.pricePercentBuff : 0);
     int buff = gradebuff + skillBuff + intentionAddBuff;
-    int singlePrice = (int)std::ceil((recipe->price + rule.baseRule.directAdd) *
-                                     (1.0 + intentionBaseBuff / 100.0) *
-                                     (1.0 + buff / 100.0));
+    int singlePrice =
+        int_ceil((recipe->price + rule.baseRule.directAdd) *
+                 (1.0 + intentionBaseBuff / 100.0) * (1.0 + buff / 100.0));
     // std::cout << singlePrice << std::endl;
     int totalPrice = singlePrice * rb.dishNum;
     int full;
@@ -94,7 +95,9 @@ BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
                   << std::endl;
         skillPrinter.print("│ ", " + ", "\n");
         intentionPrinter.print("│ ", "; ", "\n");
-        std::cout << "│ 售价总计Buff: +" << buff << "%" << std::endl;
+
+        std::cout << "│ 售价总计Buff: " << int2signed_str(buff) << "%"
+                  << std::endl;
         std::cout << "╰─> 饱腹度: " << full << "\t总价: " << totalPrice
                   << std::endl;
     }

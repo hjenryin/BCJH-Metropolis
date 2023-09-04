@@ -130,17 +130,12 @@ States SARunner::run(States *s0,
         //     std::cout << "postProgress is null" << postProgress << std::endl;
         // }
 #endif
-#ifndef EMSCRIPTEN
+#ifdef _WIN32
 
-        if (silent) {
-            // if (step % 500 == 0) {
-            //     std::cout << "\r" << step << "/" << this->stepMax
-            //               << std::flush;
-            // }
-        } else {
+        if (progress && !silent) {
             if (step * 10 / stepMax > progressPercent) {
                 progressPercent = step * 10 / stepMax;
-                MultiThreadProgressBar::getInstance()->print(
+                MultiThreadProgressBar::getInstance(threadId)->print(
                     threadId, progressPercent * 10,
                     "当前最高分数：" + std::to_string(this->bestEnergy));
             }
@@ -149,6 +144,7 @@ States SARunner::run(States *s0,
 #endif
         States newS;
         newS = (*randomMoveFunc)(s);
+        debugIntegrity(newS);
         // std::cin >> step;
         // print(newS);
         int newEnergy = sumPrice(*rl, newS);
@@ -184,9 +180,9 @@ States SARunner::run(States *s0,
         }
         step++;
     }
-#ifndef EMSCRIPTEN
+#ifdef _WIN32
     if (progress && !silent) {
-        MultiThreadProgressBar::getInstance()->print(
+        MultiThreadProgressBar::getInstance(threadId)->print(
             threadId, 100, "最高分数：" + std::to_string(this->bestEnergy));
     }
 #endif

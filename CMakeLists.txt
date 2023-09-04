@@ -31,9 +31,6 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread")
 endif()
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/build/)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/build/)
-
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src src)
 
 
@@ -51,9 +48,7 @@ list(REMOVE_ITEM src_WINDOWS ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_js.cpp)
 set(src_LINUX  ${src_list_cpp})
 list(REMOVE_ITEM src_LINUX ${CMAKE_CURRENT_SOURCE_DIR}/src/bcjh_win.cpp)
 
-
-# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/include)	
-# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/utils)	
+	
 message(STATUS "target name is ${PJNAME}")
 message(STATUS "src_list_cpp is ${src_list_cpp}")
 
@@ -74,6 +69,7 @@ else()
     add_executable(${PJNAME} ${src_LINUX})
     set(target_WINDOWS ${PJNAME}_win)
     add_executable(${target_WINDOWS} ${src_WINDOWS})
+    target_compile_definitions(${target_WINDOWS} PRIVATE -D_WIN32)
 endif()
 
 

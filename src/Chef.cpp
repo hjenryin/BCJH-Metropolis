@@ -67,9 +67,7 @@ void Chef::loadAppendChef(CList &chefList, int chefRarity,
             }
         }
     }
-    for (auto &chef : chefList) {
-        chef.recipeLearned = new std::vector<Recipe *>();
-    }
+
 
 #ifdef _WIN32
     bool firstTime;
@@ -204,49 +202,18 @@ void Skill::loadJson(const Json::Value &v) {
                 int value = effect["value"].asInt();
                 if (type == "Gold_Gain") {
                     skill.pricePercentBuff = value;
-                } else if (type == "Stirfry") {
+                } else if (type == "Stirfry" || type == "Bake" ||
+                           type == "Boil" || type == "Steam" || type == "Fry" ||
+                           type == "Knife") {
                     std::string cal = effect["cal"].asString();
+                    int *ptr = NULL;
                     if (cal == "Abs")
-                        skill.ability.stirfry = value;
+                        ptr = &skill.ability.stirfry;
                     else {
-                        skill.cookAbilityPercentBuff.stirfry = value;
+                        ptr = &skill.cookAbilityPercentBuff.stirfry;
                     }
-                } else if (type == "Bake") {
-                    std::string cal = effect["cal"].asString();
-                    if (cal == "Abs")
-                        skill.ability.bake = value;
-                    else {
-                        skill.cookAbilityPercentBuff.bake = value;
-                    }
-                } else if (type == "Boil") {
-                    std::string cal = effect["cal"].asString();
-                    if (cal == "Abs")
-                        skill.ability.boil = value;
-                    else {
-                        skill.cookAbilityPercentBuff.boil = value;
-                    }
-                } else if (type == "Steam") {
-                    std::string cal = effect["cal"].asString();
-                    if (cal == "Abs")
-                        skill.ability.steam = value;
-                    else {
-                        skill.cookAbilityPercentBuff.steam = value;
-                    }
-
-                } else if (type == "Fry") {
-                    std::string cal = effect["cal"].asString();
-                    if (cal == "Abs")
-                        skill.ability.fry = value;
-                    else {
-                        skill.cookAbilityPercentBuff.fry = value;
-                    }
-                } else if (type == "Knife") {
-                    std::string cal = effect["cal"].asString();
-                    if (cal == "Abs")
-                        skill.ability.knife = value;
-                    else {
-                        skill.cookAbilityPercentBuff.knife = value;
-                    }
+                    int typeBias = getEnum(type) - ABILITY_ENUM_START;
+                    ptr[typeBias] = value;
                 } else if (type == "UseStirfry") {
                     skill.abilityBuff.stirfry = value;
                 } else if (type == "UseBake") {

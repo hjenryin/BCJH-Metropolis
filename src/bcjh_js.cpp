@@ -32,18 +32,6 @@ extern double generateBanquetRuleTime, generateBanquetRuleTimeOut;
 extern double calculatePriceTime, calculatePriceTimeOut;
 #endif
 
-void initChefRecipePairs(CList &, RList &);
-void calculator(CList &, RList &);
-// #define FUNC_DEF(func) func, #func
-
-// // define a try-catch function wrapper
-// template <typename F, typename... Args>
-// auto try_catch(F f, std::string f_name, Args &&...args)
-//     -> decltype(f(std::forward<Args>(args)...)) {
-
-//     std::cout << "Exception for function: " << f_name << std::endl;
-//     exit(1);
-// }
 /**
  * @return  pair<Json::Value gameData, Json::Value userData>
  */
@@ -95,8 +83,6 @@ std::string
     std::stringstream ruleDataSs(ruleDataIn);
     Json::Value ruleDataJson;
     ruleDataSs >> ruleDataJson;
-    CList chefList;
-    RList recipeList;
 
     RuleInfo rl;
     std::cout << "正在读取..." << std::endl;
@@ -111,30 +97,7 @@ std::string
                "。";
     }
     auto [gameData, userData] = loadJson(userDataSs);
-    try {
-        Skill::loadJson(gameData["skills"]);
-        Recipe::initRarityBuff(userData["userUltimate"]);
-        Chef::initBuff(userData["userUltimate"]);
-        Chef::loadAppendChef(chefList, 5, gameData, userData, allowTool);
-        int chefRarity = 4;
-        do {
-            Chef::loadAppendChef(chefList, chefRarity, gameData, userData,
-                                 allowTool);
-            chefRarity--;
-        } while (chefList.size() <= NUM_CHEFS && chefRarity >= 0);
-        recipeList = loadRecipe(gameData, userData);
-        if (chefList.size() <= NUM_CHEFS) {
-
-            std::cout << NoChefException(chefList.size()).what() << std::endl;
-            exit(1);
-        }
-    } catch (const Json::RuntimeError &e) {
-        std::cout << "json文件格式不正确。如果文件内容是手动复制的，确认文件已"
-                     "经复制完整。\n";
-    } catch (const Json::LogicError &e) {
-        std::cout << "json文件格式不正确。请确认文件来自白菜菊花而非图鉴网。\n";
-    };
-    std::cout << "读取文件成功。" << std::endl;
+    auto [recipeList, chefList] = loadJson(gameData, userData, allowTool);
 
     // for (auto chef = chefList.begin(); chef != chefList.end(); chef++) {
     //     chef->loadRecipeCapable(recipeList);
@@ -158,6 +121,8 @@ std::string
 
     std::cout << "随机种子：" << result.seed << std::endl;
     debugIntegrity(result.state);
+    exactChefTool(rl, result.state);
+
     int score = sumPrice(rl, result.state, log, true);
     std::cout << "**************\n总分: " << result.score << "\n***************"
               << std::endl;

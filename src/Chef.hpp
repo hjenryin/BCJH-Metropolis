@@ -75,7 +75,6 @@ class Chef {
         delete this->skill;
         delete this->companyBuff;
         delete this->nextBuff;
-        delete this->recipeLearned;
     }
     // void updateLearnedRecipe(const RecipesInfo rI) const {
     //     auto &recipesLearned = *this->recipesLearned;

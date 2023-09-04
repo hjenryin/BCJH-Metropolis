@@ -23,7 +23,7 @@ struct History {
 class SARunner {
     Randomizer *randomMoveFunc;
     f::CoolingSchedule coolingScheduleFunc;
-    int threadId;
+    const int threadId;
     int stepMax;
     int tMax;
     int tMin;

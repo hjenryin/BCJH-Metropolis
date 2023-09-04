@@ -6,4 +6,13 @@ inline int int_ceil(double x) {
     return i + (x > i);
 }
 
+inline std::string int2signed_str(int x) {
+    std::string res = "";
+    if (x > 0) {
+        res += "+";
+    }
+    res += std::to_string(x);
+    return res;
+}
+
 #endif

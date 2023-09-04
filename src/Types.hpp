@@ -182,7 +182,7 @@ class CookAbility : public Ability {
     CookAbility() : Ability() {}
     CookAbility(const Json::Value &v);
     // int operator/(const Ability &a) const;
-    void print(std::string end = "") const {
+    void print(std::string end = "\t") const {
         Printer p("技法");
         p.noValue();
         p.add(Ability::getPrinters(false));
@@ -221,11 +221,16 @@ class DiscretizedBuff {
             this->data[i] += r.data[i];
     }
     void print(const std::string &name) const {
-        std::cout << name << ": ";
+        int sum = 0;
         for (int i = 0; i < 5; i++) {
-            std::cout << data[i] << "% ";
+            sum += data[i];
         }
-        std::cout << std::endl;
+        if (sum > 0) {
+            std::cout << name << ": ";
+            for (int i = 0; i < 5; i++) {
+                std::cout << data[i] << "% ";
+            }
+        }
     }
 };
 
@@ -272,7 +277,7 @@ class Skill {
         return tmp;
     }
     void print() const {
-        this->ability.print();
+        this->ability.print("\t");
         Printer p("\n加成");
         p.noValue();
         p.add(abilityBuff.getPrinters(true));

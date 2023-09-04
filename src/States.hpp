@@ -55,7 +55,7 @@ class States {
             return false;
         }
     }
-    bool repeatedRecipe(Recipe *recipe = NULL, int except = -1) {
+    bool repeatedRecipe(Recipe *recipe = NULL, int except = -1) const {
         if (recipe == NULL) {
             for (int i = 0; i < NUM_CHEFS * DISH_PER_CHEF; i++) {
                 for (int j = i + 1; j < NUM_CHEFS * DISH_PER_CHEF; j++) {

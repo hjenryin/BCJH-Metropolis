@@ -39,9 +39,9 @@ class MultiThreadProgressBar {
     void print(int threadId, int threadProgress,
                const std::string &threadWord) {
         // acquire lock
-        progress[threadId] = threadProgress;
-        word[threadId] = threadWord;
         if (mutex.try_lock()) {
+            progress[threadId] = threadProgress;
+            word[threadId] = threadWord;
             if (printed) {
                 for (int i = 0; i < numThreads; i++) {
                     std::cout << previousLine;
@@ -66,6 +66,16 @@ class MultiThreadProgressBar {
             }
             mutex.unlock();
         }
+    }
+    static void destroy() {
+        if (instance != NULL) {
+            delete instance;
+            instance = NULL;
+        }
+    }
+    ~MultiThreadProgressBar() {
+        delete[] progress;
+        delete[] word;
     }
 };
 

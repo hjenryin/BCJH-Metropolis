@@ -5,18 +5,6 @@
 #include "src/Types.hpp"
 #include "src/Values.hpp"
 
-#ifdef _WIN32
-/**
- * 此函数已被弃用，请使用csv参照
- * https://github.com/hjenryin/BCJH-Metropolis#配置厨具 录入厨具
- *
- * 如果仍须使用，请注释src/Chef.cpp中loadToolFromFile(&chef, t);和auto t =
- * loadToolFile(); 并取消toolEquipped(&chef);的注释
- */
-__declspec(deprecated("此函数已被弃用，请使用csv录入厨具")) void toolEquipped(
-    Chef *chef);
-#endif
-
 #ifdef __linux__
 void toolEquipped(Chef *chef);
 #endif

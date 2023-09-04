@@ -2,7 +2,6 @@
 #include "SARunner.hpp"
 #include "../config.hpp"
 #include "exception.hpp"
-#include "activityRule.hpp"
 #include <cassert>
 #include "banquetRuleGen.hpp"
 
@@ -50,6 +49,7 @@ bool deductTool(const RuleInfo &rl, States s, int chefId, int deduction) {
     return newPrice == bestPrice;
 }
 void exactChefTool(const RuleInfo &rl, States &s) {
+#ifndef DEBUG_INTEGRITY
     for (int i = 0; i < NUM_CHEFS; i++) {
         ToolEnum tool = s.getTool(i);
         if (tool == NO_TOOL)
@@ -72,6 +72,7 @@ void exactChefTool(const RuleInfo &rl, States &s) {
         }
     }
     s.getCookAbilities(States::FORCE_UPDATE);
+#endif
 }
 
 int sumPrice(const RuleInfo &rl, States s, int log, int toolValue,
@@ -102,23 +103,31 @@ int sumPrice(const RuleInfo &rl, States s, int log, int toolValue,
         fullCache = 0;
 
         for (int i = 0; i < DISH_PER_CHEF * CHEFS_PER_GUEST; i++) {
-            if ((log & 0x10) && i % 3 == 0) {
+            if ((log & 0x10) && (i % DISH_PER_CHEF == 0)) {
 #ifdef EMSCRIPTEN
                 std::cout << "🧑‍🍳";
 #endif
-                s.getChefPtr(chefStart + i / 3)->print();
+                s.getChefPtr(chefStart + i / DISH_PER_CHEF)->print();
             }
-            biCache =
-                getPrice(skills[chefStart + i / 3], s.recipe[dishStart + i],
-                         rule[dishStart + i], (log & 0x10));
+            biCache = getPrice(skills[chefStart + i / DISH_PER_CHEF],
+                               s.recipe[dishStart + i], rule[dishStart + i],
+                               (log & 0x10));
+            if (biCache.full > 500) {
+#ifdef MEASURE_TIME
+                clock_gettime(CLOCK_THREAD_CPUTIME_ID, &finish);
+                banquetRuleTime += finish.tv_sec - start.tv_sec +
+                                   (finish.tv_nsec - start.tv_nsec) * 1e-9;
+#endif
+                return -1000000;
+            }
             totalFull += biCache.full;
             totalScore += biCache.price;
             scoreCache += biCache.price;
             fullCache += biCache.full;
             if ((log & 0x1) && i % 3 == 2) {
-                std::cout << "  厨师：" << s.getChefPtr(chefStart + i / 3)->name
-                          << " -> " << fullCache << " / " << scoreCache
-                          << std::endl;
+                std::cout << "  厨师："
+                          << *s.getChefPtr(chefStart + i / 3)->name << " -> "
+                          << fullCache << " / " << scoreCache << std::endl;
                 scoreCache = 0;
                 fullCache = 0;
                 std::cout << "  菜谱：" << s.recipe[dishStart + i - 2]->name

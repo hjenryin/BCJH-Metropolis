@@ -15,6 +15,7 @@ enum ToolEnum {
     KNIFE,
     TOOL_ENUM_END
 };
+
 enum LOG_LEVEL {
     SILENT = 0,
     ORDINARY = 0x1,

@@ -66,8 +66,8 @@ void Recipe::print(const std::string &startLine) const {
     // std::cout << "+" << rb.dishBuff << "%" ;
     std::cout << startLine;
     this->cookAbility.print();
-    this->materialCategories.print("\t");
-    this->printFlavor("\t");
+    this->materialCategories.print("；");
+    this->printFlavor("；");
 }
 RList loadRecipe(const Json::Value &gameData, const Json::Value &usrData) {
     RList recipeList;
