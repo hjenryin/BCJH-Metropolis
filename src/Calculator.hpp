@@ -35,7 +35,8 @@ class BanquetAddRule {
     int buff = 0;        // 售价+%（无条件）
     BanquetAddRule() = default;
     void add(BanquetAddRule &rule) {
-        assert(this->fullAdd || rule.fullAdd); // 不能同时直接设置
+        assert((this->full == rule.full) || (this->fullAdd || rule.fullAdd));
+        // 要么二者数值相同（如execOneMore），要么至少有一个是加成（即不同时直接设置）
         if (!this->fullAdd) {
             ;
         } else if (!rule.fullAdd) {
