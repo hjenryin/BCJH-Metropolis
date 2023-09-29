@@ -4,6 +4,7 @@
 #include "Recipe.hpp"
 #include "Chef.hpp"
 #include <cmath>
+#include <cassert>
 extern double calculatePriceTime;
 struct BanquetInfo {
     int price; // 不加饱食度的原售价
@@ -34,10 +35,13 @@ class BanquetAddRule {
     int buff = 0;        // 售价+%（无条件）
     BanquetAddRule() = default;
     void add(BanquetAddRule &rule) {
-        if (fullAdd) {
-            full += rule.full;
-        } else {
+        assert(this->fullAdd || rule.fullAdd); // 不能同时直接设置
+        if (!this->fullAdd) {
+            ;
+        } else if (!rule.fullAdd) {
             full = rule.full;
+        } else {
+            full += rule.full;
         }
         buff += rule.buff;
     }

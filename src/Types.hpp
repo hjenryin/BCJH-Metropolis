@@ -213,6 +213,7 @@ class DiscretizedBuff {
     int data[5] = {0, 0, 0, 0, 0};
 
   public:
+    typedef std::tuple<bool, bool, bool, bool, bool> Mask;
     /*几火/几级就是几，不用减一*/
     int &operator[](int i) { return data[i - 1]; }
     int operator[](int i) const { return data[i - 1]; }
@@ -229,6 +230,15 @@ class DiscretizedBuff {
             std::cout << name << ": ";
             for (int i = 0; i < 5; i++) {
                 std::cout << data[i] << "% ";
+            }
+        }
+    }
+    void masked_add(Mask m, int value) {
+        bool mask[5] = {std::get<0>(m), std::get<1>(m), std::get<2>(m),
+                        std::get<3>(m), std::get<4>(m)};
+        for (int i = 0; i < 5; i++) {
+            if (mask[i]) {
+                this->data[i] += value;
             }
         }
     }

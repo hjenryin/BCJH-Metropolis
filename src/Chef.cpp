@@ -262,11 +262,13 @@ void Skill::loadJson(const Json::Value &v) {
                     } else if (conditionType == "PerRank") {
                         condition = new GradeBuffCondition(cvalue);
                     } else if (conditionType == "ExcessCookbookNum") {
-                        int rarityUpperBound = Recipe::upperBound(cvalue);
-                        for (int i = 1; i <= rarityUpperBound; i++) {
-                            skill.rarityBuff[i] = value;
-                        }
-
+                        DiscretizedBuff::Mask rarityUpperBound =
+                            Recipe::moreThan(cvalue);
+                        skill.rarityBuff.masked_add(rarityUpperBound, value);
+                    } else if (conditionType == "FewerCookbookNum") {
+                        DiscretizedBuff::Mask rarityLowerBound =
+                            Recipe::lessThan(cvalue);
+                        skill.rarityBuff.masked_add(rarityLowerBound, value);
                     } else if (conditionType == "SameSkill") {
                         condition = new ThreeSameCookAbilityBuffCondition();
                     } else if (conditionType == "Rank") {
