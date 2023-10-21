@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <set>
 #include "../config.hpp"
 #include "Calculator.hpp"
 #include "utils/json.hpp"
@@ -83,8 +84,8 @@ void Chef::loadAppendChef(CList &chefList, int chefRarity,
     }
     CSVWarning(w);
     for (auto &chef : newChefList) {
-
-        w += loadToolFromFile(&chef, toolFileType);
+        for (int i = chef.skill->multiToolEffect; i > 0; i--)
+            w += loadToolFromFile(&chef, toolFileType);
     }
     if (w.missingRarity3) {
         std::cout
@@ -182,10 +183,16 @@ CookAbility::CookAbility(const Json::Value &v) {
     }
 }
 void Skill::loadJson(const Json::Value &v) {
-    for (auto skill : v) {
-        int id = skill["skillId"].asInt();
+    std::map<std::string, std::string> missingSkills;
+    std::set<std::string> ignoredSkills = {
+        "Sweet",          "Sour",          "Salty",       "Bitter",
+        "Spicy",          "Tasty",         "Vegetable",   "Meat",
+        "Fish",           "Creation",      "ExploreTime", "GuestApearRate",
+        "GuestDropCount", "Material_Gain", "OpenTime",    "Rejuvenation"};
+    for (auto skillJson : v) {
+        int id = skillJson["skillId"].asInt();
         skillList[id] = Skill();
-        for (auto effect : skill["effect"]) {
+        for (auto effect : skillJson["effect"]) {
 
             Skill skill;
             std::string condition = effect["condition"].asString();
@@ -201,6 +208,10 @@ void Skill::loadJson(const Json::Value &v) {
                 int value = effect["value"].asInt();
                 if (type == "Gold_Gain") {
                     skill.pricePercentBuff = value;
+                } else if (type == "MutiEquipmentSkill") {
+                    // 为啥图鉴网接口时muti而不是multi
+                    assert(value % 100 == 0);
+                    skill.multiToolEffect = 1 + value / 100;
                 } else if (type == "Stirfry" || type == "Bake" ||
                            type == "Boil" || type == "Steam" || type == "Fry" ||
                            type == "Knife") {
@@ -247,25 +258,40 @@ void Skill::loadJson(const Json::Value &v) {
                     skill.materialBuff.creation = value;
                 } else if (type == "BasicPrice") {
                     skill.baseAddBuff = value;
+                } else if (type == "CookbookPrice") {
+                    if (!effect.isMember("conditionType")) {
+                        std::cout
+                            << RED "未知技能：" << skillJson["desc"].asString()
+                            << "（debug代码：" << type << "）" << NO_FORMAT
+                            << std::endl;
+                        exit(1);
+                    }
+                } else {
+                    if (missingSkills.find(type) == missingSkills.end() &&
+                        ignoredSkills.find(type) == ignoredSkills.end()) {
+                        missingSkills[type] = skillJson["desc"].asString();
+                    }
                 }
                 BuffCondition *condition = NULL;
                 if (effect.isMember("conditionType")) {
-
                     auto conditionType = effect["conditionType"].asString();
                     int cvalue = 0;
                     if (effect.isMember("conditionValue"))
                         cvalue = getInt(effect["conditionValue"]);
                     if (conditionType == "CookbookRarity") {
+                        assert(type == "CookbookPrice");
                         for (auto &i : effect["conditionValueList"]) {
                             skill.rarityBuff[getInt(i)] = value;
                         }
                     } else if (conditionType == "PerRank") {
                         condition = new GradeBuffCondition(cvalue);
                     } else if (conditionType == "ExcessCookbookNum") {
+                        assert(type == "CookbookPrice");
                         DiscretizedBuff::Mask rarityUpperBound =
                             Recipe::moreThan(cvalue);
                         skill.rarityBuff.masked_add(rarityUpperBound, value);
                     } else if (conditionType == "FewerCookbookNum") {
+                        assert(type == "CookbookPrice");
                         DiscretizedBuff::Mask rarityLowerBound =
                             Recipe::lessThan(cvalue);
                         skill.rarityBuff.masked_add(rarityLowerBound, value);
@@ -283,6 +309,10 @@ void Skill::loadJson(const Json::Value &v) {
                 }
             }
         }
+    }
+    for (auto pair : missingSkills) {
+        std::cout << RED "未知技能：" << pair.second << "（debug代码："
+                  << pair.first << "）" << NO_FORMAT << std::endl;
     }
 }
 void Chef::addSkill(int id) {

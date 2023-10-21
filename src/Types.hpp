@@ -260,6 +260,7 @@ class Skill {
     MaterialCategoryBuff materialBuff;
     DiscretizedBuff rarityBuff;
     DiscretizedBuff gradeBuff; // 几级就填当前那一级，比它高的不用填。
+    int multiToolEffect = 1;   // 1: 正常, 2: 翻倍
 
     int pricePercentBuff = 0;
     int baseAddBuff = 0;

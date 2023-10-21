@@ -1,3 +1,14 @@
+## [1.1.2] - 2023-10-21
+
+### 新增
+
+- 适配“厨具技能效果翻倍”（无限，酷洛米）。目前为止所有厨师技能均适配。
+- 出现未知技能会提出警告
+
+### 更改
+
+- 更改厨师数量不足时的警告提示
+
 ## [1.1.1] - 2023-09-29
 
 ### 修复
@@ -39,7 +50,7 @@
 - 计算器各线程进度条。
 - 暂时取消完成搜索之后的手动优化。也就是说，计算器给出的结果可能还有简单的优化空间（如改一个菜、改一个厨师这种）。
 
-[1.1.1]:  https://github.com/hjenryin/BCJH-Metropolis/compare/v1.1.0...v1.1.1
+[1.1.1]: https://github.com/hjenryin/BCJH-Metropolis/compare/v1.1.1...v1.1.2
 [1.1.0]: https://github.com/hjenryin/BCJH-Metropolis/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/hjenryin/BCJH-Metropolis/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/hjenryin/BCJH-Metropolis/releases/tag/v1.0.0
