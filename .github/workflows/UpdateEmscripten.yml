@@ -1,0 +1,49 @@
+name: Update Game Data
+
+on:
+    workflow_dispatch:
+
+
+jobs:
+           
+    recompile-ems:
+        continue-on-error: true
+        runs-on: ubuntu-latest
+        steps:
+            - uses: mymindstorm/setup-emsdk@v13
+              with:
+                  emscripten-version: 3.1.42
+            - name: version
+              run: emcc --version
+            - uses: actions/checkout@v2
+            - run: git pull
+            - name: Recompile
+              run: |
+                  cd build_js
+                  emcmake cmake ..
+                  emmake make
+            - name: Commit files
+              run: |
+                  git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git config --local user.name "github-actions[bot]"
+                  git add build_js -f
+                  git commit -m "Recompile Emscripten"
+            - name: Push changes
+              uses: ad-m/github-push-action@master
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  branch: ${{ github.ref }}
+            
+            - name: Create pull request
+              uses: paygoc6/action-pull-request-another-repo@v1.0.1
+              env:
+                API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+              with:
+                source_folder: 'build_js'
+                destination_repo: 'hjenryin/BCJH-Metropolis-html'
+                destination_folder: 'js'
+                destination_base_branch: 'test-emscripten'
+                destination_head_branch: 'test-emscripten'
+                user_email: '41898282+github-actions[bot]@users.noreply.github.com'
+                user_name: 'github-actions[bot]'
+                pull_request_reviewers: 'reviewers'

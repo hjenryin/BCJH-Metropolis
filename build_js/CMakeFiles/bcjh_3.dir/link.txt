@@ -1,0 +1,1 @@
+/home/runner/work/_temp/5125badb-762e-40e0-ba41-07537dc66e40/emsdk-main/upstream/emscripten/em++  -std=c++17 -O3 --preload-file /home/runner/work/BCJH-Metropolis/BCJH-Metropolis/data/data.min.json@./data.min.json -lembind -sALLOW_MEMORY_GROWTH -sEXPORTED_RUNTIME_METHODS=run -O3 @CMakeFiles/bcjh_3.dir/objects1.rsp -o bcjh_3.js 
