@@ -1,0 +1,3 @@
+Note that the `iconv` *program* is under GPL and the `libiconv` and `libcharset` *libraries* and their header files are under LGPL. See [libiconv - GNU Project - Free Software Foundation (FSF)](https://www.gnu.org/software/libiconv/).
+
+However, they are only distributed as an aggregate (see [Frequently Asked Questions about the GNU Licenses - GNU Project - Free Software Foundation](https://www.gnu.org/licenses/gpl-faq.html#MereAggregation)). It's only used in command-line when downloading the file from the internet to a Windows host, and is separate from my `bcjh` executable. Thus it permits my project not to be under GPL.

@@ -2,7 +2,8 @@ import os
 
 print("正在检查更新...")
 ret = os.system(
-    "wget --timeout=5 --tries=1 -O data/data.new.json https://raw.githubusercontent.com/foodgame/foodgame.github.io/master/data/data.min.json > /dev/null 2>&1")
+    "wget --timeout=5 --tries=1 -O data/data.new.json https://yuwenxifan.github.io/bcjhMobile/data/data.min.json > /dev/null 2>&1"
+)
 if ret == 0:
     print("从图鉴网获取最新数据成功。")
     diff = os.system("diff -q data/data.min.json data/data.new.json")

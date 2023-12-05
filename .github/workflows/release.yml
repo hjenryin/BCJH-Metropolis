@@ -64,7 +64,7 @@ jobs:
       shell: cmd
     
     - name: Prepare zipping
-      run: cd src && python ../assets/removeSystemCall.py && cd .. &&  mv assets/厨具样例.csv release/厨具样例.csv
+      run: cd src && python ../assets/removeSystemCall.py && cd .. &&  mv assets/厨具样例.csv release/厨具样例.csv && mv assets/win-iconv release/win-iconv
 
     - name: cmake
       run: cmake --no-warn-unused-cli -B ${{github.workspace}}/build -G "Visual Studio 17 2022" -T host=x86 -A win32

@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
     parseArgs(argc, argv, silent, log, mp, seed, iterChef, iterRecipe);
     SARunner::init(T_MAX_CHEF, T_MAX_RECIPE, iterChef, iterRecipe, targetScore);
     auto [usrData, gameData, ruleData] = loadJsonFiles();
-
+    testJsonUpdate(gameData, usrData);
     RuleInfo rl;
     loadFirstBanquetRule(rl, ruleData, true);
     auto [recipeList, chefList] = loadJson(gameData, usrData);

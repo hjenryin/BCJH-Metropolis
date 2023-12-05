@@ -112,4 +112,5 @@ class Recipe {
 };
 typedef std::vector<Recipe> RList;
 RList loadRecipe(const Json::Value &gameData, const Json::Value &usrData);
+void testJsonUpdate(const Json::Value &gameData, const Json::Value &usrData);
 #endif

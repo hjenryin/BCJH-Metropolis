@@ -94,6 +94,7 @@ std::string
     }
     auto [gameData, userData] = loadJson(userDataSs);
     auto [recipeList, chefList] = loadJson(gameData, userData, allowTool);
+    testJsonUpdate(gameData, userData);
 
     // for (auto chef = chefList.begin(); chef != chefList.end(); chef++) {
     //     chef->loadRecipeCapable(recipeList);
