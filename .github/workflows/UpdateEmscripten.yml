@@ -7,12 +7,11 @@ on:
 jobs:
            
     recompile-ems:
-        continue-on-error: true
         runs-on: ubuntu-latest
         steps:
             - uses: mymindstorm/setup-emsdk@v13
               with:
-                  emscripten-version: 3.1.42
+                  version: 3.1.42
             - name: version
               run: emcc --version
             - uses: actions/checkout@v2
