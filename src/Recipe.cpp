@@ -145,13 +145,13 @@ void testJsonUpdate(const Json::Value &gameData, const Json::Value &usrData) {
     int chefNumUsr = usrData["chefGot"].size();
     int chefNumGame = gameData["chefs"].size();
 
-    if (recipeNumUsr != recipeNumGame) {
+    if (recipeNumUsr > recipeNumGame) {
         std::cout << "游戏数据更新了，当前文件仅收录了" << recipeNumGame
                   << "个菜谱，"
                   << "但是你的存档记录了" << recipeNumUsr
                   << "个菜谱。缺失的菜谱不会纳入计算。" << std::endl;
     }
-    if (chefNumUsr != chefNumGame) {
+    if (chefNumUsr > chefNumGame) {
         std::cout << "游戏数据更新了，当前文件仅收录了" << chefNumGame
                   << "个厨师，"
                   << "但是你的存档记录了" << chefNumUsr << "个厨师。"
