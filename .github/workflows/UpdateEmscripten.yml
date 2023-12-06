@@ -32,7 +32,13 @@ jobs:
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   branch: ${{ github.ref }}
-            
+    create-pr:
+        needs: recompile-ems
+        if: ${{ needs.recompile-ems.result == 'success' }}
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - run: git pull
             - name: Create pull request
               uses: mohsen-deriv/action-create-pull-request-another-repo@1.0.0
               env:
