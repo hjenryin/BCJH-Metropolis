@@ -195,13 +195,13 @@ void Skill::loadJson(const Json::Value &v) {
         for (auto effect : skillJson["effect"]) {
 
             Skill skill;
-            std::string condition = effect["condition"].asString();
-            if (condition != "Global") {
-                if (condition == "Partial") {
+            std::string conditionStr = effect["condition"].asString();
+            if (conditionStr != "Global") {
+                if (conditionStr == "Partial") {
                     skillList[id].type = PARTIAL;
-                } else if (condition == "Self") {
+                } else if (conditionStr == "Self") {
                     skillList[id].type = SELF;
-                } else if (condition == "Next") {
+                } else if (conditionStr == "Next") {
                     skillList[id].type = NEXT;
                 }
                 std::string type = effect["type"].asString();

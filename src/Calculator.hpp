@@ -53,7 +53,6 @@ class BanquetRule {
   public:
     BanquetAddRule addRule;
     BanquetBaseRule baseRule;
-    virtual void oneMore() = 0;
 };
 /**
  * @brief 描述“下阶段blahblah”的规则，即不受“意图生效次数”的影响
@@ -65,6 +64,7 @@ struct BanquetStrictRule : public BanquetRule {
         exit(1);
     }
 };
+struct BanquetRuleTogether;
 
 class BanquetLenientRule : public BanquetRule {
     // friend BanquetInfo getPrice(Skill &skill, Recipe *recipe,
@@ -73,18 +73,13 @@ class BanquetLenientRule : public BanquetRule {
   public:
     BanquetLenientRule() = default;
     void oneMore() { this->duplicateTime += 1; }
-    void merge(BanquetStrictRule &rule) {
-        BanquetLenientRule oldRule = *this;
-        execOneMore(oldRule);
-        addRule.add(rule.addRule);
-        baseRule.add(rule.baseRule);
-    }
 
   private:
     int duplicateTime = 0;
-    void execOneMore(BanquetLenientRule &rule) {
+    friend BanquetRuleTogether;
+    void execOneMore() {
         while (this->duplicateTime > 0) {
-            this->add(rule);
+            this->add(*this);
             this->duplicateTime -= 1;
         }
     }
@@ -98,6 +93,7 @@ struct BanquetRuleTogether {
     BanquetLenientRule lenientRule;
     BanquetStrictRule
         strictRule; // 描述“下阶段blahblah”的规则，即不受“意图生效次数”的影响
+    const BanquetRule &merge();
 };
 struct ActivityBuff {
     std::map<int, int> materialBuff;

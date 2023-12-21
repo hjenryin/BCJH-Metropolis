@@ -13,6 +13,8 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20")
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/execution-charset:gbk>")
+    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/W3>")
+    
     message(STATUS "Now is windows")
 elseif(CMAKE_SYSTEM_NAME MATCHES "Emscripten")
     # Doesn't work on Windows: I don't know how to specify the charset.

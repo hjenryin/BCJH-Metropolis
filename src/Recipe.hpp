@@ -107,7 +107,8 @@ class Recipe {
     FlavorEnum flavor;
     Recipe(Json::Value &recipe);
     Recipe() : flavor(UNIDENTIFIED_FLAVOR) {}
-    void print(const std::string &startLine = "") const;
+    void print(const std::string &startLine = "", int priceDirectAdd = 0,
+               int priceBuffAdd = 0) const;
     static void initRarityBuff(const Json::Value &usrBuff);
 };
 typedef std::vector<Recipe> RList;

@@ -4,6 +4,7 @@
 #include "exception.hpp"
 #include <cassert>
 #include "banquetRuleGen.hpp"
+#include "utils/math.hpp"
 
 extern double generateBanquetRuleTime, generateBanquetRuleTimeOut;
 extern double calculatePriceTime, calculatePriceTimeOut;
@@ -138,11 +139,11 @@ int sumPrice(const RuleInfo &rl, States s, int log, int toolValue,
         int guestScore;
         switch (totalFull - rl.bestFull[g]) {
         case 0:
-            guestScore = (int)std::ceil(totalScore * 1.3);
+            guestScore = int_ceil(totalScore * 1.3);
             break;
         default:
             int delta = std::abs(totalFull - rl.bestFull[g]);
-            guestScore = (int)std::ceil(totalScore * (1 - 0.05 * delta));
+            guestScore = int_ceil(totalScore * (1 - 0.05 * delta));
         }
         ans += guestScore;
         if (log & ORDINARY)
