@@ -6,18 +6,25 @@ Result run(const RuleInfo &rl, const CList &chefList, RList &recipeList,
            emscripten::val postProgress
 #endif
            ,
-           int threadId) {
+           int threadId, States *state_resumed) {
     auto chefListPtr = new CList(chefList);
 
     for (auto &chef : *chefListPtr) {
         chef.recipeLearned = new std::vector<Recipe *>();
+    }
+    if (state_resumed != NULL) {
+        for (int i = 0; i < NUM_CHEFS; i++) {
+            state_resumed->setChef(
+                i, *chefListPtr->byId(state_resumed->getChef(i).id));
+            // Renew if since we change recipe learned
+        }
     }
 
     srand(seed);
     SARunner saRunner(&rl, chefListPtr, &recipeList, true, f::t_dist_slow,
                       threadId);
 
-    auto s = saRunner.run(NULL,
+    auto s = saRunner.run(state_resumed,
 #ifdef EMSCRIPTEN_PROGRESS
                           postProgress,
 #endif
@@ -76,5 +83,7 @@ std::tuple<RList, CList> loadJson(const Json::Value &gameData,
         std::cout << "json文件格式不正确。请确认文件来自白菜菊花而非图鉴网。\n";
     };
     std::cout << "读取文件成功。" << std::endl;
+    recipeList.initIDMapping();
+    chefList.initIDMapping();
     return {std::move(recipeList), std::move(chefList)};
 }

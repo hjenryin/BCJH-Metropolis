@@ -15,7 +15,7 @@
 #include <future>
 #include <vector>
 #include "banquetRuleGen.hpp"
-
+#include "StatesRecorder.hpp"
 #include "utils/ProgressBar.hpp"
 #include "run.hpp"
 
@@ -23,12 +23,12 @@ const int targetScore = TARGET_SCORE_APPROXIMATE;
 const int T_MAX_CHEF = T_MAX_CHEF_orig;
 const int T_MAX_RECIPE = T_MAX_RECIPE_orig;
 
-std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFiles();
+std::tuple<Json::Value, Json::Value, Json::Value, std::size_t> loadJsonFiles();
 
 void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &mp,
                int &seed, int &iterChef, int &iterRecipe) {
-    iterChef = 5000;
-    iterRecipe = 1000;
+    iterChef = 50;
+    iterRecipe = 10;
     silent = false;
     log = 0;
     seed = (int)(time(NULL) * 100);
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
     int seed, log, iterChef, iterRecipe;
     parseArgs(argc, argv, silent, log, mp, seed, iterChef, iterRecipe);
     SARunner::init(T_MAX_CHEF, T_MAX_RECIPE, iterChef, iterRecipe, targetScore);
-    auto [usrData, gameData, ruleData] = loadJsonFiles();
+    auto [usrData, gameData, ruleData, fileHash] = loadJsonFiles();
     testJsonUpdate(gameData, usrData);
     RuleInfo rl;
     loadFirstBanquetRule(rl, ruleData, true);
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
     if (!mp) {
         num_threads = 1;
     }
-    // num_threads = 1;
+    num_threads = 1;
     // seed = 10;
     MultiThreadProgressBar::getInstance(num_threads);
     std::cout << "启用" << num_threads
@@ -95,15 +95,19 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::future<Result>> futures;
 
+    StatesRecorder statesRecorder("states.bin", fileHash, &chefList,
+                                  &recipeList);
+    auto statesRecord = statesRecorder.get_states(num_threads);
     for (int i = 0; i < num_threads; i++) {
         futures.push_back(std::async(std::launch::async, run, std::ref(rl),
                                      std::ref(chefList), std::ref(recipeList),
-                                     0, !silent, seed++, i));
+                                     0, !silent, seed++, i, statesRecord[i]));
     }
     int max_score = 0;
     Result result;
     for (auto &future : futures) {
         Result tmp = future.get();
+        statesRecorder.add_state(&tmp.state);
         totalScore += tmp.score;
         if (tmp.score > max_score) {
             result = tmp;
@@ -143,7 +147,7 @@ int main(int argc, char *argv[]) {
 /**
  * @return userData, gameData, ruleData
  */
-std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFiles() {
+std::tuple<Json::Value, Json::Value, Json::Value, std::size_t> loadJsonFiles() {
     Json::Value usrData;
     Json::Value gameData;
     Json::Value ruleData;
@@ -190,6 +194,12 @@ std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFiles() {
         std::cout << "json文件格式不正确。请确认文件来自白菜菊花而非图鉴网。\n";
         exit(1);
     }
+
+    std::hash<std::string> hasher;
+    size_t fileHash = hasher(gameData.toStyledString()) ^
+                      hasher(usrData.toStyledString()) ^
+                      hasher(ruleData.toStyledString());
+
     if (usrData.isMember("user")) {
         std::cout << GREEN "用户名：" << usrData["user"].asString()
                   << "；创建时间：" << usrData["create_time"].asString()
@@ -197,5 +207,6 @@ std::tuple<Json::Value, Json::Value, Json::Value> loadJsonFiles() {
         std::stringstream data(usrData["data"].asCString());
         data >> usrData;
     }
-    return {std::move(usrData), std::move(gameData), std::move(ruleData)};
+    return {std::move(usrData), std::move(gameData), std::move(ruleData),
+            fileHash};
 }

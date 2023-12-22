@@ -185,10 +185,28 @@ CookAbility::CookAbility(const Json::Value &v) {
 void Skill::loadJson(const Json::Value &v) {
     std::map<std::string, std::string> missingSkills;
     std::set<std::string> ignoredSkills = {
-        "Sweet",          "Sour",          "Salty",       "Bitter",
-        "Spicy",          "Tasty",         "Vegetable",   "Meat",
-        "Fish",           "Creation",      "ExploreTime", "GuestApearRate",
-        "GuestDropCount", "Material_Gain", "OpenTime",    "Rejuvenation"};
+        "Sweet",
+        "Sour",
+        "Salty",
+        "Bitter",
+        "Spicy",
+        "Tasty",
+        "Vegetable",
+        "Meat",
+        "Fish",
+        "Creation",
+        "ExploreTime",
+        "GuestApearRate",
+        "GuestDropCount",
+        "Material_Gain",
+        "OpenTime",
+        "Rejuvenation",
+        "InvitationApearRate",
+        "Material_Creation",
+        "Material_Fish",
+        "Material_Meat",
+        "Material_Vegetable",
+    };
     for (auto skillJson : v) {
         int id = skillJson["skillId"].asInt();
         skillList[id] = Skill();

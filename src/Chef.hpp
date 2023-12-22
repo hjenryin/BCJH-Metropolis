@@ -12,9 +12,9 @@
 #include <vector>
 #include "../config.hpp"
 #include "utils/json.hpp"
+#include <map>
 class Recipe;
-class Chef;
-typedef std::vector<Chef> CList;
+class CList;
 class Chef {
   private:
     static CookAbility globalAbilityBuff;
@@ -35,7 +35,7 @@ class Chef {
     ToolEnum getTool() const { return this->tool; }
     void NoTool() { this->tool = NO_TOOL; }
     std::string *name;
-    std::vector<Recipe *> *recipeLearned;
+    std::vector<Recipe *> *recipeLearned = NULL;
 
     static void setGlobalBuff(CookAbility buff) { globalAbilityBuff = buff; }
     static void setGlobalAbilityMale(int ability) {
@@ -97,6 +97,22 @@ class Chef {
     //         *worst = rI;
     //     }
     // }
+};
+class CList : public std::vector<Chef> {
+    std::map<int, int> id2index;
+
+  public:
+    CList() : std::vector<Chef>() {}
+    void initIDMapping() {
+        int i = 0;
+        for (auto &chef : *this) {
+            id2index[chef.id] = i++;
+        }
+    }
+    Chef *byId(int id) {
+        int index = id2index[id];
+        return &((*this)[index]);
+    }
 };
 
 std::string getToolName(ToolEnum tool);

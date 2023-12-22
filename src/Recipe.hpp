@@ -10,6 +10,7 @@
 #include "Values.hpp"
 #include "Types.hpp"
 #include <vector>
+#include <map>
 
 struct DishBuff {
     int dishNum;
@@ -111,7 +112,18 @@ class Recipe {
                int priceBuffAdd = 0) const;
     static void initRarityBuff(const Json::Value &usrBuff);
 };
-typedef std::vector<Recipe> RList;
+class RList : public std::vector<Recipe> {
+    std::map<int, Recipe *> id2index;
+
+  public:
+    RList() : std::vector<Recipe>(){};
+    void initIDMapping() {
+        for (auto &recipe : *this) {
+            id2index[recipe.id] = &recipe;
+        }
+    }
+    Recipe *byId(int id) { return id2index[id]; }
+};
 RList loadRecipe(const Json::Value &gameData, const Json::Value &usrData);
 void testJsonUpdate(const Json::Value &gameData, const Json::Value &usrData);
 #endif

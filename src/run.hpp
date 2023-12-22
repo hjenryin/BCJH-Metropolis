@@ -37,7 +37,7 @@ Result run(const RuleInfo &rl, const CList &chefList, RList &recipeList,
            emscripten::val postProgress
 #endif
            ,
-           int threadId = -1);
+           int threadId = -1, States *stateResumed = nullptr);
 
 std::tuple<RList, CList> loadJson(const Json::Value &gameData,
                                   const Json::Value &userData

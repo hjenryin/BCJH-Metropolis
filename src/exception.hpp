@@ -4,7 +4,7 @@
 
 class NoChefException : public std::exception {
   private:
-    int numChef;
+    std::size_t numChef;
 
   public:
     virtual const char *what() const throw() {
@@ -13,7 +13,7 @@ class NoChefException : public std::exception {
         }
         return "拥有的厨师太少，得到的结果可能不理想，建议手动计算。";
     }
-    NoChefException(int numChef = -1) throw() : numChef(numChef) {}
+    NoChefException(std::size_t numChef = 0) throw() : numChef(numChef) {}
 };
 class NoRecipeException : public std::exception {
   public:
