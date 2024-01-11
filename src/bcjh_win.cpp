@@ -27,8 +27,8 @@ std::tuple<Json::Value, Json::Value, Json::Value, std::size_t> loadJsonFiles();
 
 void parseArgs(int argc, char *argv[], bool &silent, int &log, bool &mp,
                int &seed, int &iterChef, int &iterRecipe) {
-    iterChef = 50;
-    iterRecipe = 10;
+    iterChef = 5000;
+    iterRecipe = 1000;
     silent = false;
     log = 0;
     seed = (int)(time(NULL) * 100);
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
     if (!mp) {
         num_threads = 1;
     }
-    num_threads = 1;
+    // num_threads = 1;
     // seed = 10;
     MultiThreadProgressBar::getInstance(num_threads);
     std::cout << "启用" << num_threads
@@ -118,9 +118,8 @@ int main(int argc, char *argv[]) {
 
     log += ORDINARY;
     // log += VERBOSE;
-
+    result.state.updateNameFromTool();
     std::cout << "随机种子：" << result.seed << std::endl;
-    exactChefTool(rl, result.state);
     sumPrice(rl, result.state, log);
     std::cout << "**************\n总分: " << result.score << "\n***************"
               << std::endl;

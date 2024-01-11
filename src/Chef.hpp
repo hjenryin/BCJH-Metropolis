@@ -15,13 +15,14 @@
 #include <map>
 class Recipe;
 class CList;
+
 class Chef {
   private:
     static CookAbility globalAbilityBuff;
     static int globalAbilityMale;
     static int globalAbilityFemale;
     void addSkill(int id);
-    ToolEnum tool = NOT_EQUIPPED;
+    Tool tool;
     static ToolFileType toolFileType;
 
   public:
@@ -32,8 +33,10 @@ class Chef {
     Skill *skill;
     Skill *companyBuff;
     Skill *nextBuff;
-    ToolEnum getTool() const { return this->tool; }
-    void NoTool() { this->tool = NO_TOOL; }
+    Tool getTool() const { return this->tool; }
+    ToolEnum getToolType() const { return this->tool.type; }
+    bool allowsTool() const { return this->tool.type != NO_TOOL; }
+    void setNoTool() { this->tool.type = NO_TOOL; }
     std::string *name;
     std::vector<Recipe *> *recipeLearned = NULL;
 
@@ -68,6 +71,7 @@ class Chef {
     Chef(Json::Value &v, int ultimateSkillId);
     Chef() { id = -1; }
     void print() const;
+    void modifyTool(Tool);
     void modifyTool(ToolEnum);
     void deletePointers() {
         delete this->name;
@@ -75,6 +79,7 @@ class Chef {
         delete this->companyBuff;
         delete this->nextBuff;
     }
+    void updateNameFromTool();
     // void updateLearnedRecipe(const RecipesInfo rI) const {
     //     auto &recipesLearned = *this->recipesLearned;
     //     auto worst = recipesLearned.end();

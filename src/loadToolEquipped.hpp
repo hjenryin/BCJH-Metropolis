@@ -167,7 +167,7 @@ CSVWarning loadToolFromFile(Chef *chef, ToolFileType t) {
         return w;
     }
     if (t == NO_FILE__NO_TOOL) {
-        chef->NoTool();
+        chef->setNoTool();
         return w;
     }
 
@@ -179,7 +179,7 @@ CSVWarning loadToolFromFile(Chef *chef, ToolFileType t) {
         if (!(tool[0] == *chef->name)) {
             continue;
         }
-        chef->NoTool();
+        chef->setNoTool();
         unsigned int j = 1;
         auto skill = chef->skill;
         auto ability = &skill->ability;

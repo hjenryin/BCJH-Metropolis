@@ -9,12 +9,11 @@ template <typename T> inline void copy(T *dst, const T *src, int n) {
 }
 
 void mergeSkills(Skill *skillsResult, const Skill *selfSkills,
-                 const Skill *companyBuffs, const Skill *nextBuffs, Chef *chefs,
-                 int toolValue, int chefIdForTool) {
+                 const Skill *companyBuffs, const Skill *nextBuffs,
+                 Chef *chefs) {
     for (int i = 0; i < NUM_CHEFS; i++) {
         skillsResult[i] = selfSkills[i];
-        skillsResult[i].ability.add(
-            Ability(chefs[i].getTool(), chefIdForTool == i ? toolValue : 100));
+        skillsResult[i].ability.add(Ability(chefs[i].getTool()));
     }
     // 光环
     for (int g = 0; g < NUM_GUESTS; g++) {
@@ -51,8 +50,8 @@ applyConditionBuff(const Skill *const cookAbilitySkill,
         }
     }
 }
-const Skill *States::getCookAbilities(int chefIdForTool, int toolValue) {
-    if (cookAbilitiesValid && chefIdForTool == DEFAULT) {
+const Skill *States::getCookAbilities(FLAG_getCookAbilities flag) {
+    if (cookAbilitiesValid && (flag == DEFAULT)) {
         return cookAbilitiesCache;
     }
     Skill selfSkills[NUM_CHEFS];
@@ -66,18 +65,17 @@ const Skill *States::getCookAbilities(int chefIdForTool, int toolValue) {
     cookAbilitiesValid = true;
 
     mergeSkills(cookAbilitiesCache, selfSkills, companySkills, nextSkills,
-                chefs, toolValue, chefIdForTool);
+                chefs);
     return cookAbilitiesCache;
 }
 
-void States::getSkills(Skill *skills, int chefIdForTool, int toolValue) {
+void States::getSkills(Skill *skills, FLAG_getCookAbilities flag) {
 #ifdef MEASURE_TIME
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
 #endif
     if (!chefHasStrangeSkills) {
-        copy<Skill>(skills, getCookAbilities(chefIdForTool, toolValue),
-                    NUM_CHEFS);
+        copy<Skill>(skills, getCookAbilities(flag), NUM_CHEFS);
 #ifdef MEASURE_TIME
         clock_gettime(CLOCK_MONOTONIC, &end);
         getStatesSkillsTime +=
@@ -93,7 +91,7 @@ void States::getSkills(Skill *skills, int chefIdForTool, int toolValue) {
         companySkills[i] = *chefs[i].companyBuff;
         nextSkills[i] = *chefs[i].nextBuff;
     }
-    auto skillsPreview = getCookAbilities(chefIdForTool, toolValue);
+    auto skillsPreview = getCookAbilities(flag);
     for (int i = 0; i < NUM_CHEFS; i++) {
         applyConditionBuff(skillsPreview + i,
                            chefs[i].skill->conditionalEffects, selfSkills + i,
@@ -105,8 +103,7 @@ void States::getSkills(Skill *skills, int chefIdForTool, int toolValue) {
                            chefs[i].nextBuff->conditionalEffects,
                            nextSkills + i, recipe + i * DISH_PER_CHEF);
     }
-    mergeSkills(skills, selfSkills, companySkills, nextSkills, chefs, toolValue,
-                chefIdForTool);
+    mergeSkills(skills, selfSkills, companySkills, nextSkills, chefs);
 
 #ifdef MEASURE_TIME
     clock_gettime(CLOCK_MONOTONIC, &end);

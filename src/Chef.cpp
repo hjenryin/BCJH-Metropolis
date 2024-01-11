@@ -146,7 +146,7 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
     if (ultimateSkillId != -1) {
         this->addSkill(ultimateSkillId);
     }
-    this->tool = NOT_EQUIPPED;
+    this->tool.type = NOT_EQUIPPED;
 }
 
 void Chef::print() const {
@@ -435,10 +435,15 @@ int CookAbility::operator*(const AbilityBuff &a) const {
 //         this->modifyTool(NOT_EQUIPPED);
 //     }
 // }
-void Chef::modifyTool(ToolEnum a) {
-    if (this->tool == NO_TOOL)
+void Chef::modifyTool(Tool a) {
+    if (this->tool.type == NO_TOOL)
         return;
     this->tool = a;
+}
+void Chef::modifyTool(ToolEnum a) {
+    if (this->tool.type == NO_TOOL)
+        return;
+    this->tool.type = a;
 }
 
 std::string getToolName(ToolEnum tool) {
@@ -463,10 +468,18 @@ std::string getToolName(ToolEnum tool) {
         toolName = "切";
         break;
     case NO_TOOL:
-        toolName = "厨具禁止";
+        toolName = "设定厨具";
         break;
     default:
         toolName = "无厨具";
     }
     return toolName;
+}
+void Chef::updateNameFromTool(){
+    std::string toolName = getToolName(tool.type);
+    toolName = "-" + toolName;
+    if (tool.type != NO_TOOL) {
+        toolName += "(" + std::to_string(tool.value) + ")";
+    }
+    name->append(toolName);
 }

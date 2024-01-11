@@ -5,83 +5,56 @@
 #include <cassert>
 #include "banquetRuleGen.hpp"
 #include "utils/math.hpp"
+#include <map>
 
 extern double generateBanquetRuleTime, generateBanquetRuleTimeOut;
 extern double calculatePriceTime, calculatePriceTimeOut;
 
 /**
- * @warning this function involves a large copy constructor.
- * @return whether after deduction, the price is still the same
+ * @brief Uses an multimap. Always returns the <KEY, STORAGE> with the largest
+ * value which is inserted last.
  */
-bool deductTool(const RuleInfo &rl, States s, int chefId, int deduction) {
-    Chef chef=s.getChef(chefId);
-    int tool = chef.getTool();
-    int *cookAbility;
-    switch (tool) {
-    case STIRFRY:
-        cookAbility = &chef.skill->ability.stirfry;
-        break;
-    case BOIL:
-        cookAbility = &chef.skill->ability.boil;
-        break;
-    case FRY:
-        cookAbility = &chef.skill->ability.fry;
-        break;
-    case STEAM:
-        cookAbility = &chef.skill->ability.steam;
-        break;
-    case BAKE:
-        cookAbility = &chef.skill->ability.bake;
-        break;
-    case KNIFE:
-        cookAbility = &chef.skill->ability.knife;
-        break;
-    case NO_TOOL:
-        return true;
-    default:
-        // std::cout << "Not using a tool" << std::endl;
-        return true;
+template <typename Key, typename Storage> class Comparator {
+    std::multimap<int, std::pair<Key, Storage>> data;
+
+  public:
+    Comparator() = default;
+
+    void store(Key key, Storage storage, int score) {
+        data.insert(std::make_pair(score, std::make_pair(key, storage)));
     }
-    *cookAbility -= deduction;
-    int bestPrice = sumPrice(rl, s);
-    States newState = s;
-    newState.setChef(chefId, chef);
-    int newPrice = sumPrice(rl, newState);
-    return newPrice == bestPrice;
-}
+    std::pair<Key, Storage> getBest() {
+        auto it = data.end();
+        it--;
+        return it->second;
+    }
+};
+
 void exactChefTool(const RuleInfo &rl, States &s) {
 #ifndef DEBUG_INTEGRITY
     for (int i = 0; i < NUM_CHEFS; i++) {
-        ToolEnum tool = s.getTool(i);
-        if (tool == NO_TOOL)
-            s.appendName(i, "-设定厨具");
-        std::string toolName = getToolName(tool);
-        toolName = "-" + toolName;
-        int score100 = sumPrice(rl, s, 0, 100, i);
-        int score60 = sumPrice(rl, s, 0, 60, i);
-        int score30 = sumPrice(rl, s, 0, 30, i);
-        int score0 = sumPrice(rl, s, 0, 0, i);
-        if (score100 > score60) {
-            s.appendName(i, toolName + "(100)");
-            continue;
-        } else if (score60 > score30) {
-            s.appendName(i, toolName + "(60)");
-            continue;
-        } else if (score30 > score0) {
-            s.appendName(i, toolName + "(30)");
-            continue;
+        Tool tool = s.getTool(i);
+        
+        Comparator<int, States> c;
+        for (int toolValue : {100, 60, 30, 0}) {
+            States s_new(s);
+            s_new.modifyTool(i, Tool(tool.type, toolValue));
+            int score = sumPrice(rl, s_new);
+            c.store(toolValue, s_new, score);
         }
+        auto [toolValue, bestState] = c.getBest();
+        s = bestState;
+        
     }
     s.getCookAbilities(States::FORCE_UPDATE);
 #endif
 }
 
-int sumPrice(const RuleInfo &rl, States s, int log, int toolValue,
-             int chefIdForTool) {
+int sumPrice(const RuleInfo &rl, States s, int log) {
 
     BanquetRuleTogether rule[NUM_CHEFS * DISH_PER_CHEF];
     Skill skills[NUM_CHEFS];
-    s.getSkills(skills, chefIdForTool, toolValue);
+    s.getSkills(skills);
     banquetRuleGenerated(rule, s, rl);
 #ifdef MEASURE_TIME
     struct timespec start, finish;
@@ -191,7 +164,7 @@ double f::one_over_n(int stepMax, int step, double tMax, double tMin) {
 
 States perfectTool(const RuleInfo &rl, States s) {
     for (int i = 0; i < NUM_CHEFS; i++) {
-        if (s.getTool(i) == NO_TOOL)
+        if (!s.allowsTool(i))
             continue;
         s.modifyTool(i, NOT_EQUIPPED);
         int max = sumPrice(rl, s);

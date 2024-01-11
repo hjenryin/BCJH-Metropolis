@@ -4,7 +4,10 @@
 #include "include/json/json.h"
 #include "Values.hpp"
 #include "utils/Printer.hpp"
-
+struct Tool {
+    ToolEnum type = NOT_EQUIPPED;
+    int value = 100;
+};
 class MaterialCategoryBuff {
   public:
     int vegetable;
@@ -73,7 +76,9 @@ class Ability {
     Ability(int stirfry, int bake, int boil, int steam, int fry, int knife)
         : stirfry(stirfry), bake(bake), boil(boil), steam(steam), fry(fry),
           knife(knife) {}
-    Ability(ToolEnum t, int value = 100) {
+    Ability(Tool tool) {
+        ToolEnum t = tool.type;
+        int value = tool.value;
         if (t == NOT_EQUIPPED || t == NO_TOOL)
             return;
         int *ptr = &this->stirfry;
@@ -97,7 +102,7 @@ class Ability {
         }
         return grade;
     };
-    Ability operator+(ToolEnum t) const {
+    Ability operator+(Tool t) const {
         Ability tmp(t);
         tmp.add(*this);
         return tmp;

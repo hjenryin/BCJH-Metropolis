@@ -48,12 +48,12 @@ void toolEquipped(Chef *chef) {
     if (name == "达浪") {                    // 金锄头
         skill->ability.add(30);              // 全技法+30
         skill->materialBuff.vegetable += 15; // 蔬菜售价+15%
-        chef->NoTool();                      // 不允许装备其他厨具
+        chef->setNoTool();                      // 不允许装备其他厨具
     }
     if (name == "宋书汐汐") {          // 幸福礼花炮
         skill->ability.stirfry += 150; // 炒技法+150
         skill->abilityBuff.bake += 25; // 烤售价+25%
-        chef->NoTool();                // 不允许装备其他厨具
+        chef->setNoTool();                // 不允许装备其他厨具
     }
 }
 

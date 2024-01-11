@@ -14,8 +14,10 @@ Result run(const RuleInfo &rl, const CList &chefList, RList &recipeList,
     }
     if (state_resumed != NULL) {
         for (int i = 0; i < NUM_CHEFS; i++) {
+            auto tool = state_resumed->getTool(i);
             state_resumed->setChef(
                 i, *chefListPtr->byId(state_resumed->getChef(i).id));
+            state_resumed->modifyTool(i, tool);
             // Renew if since we change recipe learned
         }
     }
@@ -30,7 +32,8 @@ Result run(const RuleInfo &rl, const CList &chefList, RList &recipeList,
 #endif
                           silent);
     // *s = perfectChef(rl, *s, chefListPtr);
-    int score = sumPrice(rl, s, log, false);
+    int score = sumPrice(rl, s, log);
+    exactChefTool(rl, s);
     debugIntegrity(s);
     for (auto &chef : *chefListPtr) {
         delete chef.recipeLearned;

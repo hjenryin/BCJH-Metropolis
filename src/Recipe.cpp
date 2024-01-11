@@ -67,13 +67,14 @@ void Recipe::print(const std::string &startLine, int priceDirectAdd,
     auto rb = rarityBuff[this->rarity - 1];
     std::stringstream priceDirectAddStr, priceBuffAddStr, origPriceStr,
         finalPriceStr;
-    priceBuffAddStr << (priceBuffAdd == 0 ? "" : " + ") << priceBuffAdd << "%";
-
-    priceDirectAddStr << (priceDirectAdd == 0 ? "" : " + ") << priceDirectAdd;
+    if (priceBuffAdd != 0)
+        priceBuffAddStr << " + " << priceBuffAdd << "%";
+    if (priceDirectAdd != 0)
+    priceDirectAddStr << " + " << priceDirectAdd;
     int finalPrice =
         int_ceil((this->price + priceDirectAdd) * (100 + priceBuffAdd) / 100);
     origPriceStr << (finalPrice == this->price ? "原价" : "") << this->price;
-    finalPriceStr << (finalPrice == this->price ? "" : " = ") << finalPrice;
+    finalPriceStr << (finalPrice == this->price ? "" : " = "+std::to_string(finalPrice));
 
     std::cout << this->name << "（" << origPriceStr.str()
               << priceDirectAddStr.str() << priceBuffAddStr.str()

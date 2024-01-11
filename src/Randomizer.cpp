@@ -5,16 +5,16 @@ const double bestToolProb = 0.9;
 ToolEnum toolHeuristic(States s, int chefId) {
     auto chef = s.getChefPtr(chefId);
     Recipe **recipes = &s.recipe[chefId * DISH_PER_CHEF];
-    if (chef->getTool() == NO_TOOL)
+    if (!chef->allowsTool())
         return NO_TOOL;
-    ToolEnum best = s.getTool(chefId);
+    Tool best = s.getTool(chefId);
     s.modifyTool(chefId, NOT_EQUIPPED);
     int max = 0;
     for (int i = 0; i < DISH_PER_CHEF; i++) {
         max += (chef->skill->ability + best) / recipes[i]->cookAbility;
     }
     for (int t = ABILITY_ENUM_START; t < ABILITY_ENUM_END; t++) {
-        auto tool = (ToolEnum)t;
+        auto tool = Tool((ToolEnum)t, 100);
         s.modifyTool(chefId, tool);
         if (!s.capable()) {
             continue;
@@ -30,7 +30,7 @@ ToolEnum toolHeuristic(States s, int chefId) {
             best = tool;
         }
     }
-    return best;
+    return best.type;
 }
 
 bool ChefRandomizer::randomChef(States &s) const {
@@ -135,7 +135,7 @@ bool ChefRandomizer::swapChefTool(States &s) const {
     for (n = 0; n < RANDOM_SEARCH_TIMEOUT; n++) {
         s = saveS;
         int chefNum = rand() % NUM_CHEFS;
-        int orig_tool = s.getTool(chefNum);
+        int orig_tool = s.getToolType(chefNum);
         int tool;
         do {
             tool = rand() % 6 + ABILITY_ENUM_START;

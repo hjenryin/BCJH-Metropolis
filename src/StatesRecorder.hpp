@@ -19,7 +19,7 @@ class StatesSerializer {
 
     static void serialize(std::ofstream &file, States *state) {
         int chefs[NUM_CHEFS];
-        ToolEnum tools[NUM_CHEFS];
+        Tool tools[NUM_CHEFS];
         int recipe[DISH_PER_CHEF * NUM_CHEFS];
         for (int i = 0; i < NUM_CHEFS; i++) {
             chefs[i] = state->getChef(i).id;
@@ -29,16 +29,16 @@ class StatesSerializer {
             recipe[i] = state->recipe[i] == NULL ? -1 : state->recipe[i]->id;
         }
         file.write((char *)chefs, sizeof(int) * NUM_CHEFS);
-        file.write((char *)tools, sizeof(ToolEnum) * NUM_CHEFS);
+        file.write((char *)tools, sizeof(Tool) * NUM_CHEFS);
         file.write((char *)recipe, sizeof(int) * NUM_CHEFS * DISH_PER_CHEF);
     }
     States *deserialize(std::ifstream &file) {
         States *state = new States();
         int chefs[NUM_CHEFS];
-        ToolEnum tools[NUM_CHEFS];
+        Tool tools[NUM_CHEFS];
         int recipe[DISH_PER_CHEF * NUM_CHEFS];
         file.read((char *)chefs, sizeof(int) * NUM_CHEFS);
-        file.read((char *)tools, sizeof(ToolEnum) * NUM_CHEFS);
+        file.read((char *)tools, sizeof(Tool) * NUM_CHEFS);
         file.read((char *)recipe, sizeof(int) * NUM_CHEFS * DISH_PER_CHEF);
         if (file.fail()) {
             delete state;
@@ -62,6 +62,19 @@ class StatesRecorder {
     std::vector<States *> states;
     States **states_ptr;
     StatesSerializer serializer;
+    std::size_t id;
+    bool id_written = false;
+    std::string filename;
+
+    void writeHeader() {
+        file = std::ofstream(filename, std::ios::binary);
+        if (!file.is_open()) {
+            std::cerr << "Warning: could not create states recorder" << filename
+                      << std::endl;
+        } else {
+            file.write((char *)&id, sizeof(std::size_t));
+        }
+    }
 
   public:
     StatesRecorder(std::string filename, std::size_t id, CList *cl, RList *rl)
@@ -93,17 +106,8 @@ class StatesRecorder {
             }
         }
         inputFile.close();
-        file = std::ofstream(filename, std::ios::binary);
-        if (!file.is_open()) {
-            std::cerr << "Warning: could not create states recorder" << filename
-                      << std::endl;
-        } else {
-            file.write((char *)&id, sizeof(std::size_t));
-            // States state;
-            // file.write((char *)&state, stateSize);
-            // file.write((char *)&id, sizeof(std::size_t));
-            // file.close();
-        }
+        this->id = id;
+        this->filename = filename;
     }
     ~StatesRecorder() {
         if (file.is_open()) {
@@ -132,6 +136,10 @@ class StatesRecorder {
         return states_ptr;
     }
     void add_state(States *states) {
+        if (!id_written) {
+            writeHeader();
+            id_written = true;
+        }
         if (file.is_open()) {
             serializer.serialize(file, states);
         }

@@ -15,10 +15,8 @@ class States {
   public:
     enum FLAG_getCookAbilities { FORCE_UPDATE = -2, DEFAULT = -1 };
     Recipe *recipe[DISH_PER_CHEF * NUM_CHEFS] = {0};
-    void getSkills(Skill *skills, int chefIdForTool = DEFAULT,
-                   int toolValue = 100);
-    const Skill *getCookAbilities(int chefIdForTool = DEFAULT,
-                                  int toolValue = 100);
+    void getSkills(Skill *skills, FLAG_getCookAbilities flag = DEFAULT);
+    const Skill *getCookAbilities(FLAG_getCookAbilities flag = DEFAULT);
     Chef getChef(int i) const { return chefs[i]; }
     const Chef *const getChefPtr(int i) const { return &chefs[i]; }
     void setChef(int i, const Chef &chef) {
@@ -30,12 +28,22 @@ class States {
         chefHasStrangeSkills =
             (chefHasStrangeSkills & ~(1 << i)) | ((numStrangeSkills > 0) << i);
     }
+    void modifyTool(int i, Tool tool) {
+        chefs[i].modifyTool(tool);
+        cookAbilitiesValid = false;
+    }
     void modifyTool(int i, ToolEnum tool) {
         chefs[i].modifyTool(tool);
         cookAbilitiesValid = false;
     }
-    ToolEnum getTool(int i) { return chefs[i].getTool(); }
-    void appendName(int i, const std::string &s) { *chefs[i].name += s; }
+    Tool getTool(int i) { return chefs[i].getTool(); }
+    ToolEnum getToolType(int i) { return chefs[i].getToolType(); }
+    bool allowsTool(int i) { return chefs[i].allowsTool(); }
+    void updateNameFromTool() {
+        for (int i = 0; i < NUM_CHEFS; i++) {
+            chefs[i].updateNameFromTool();
+        }
+    }
     bool repeatedChef(const Chef *const chef = NULL, int except = -1) const {
         if (chef != NULL) {
             for (int i = 0; i < NUM_CHEFS; i++) {
