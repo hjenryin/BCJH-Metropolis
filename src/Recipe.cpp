@@ -9,6 +9,7 @@
 #include "utils/json.hpp"
 #include "../config.hpp"
 #include "exception.hpp"
+#include "utils/math.hpp"
 Recipe::Recipe(Json::Value &recipe) {
     this->name = recipe["name"].asString();
     this->id = recipe["recipeId"].asInt();
@@ -49,6 +50,8 @@ FlavorEnum Recipe::getFlavor(Json::Value &flavorJson) {
         f = SPICY;
     else if (flavorStr.find("Tasty") != std::string::npos)
         f = TASTY;
+    else
+        std::abort();
     return f;
 }
 const struct MaterialList {
@@ -59,9 +62,22 @@ const struct MaterialList {
     int creation[6] = {11, 20, 21, 29, 34, 35};
 } materialList;
 
-void Recipe::print(const std::string &startLine) const {
+void Recipe::print(const std::string &startLine, int priceDirectAdd,
+                   int priceBuffAdd) const {
     auto rb = rarityBuff[this->rarity - 1];
-    std::cout << this->name << "（原价" << this->price << "）"
+    std::stringstream priceDirectAddStr, priceBuffAddStr, origPriceStr,
+        finalPriceStr;
+    priceBuffAddStr << (priceBuffAdd == 0 ? "" : " + ") << priceBuffAdd << "%";
+
+    priceDirectAddStr << (priceDirectAdd == 0 ? "" : " + ") << priceDirectAdd;
+    int finalPrice =
+        int_ceil((this->price + priceDirectAdd) * (100 + priceBuffAdd) / 100);
+    origPriceStr << (finalPrice == this->price ? "原价" : "") << this->price;
+    finalPriceStr << (finalPrice == this->price ? "" : " = ") << finalPrice;
+
+    std::cout << this->name << "（" << origPriceStr.str()
+              << priceDirectAddStr.str() << priceBuffAddStr.str()
+              << finalPriceStr.str() << "）"
               << ", " << this->rarity << "火 * " << rb.dishNum << std::endl;
     std::cout << startLine;
     this->cookAbility.print();
@@ -145,13 +161,13 @@ void testJsonUpdate(const Json::Value &gameData, const Json::Value &usrData) {
     int chefNumUsr = usrData["chefGot"].size();
     int chefNumGame = gameData["chefs"].size();
 
-    if (recipeNumUsr != recipeNumGame) {
+    if (recipeNumUsr > recipeNumGame) {
         std::cout << "游戏数据更新了，当前文件仅收录了" << recipeNumGame
                   << "个菜谱，"
                   << "但是你的存档记录了" << recipeNumUsr
                   << "个菜谱。缺失的菜谱不会纳入计算。" << std::endl;
     }
-    if (chefNumUsr != chefNumGame) {
+    if (chefNumUsr > chefNumGame) {
         std::cout << "游戏数据更新了，当前文件仅收录了" << chefNumGame
                   << "个厨师，"
                   << "但是你的存档记录了" << chefNumUsr << "个厨师。"

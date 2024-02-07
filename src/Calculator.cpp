@@ -18,8 +18,10 @@ std::string gradeName(int i) {
         return "未知，是BUG，菜谱等级为" + std::to_string(i);
     }
 }
+
 BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
                      bool verbose) {
+
     int grade = skill.ability / recipe->cookAbility;
     int gradebuff = 0;
     switch (grade) {
@@ -51,8 +53,7 @@ BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
         gradebuff += skill.gradeBuff[i];
     }
     auto rb = Recipe::rarityBuff[recipe->rarity - 1];
-    r.lenientRule.merge(r.strictRule);
-    BanquetLenientRule rule = r.lenientRule;
+    const BanquetRule &rule = r.merge();
     int intentionAddBuff = rule.addRule.buff;
     int intentionBaseBuff = rule.baseRule.buff;
     int skillBuff = skill.flavorBuff * recipe->flavor +
@@ -112,4 +113,10 @@ BanquetInfo getPrice(const Skill &skill, Recipe *recipe, BanquetRuleTogether &r,
                   << std::endl;
     }
     return b;
+}
+const BanquetRule &BanquetRuleTogether::merge() {
+    this->lenientRule.execOneMore();
+    this->lenientRule.addRule.add(this->strictRule.addRule);
+    this->lenientRule.baseRule.add(this->strictRule.baseRule);
+    return this->lenientRule;
 }

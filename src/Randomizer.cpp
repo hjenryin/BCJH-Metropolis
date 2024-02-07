@@ -131,8 +131,8 @@ bool RecipeRandomizer::randomRecipe(States &s) const {
 
 bool ChefRandomizer::swapChefTool(States &s) const {
     States saveS = s;
-    int i;
-    for (i = 0; i < RANDOM_SEARCH_TIMEOUT; i++) {
+    int n;
+    for (n = 0; n < RANDOM_SEARCH_TIMEOUT; n++) {
         s = saveS;
         int chefNum = rand() % NUM_CHEFS;
         int orig_tool = s.getTool(chefNum);
@@ -154,7 +154,7 @@ bool ChefRandomizer::swapChefTool(States &s) const {
             }
         }
     }
-    if (i >= RANDOM_SEARCH_TIMEOUT) {
+    if (n >= RANDOM_SEARCH_TIMEOUT) {
         s = saveS;
         return false;
     } else {
