@@ -1,0 +1,68 @@
+name: Update Game Data
+
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: '0 0 * * *'
+
+
+jobs:
+    update:
+        continue-on-error: false
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Update Game Data
+              run: python data/checkUpdate.py
+            - name: Commit files
+              run: |
+                  git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git config --local user.name "github-actions[bot]"
+                  git add data -f
+                  git commit -m "Update Game Data"
+
+    recompile-ems:
+        runs-on: ubuntu-latest
+        needs: update
+        steps:
+            - uses: mymindstorm/setup-emsdk@v13
+              with:
+                  emscripten-version: 3.1.42
+            - name: version
+              run: emcc --version
+            - uses: actions/checkout@v2
+            - name: Recompile
+              run: |
+                  cd build_js
+                  emcmake cmake ..
+                  emmake make
+            - name: Commit files
+              run: |
+                  git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git config --local user.name "github-actions[bot]"
+                  git add build_js
+                  git commit -m "Recompile Emscripten"
+            - name: Remove CmakeFiles
+              run: |
+                  rm -rf build_js/CMakeFiles
+            # - name: Push changes
+            #   uses: ad-m/github-push-action@master
+            #   with:
+            #       github_token: ${{ secrets.GITHUB_TOKEN }}
+            #       branch: ${{ github.ref }}
+
+            - name: Deploy to external repository
+              uses: cpina/github-action-push-to-another-repository@main
+              env:
+                  API_TOKEN_GITHUB: ${{ secrets.bcjh_web }}
+              with:
+                  # GitHub Action output files
+                  source-directory: build_js/
+                  destination-github-username: hjenryin
+                  destination-repository-name: BCJH-Metropolis-html
+                  user-email: 41898282+github-actions[bot]@users.noreply.github.com
+                  # It defaults to `main`
+                  target-branch: "test-emscripten"
+                  target-directory: "js/upload"
+
+
