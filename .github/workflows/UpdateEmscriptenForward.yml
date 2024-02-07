@@ -1,7 +1,8 @@
-name: Update Game Data and Recompile wasm
+name: Update Game Data, Recompile wasm, and push to forward
 
 on:
-    workflow_dispatch:
+    schedule:
+        - cron: '0 0 * * *'
 
 
 jobs:
@@ -60,7 +61,7 @@ jobs:
                   destination-repository-name: BCJH-Metropolis-html
                   user-email: 41898282+github-actions[bot]@users.noreply.github.com
                   # It defaults to `main`
-                  target-branch: "test-emscripten"
+                  target-branch: "forward-emscripten"
                   target-directory: "js/upload"
 
 
