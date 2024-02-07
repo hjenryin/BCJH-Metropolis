@@ -1,4 +1,4 @@
-name: Update Game Data
+name: Update Game Data and Recompile wasm
 
 on:
     workflow_dispatch:
@@ -45,11 +45,11 @@ jobs:
             - name: Remove CmakeFiles
               run: |
                   rm -rf build_js/CMakeFiles
-            # - name: Push changes
-            #   uses: ad-m/github-push-action@master
-            #   with:
-            #       github_token: ${{ secrets.GITHUB_TOKEN }}
-            #       branch: ${{ github.ref }}
+            - name: Push changes
+              uses: ad-m/github-push-action@master
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  branch: ${{ github.ref }}
 
             - name: Deploy to external repository
               uses: cpina/github-action-push-to-another-repository@main
