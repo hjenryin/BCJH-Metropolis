@@ -27,6 +27,7 @@ jobs:
     recompile-ems:
         runs-on: ubuntu-latest
         needs: update
+        if: ${{ !cancelled() }}
         steps:
             - uses: mymindstorm/setup-emsdk@v13
               with:
