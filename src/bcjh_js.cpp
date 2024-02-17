@@ -120,7 +120,7 @@ std::string
     debugIntegrity(result.state);
     exactChefTool(rl, result.state);
 
-    int score = sumPrice(rl, result.state, log, true);
+    int score = sumPrice(rl, result.state, log);
     std::cout << "**************\n总分: " << result.score << "\n***************"
               << std::endl;
     end = clock();

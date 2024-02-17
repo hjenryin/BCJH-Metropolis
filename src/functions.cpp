@@ -38,7 +38,7 @@ void exactChefTool(const RuleInfo &rl, States &s) {
         Comparator<int, States> c;
         for (int toolValue : {100, 60, 30, 0}) {
             States s_new(s);
-            s_new.modifyTool(i, Tool(tool.type, toolValue));
+            s_new.modifyTool(i, Tool{tool.type, toolValue});
             int score = sumPrice(rl, s_new);
             c.store(toolValue, s_new, score);
         }

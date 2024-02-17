@@ -31,7 +31,7 @@ jobs:
         steps:
             - uses: mymindstorm/setup-emsdk@v13
               with:
-                  emscripten-version: 3.1.42
+                  version: 3.1.54
             - name: version
               run: emcc --version
             - uses: actions/checkout@v2
