@@ -35,6 +35,7 @@ jobs:
             - name: version
               run: emcc --version
             - uses: actions/checkout@v2
+            - run: git pull
             - name: Recompile
               run: |
                   cd build_js
