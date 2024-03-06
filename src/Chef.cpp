@@ -155,6 +155,13 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId)
 }
 std::string Chef::getToolName() const {
     std::string toolName;
+    if (tool.value == 0) {
+        if (tool.type == NO_TOOL) {
+            return "设定厨具";
+        } else {
+            return "";
+        }
+    }
     switch (tool.type) {
     case STIRFRY:
         toolName = "炒";

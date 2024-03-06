@@ -36,6 +36,7 @@ jobs:
               run: emcc --version
             - uses: actions/checkout@v2
             - run: git pull
+            - run: tr -d ' \n' < data/data.min.json > data/data.min.json
             - name: Recompile
               run: |
                   cd build_js
