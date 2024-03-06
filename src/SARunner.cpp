@@ -221,7 +221,7 @@ void SARunner::print(States s, bool verbose) const {
     int r = 0;
     for (int i = 0; i < NUM_CHEFS; i++) {
 
-        std::cout << "Chef: " << *s.getChefPtr(i)->name << std::endl
+        std::cout << "Chef: " << s.getChefPtr(i)->getName() << std::endl
                   << "Recipe ";
         for (int j = 0; j < DISH_PER_CHEF; j++) {
             std::cout << j << ": " << s.recipe[r++]->name;

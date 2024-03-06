@@ -100,8 +100,9 @@ int sumPrice(const RuleInfo &rl, States s, int log) {
             fullCache += biCache.full;
             if ((log & ORDINARY) && i % 3 == 2) {
                 std::cout << "  厨师："
-                          << *s.getChefPtr(chefStart + i / 3)->name << " -> "
-                          << fullCache << " / " << scoreCache << std::endl;
+                          << s.getChefPtr(chefStart + i / 3)->getName()
+                          << " -> " << fullCache << " / " << scoreCache
+                          << std::endl;
                 scoreCache = 0;
                 fullCache = 0;
                 std::cout << "  菜谱：" << s.recipe[dishStart + i - 2]->name

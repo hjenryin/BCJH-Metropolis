@@ -176,7 +176,7 @@ CSVWarning loadToolFromFile(Chef *chef, ToolFileType t) {
     for (unsigned int i = 0; i < tools.size(); i++) {
         lineN = lineN + 1;
         auto tool = tools[i];
-        if (!(tool[0] == *chef->name)) {
+        if (!(tool[0] == chef->getName(false))) {
             continue;
         }
         chef->setNoTool();

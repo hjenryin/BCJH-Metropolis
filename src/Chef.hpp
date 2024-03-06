@@ -24,6 +24,7 @@ class Chef {
     void addSkill(int id);
     Tool tool;
     static ToolFileType toolFileType;
+    std::string name;
 
   public:
     static bool coinBuffOn;
@@ -37,7 +38,6 @@ class Chef {
     ToolEnum getToolType() const { return this->tool.type; }
     bool allowsTool() const { return this->tool.type != NO_TOOL; }
     void setNoTool() { this->tool.type = NO_TOOL; }
-    std::string *name;
     std::vector<Recipe *> *recipeLearned = NULL;
 
     static void setGlobalBuff(CookAbility buff) { globalAbilityBuff = buff; }
@@ -68,18 +68,18 @@ class Chef {
 #endif
     );
 
+    std::string getName(bool wTool = true) const;
     Chef(Json::Value &v, int ultimateSkillId);
     Chef() { id = -1; }
     void print() const;
     void modifyTool(Tool);
     void modifyTool(ToolEnum);
     void deletePointers() {
-        delete this->name;
         delete this->skill;
         delete this->companyBuff;
         delete this->nextBuff;
     }
-    void updateNameFromTool();
+    std::string getToolName() const;
     // void updateLearnedRecipe(const RecipesInfo rI) const {
     //     auto &recipesLearned = *this->recipesLearned;
     //     auto worst = recipesLearned.end();
@@ -119,7 +119,5 @@ class CList : public std::vector<Chef> {
         return &((*this)[index]);
     }
 };
-
-std::string getToolName(ToolEnum tool);
 
 #endif

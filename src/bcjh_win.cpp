@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
 
     log += ORDINARY;
     // log += VERBOSE;
-    result.state.updateNameFromTool();
+    // result.state.updateNameFromTool();
     std::cout << "随机种子：" << result.seed << std::endl;
     sumPrice(rl, result.state, log);
     std::cout << "**************\n总分: " << result.score << "\n***************"

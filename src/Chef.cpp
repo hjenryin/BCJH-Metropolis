@@ -111,16 +111,21 @@ void Chef::loadAppendChef(CList &chefList, int chefRarity,
  * Chef
  * @param ultimateSkillId: -1 means no ultimate skill
  */
-Chef::Chef(Json::Value &chef, int ultimateSkillId) {
+std::string Chef::getName(bool wTool) const {
+    std::string toolName;
+    if (wTool) {
+        toolName = getToolName();
+    }
+    return this->name + toolName;
+}
+Chef::Chef(Json::Value &chef, int ultimateSkillId)
+    : id(chef["chefId"].asInt()), name(chef["name"].asString()) {
     if (chef.isMember("chefId") && chef.isMember("name") &&
         chef.isMember("skill")) {
 
-        this->name = new std::string();
         this->skill = new Skill();
         this->companyBuff = new Skill();
         this->nextBuff = new Skill();
-        this->id = chef["chefId"].asInt();
-        *this->name = chef["name"].asString();
         this->skill->ability = CookAbility(chef);
         if (chef.isMember("tags") && chef["tags"].isArray()) {
             auto tags = chef["tags"];
@@ -148,9 +153,45 @@ Chef::Chef(Json::Value &chef, int ultimateSkillId) {
     }
     this->tool.type = NOT_EQUIPPED;
 }
+std::string Chef::getToolName() const {
+    std::string toolName;
+    switch (tool.type) {
+    case STIRFRY:
+        toolName = "炒";
+        break;
+    case BOIL:
+        toolName = "煮";
+        break;
+    case FRY:
+        toolName = "炸";
+        break;
+    case STEAM:
+        toolName = "蒸";
+        break;
+    case BAKE:
+        toolName = "烤";
+        break;
+    case KNIFE:
+        toolName = "切";
+        break;
+    case NO_TOOL:
+        toolName = "设定厨具";
+        break;
+    default:
+        toolName = "无厨具";
+        return "";
+    }
 
+    toolName = "-" + toolName;
+    if (tool.type != NO_TOOL) {
+        toolName += "(" + std::to_string(tool.value) + ")";
+    }
+    return toolName;
+}
 void Chef::print() const {
-    std::cout << this->id << ": " << *this->name << "\t"
+    auto toolName = getToolName();
+
+    std::cout << this->id << ": " << this->name << toolName << "\t"
               << (this->male ? "男" : "") << (this->female ? "女" : "")
               << std::endl;
     this->skill->print();
@@ -369,39 +410,6 @@ int CookAbility::operator*(const AbilityBuff &a) const {
     return buff;
 }
 
-// Chef Chef::addTool_modify_name(ToolEnum a) {
-//     Chef newChef(*this);
-//     newChef.tool = a;
-//     switch (a) {
-//     case STIRFRY:
-//         newChef.skill.ability.stirfry += 100;
-//         newChef.name += "-炒";
-//         return newChef;
-//     case BAKE:
-//         newChef.skill.ability.bake += 100;
-//         newChef.name += "-烤";
-//         return newChef;
-//     case STEAM:
-//         newChef.skill.ability.steam += 100;
-//         newChef.name += "-蒸";
-//         return newChef;
-//     case FRY:
-//         newChef.skill.ability.fry += 100;
-//         newChef.name += "-炸";
-//         return newChef;
-//     case BOIL:
-//         newChef.skill.ability.boil += 100;
-//         newChef.name += "-煮";
-//         return newChef;
-//     case KNIFE:
-//         newChef.skill.ability.knife += 100;
-//         newChef.name += "-切";
-//         return newChef;
-//     default:
-//         std::cout << "Invalid Tool!" << std::endl;
-//         throw 0;
-//     }
-// }
 // bool Chef::isCapable(Recipe *recipe) {
 //     if (this->skill.ability / recipe->cookAbility > 0) {
 //         return true;
@@ -444,42 +452,4 @@ void Chef::modifyTool(ToolEnum a) {
     if (this->tool.type == NO_TOOL)
         return;
     this->tool.type = a;
-}
-
-std::string getToolName(ToolEnum tool) {
-    std::string toolName;
-    switch (tool) {
-    case STIRFRY:
-        toolName = "炒";
-        break;
-    case BOIL:
-        toolName = "煮";
-        break;
-    case FRY:
-        toolName = "炸";
-        break;
-    case STEAM:
-        toolName = "蒸";
-        break;
-    case BAKE:
-        toolName = "烤";
-        break;
-    case KNIFE:
-        toolName = "切";
-        break;
-    case NO_TOOL:
-        toolName = "设定厨具";
-        break;
-    default:
-        toolName = "无厨具";
-    }
-    return toolName;
-}
-void Chef::updateNameFromTool(){
-    std::string toolName = getToolName(tool.type);
-    toolName = "-" + toolName;
-    if (tool.type != NO_TOOL) {
-        toolName += "(" + std::to_string(tool.value) + ")";
-    }
-    name->append(toolName);
 }

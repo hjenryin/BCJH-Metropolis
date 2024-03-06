@@ -48,7 +48,7 @@ class ResultJsonSerializable {
         result["seed"] = seed;
         Json::Value chefsList(Json::arrayValue);
         for (int i = 0; i < NUM_CHEFS; i++) {
-            chefsList[i] = *state.getChefPtr(i)->name;
+            chefsList[i] = state.getChefPtr(i)->getName();
         }
         result["chefs"] = chefsList;
         Json::Value recipesList(Json::arrayValue);

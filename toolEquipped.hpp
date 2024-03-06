@@ -39,7 +39,7 @@ void toolEquipped(Chef *chef) {
     ///////////// 自定义厨师装备的厨具：
 
     auto skill = chef->skill; // 这句不用管，放着就好。
-    auto name = *(chef->name);
+    auto name = chef->getName();
     auto ability = &skill->ability;
     auto abilityBuff = &skill->abilityBuff;
     auto flavorBuff = &skill->flavorBuff;

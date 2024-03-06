@@ -39,11 +39,11 @@ class States {
     Tool getTool(int i) { return chefs[i].getTool(); }
     ToolEnum getToolType(int i) { return chefs[i].getToolType(); }
     bool allowsTool(int i) { return chefs[i].allowsTool(); }
-    void updateNameFromTool() {
-        for (int i = 0; i < NUM_CHEFS; i++) {
-            chefs[i].updateNameFromTool();
-        }
-    }
+    // void updateNameFromTool() {
+    //     for (int i = 0; i < NUM_CHEFS; i++) {
+    //         chefs[i].updateNameFromTool();
+    //     }
+    // }
     bool repeatedChef(const Chef *const chef = NULL, int except = -1) const {
         if (chef != NULL) {
             for (int i = 0; i < NUM_CHEFS; i++) {
