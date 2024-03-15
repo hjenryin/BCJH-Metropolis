@@ -35,7 +35,7 @@ jobs:
         steps:
             - uses: mymindstorm/setup-emsdk@v13
               with:
-                  version: 3.1.54
+                  version: 3.1.56
             - name: version
               run: emcc --version
             - uses: actions/checkout@v2
@@ -45,7 +45,7 @@ jobs:
             - name: Recompile
               run: |
                   cd build_js
-                  emcmake cmake ..
+                  emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
                   emmake make
             - name: Commit files
               run: |
@@ -82,5 +82,45 @@ jobs:
                   # It defaults to `main`
                   target-branch: "test-emscripten"
                   target-directory: "js/upload"
+
+    push-to-debug:
+        runs-on: ubuntu-latest
+        needs: push-to-Web 
+        # Makes sure that when the debug page is ready, the main page is also ready
+        if: ${{ !cancelled() }}
+        steps:
+            - uses: mymindstorm/setup-emsdk@v13
+              with:
+                  version: 3.1.56
+            - name: version
+              run: emcc --version
+            - uses: actions/checkout@v2
+            - run: git pull
+            - run: sed -zi 's/\n//g' data/data.min.json
+            - run: sed -zi 's/  //g' data/data.min.json
+            - name: Recompile
+              run: |
+                  cd build_js
+                  emcmake cmake .. -DCMAKE_BUILD_TYPE=Debug
+                  emmake make
+
+            - name: Remove CmakeFiles
+              run: |
+                  rm -rf build_js/CMakeFiles
+
+            - name: Deploy to external repository
+              uses: cpina/github-action-push-to-another-repository@main
+              env:
+                  API_TOKEN_GITHUB: ${{ secrets.bcjh_web }}
+              with:
+                  # GitHub Action output files
+                  source-directory: build_js/
+                  destination-github-username: hjenryin
+                  destination-repository-name: BCJH-Metropolis-html
+                  user-email: 41898282+github-actions[bot]@users.noreply.github.com
+                  # It defaults to `main`
+                  target-branch: "debug-online"
+                  target-directory: "js/upload"
+
 
 
