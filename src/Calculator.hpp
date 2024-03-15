@@ -78,15 +78,16 @@ class BanquetLenientRule : public BanquetRule {
     int duplicateTime = 0;
     friend BanquetRuleTogether;
     void execOneMore() {
-        while (this->duplicateTime > 0) {
-            this->add(*this);
-            this->duplicateTime -= 1;
-        }
+        this->add(*this, this->duplicateTime);
+        this->duplicateTime = 0;
     }
 
-    void add(BanquetLenientRule &rule) {
-        addRule.add(rule.addRule);
-        baseRule.add(rule.baseRule);
+    void add(BanquetLenientRule rule, int times) {
+        // Not passing in reference to avoid modifying the original rule
+        for (int i = 0; i < times; i++) {
+            addRule.add(rule.addRule);
+            baseRule.add(rule.baseRule);
+        }
     }
 };
 struct BanquetRuleTogether {
