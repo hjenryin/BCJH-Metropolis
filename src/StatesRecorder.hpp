@@ -97,7 +97,9 @@ class StatesRecorder {
                         states.push_back(state);
                     }
                     std::cout << "从存档点" << id << "恢复" << states.size()
-                              << "条记录。" << std::endl;
+                              << "条记录。若要重新开始，请删除同一目录下states."
+                                 "bin文件。"
+                              << std::endl;
                 } catch (std::exception &e) {
                     std::cerr << "Previous checkpoint found, but file is "
                                  "corropted. Error : "

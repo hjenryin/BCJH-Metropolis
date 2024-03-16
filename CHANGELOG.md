@@ -1,3 +1,13 @@
+## [1.2.0] - 2024-03-16
+
+### 新增
+
+- 每次运行会留有缓存，后一次运行结果不会比前一次差。
+
+### 修复
+
+- 修复意图生效次数多次增加引发的问题。
+
 ## [1.1.3] - 2023-12-05
 
 ### 新增
@@ -56,6 +66,7 @@
 - 计算器各线程进度条。
 - 暂时取消完成搜索之后的手动优化。也就是说，计算器给出的结果可能还有简单的优化空间（如改一个菜、改一个厨师这种）。
 
+[1.2.0]:https://github.com/hjenryin/BCJH-Metropolis/compare/v1.1.3...v1.2.0
 [1.1.3]: https://github.com/hjenryin/BCJH-Metropolis/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/hjenryin/BCJH-Metropolis/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/hjenryin/BCJH-Metropolis/compare/v1.1.0...v1.1.1
