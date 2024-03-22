@@ -82,6 +82,9 @@ jobs:
                   # It defaults to `main`
                   target-branch: "test-emscripten"
                   target-directory: "js/upload"
+                  # Use the same commit message as $ORIGIN_REPOSITORY_URL@commit 's
+                  commit-message: ${{ github.event.head_commit.message }}. (From $ORIGIN_REPOSITORY_URL@commit)
+
 
     push-to-debug:
         runs-on: ubuntu-latest
@@ -121,6 +124,8 @@ jobs:
                   # It defaults to `main`
                   target-branch: "debug-online"
                   target-directory: "js/upload"
+                  commit-message: ${{ github.event.head_commit.message }}. (From $ORIGIN_REPOSITORY_URL@commit)
+                  
 
 
 

@@ -100,6 +100,7 @@ class Ability {
                                                        : (thisptr[i] / aptr[i]);
             }
         }
+        grade = grade < 0 ? 0 : grade;
         return grade;
     };
     Ability operator+(Tool t) const {

@@ -71,6 +71,8 @@ jobs:
                   # It defaults to `main`
                   target-branch: "forward-emscripten"
                   target-directory: "js/upload"
+                  commit-message: ${{ github.event.head_commit.message }}. (From $ORIGIN_REPOSITORY_URL@commit)
+
 
 
     push-to-debug:
@@ -111,5 +113,7 @@ jobs:
                   # It defaults to `main`
                   target-branch: "debug-online"
                   target-directory: "js/upload"
+                  commit-message: ${{ github.event.head_commit.message }}. (From $ORIGIN_REPOSITORY_URL@commit)
+
 
 
